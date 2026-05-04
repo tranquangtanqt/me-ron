@@ -29,7 +29,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.elriztechnology.flutter_pos"
+        applicationId = "me_ron.app"
         minSdk = 24
         targetSdk = 36
         versionCode = 11
@@ -63,6 +63,7 @@ flutter {
 
 dependencies {
     implementation("com.android.support:multidex:2.0.1")
-    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
-    implementation("com.google.firebase:firebase-analytics")
+    implementation(platform("com.google.firebase:firebase-bom:34.12.0"))
+    //implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
+    //implementation("com.google.firebase:firebase-analytics")
 }
