@@ -112,7 +112,9 @@ class ProductLocalDatasourceImpl extends ProductDatasource {
         offset: offset,
       );
 
-      return Result.success(
+      return res.isEmpty
+        ? Result.success(data: [])
+        : Result.success(
         data: res.map((e) => ProductModel.fromJson(e)).toList(),
       );
     } catch (e) {

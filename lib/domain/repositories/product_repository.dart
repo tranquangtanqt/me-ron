@@ -2,8 +2,6 @@ import '../../core/common/result.dart';
 import '../entities/product_entity.dart';
 
 abstract class ProductRepository {
-  Future<Result<int>> syncAllUserProducts(String userId);
-
   Future<Result<ProductEntity?>> getProduct(int productId);
 
   Future<Result<int>> createProduct(ProductEntity product);

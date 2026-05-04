@@ -7,7 +7,7 @@ import '../../../core/common/result.dart';
 import '../../../core/utilities/console_logger.dart';
 import '../../../domain/entities/product_entity.dart';
 import '../../../domain/usecases/product_usecases.dart';
-import '../../../domain/usecases/storage_usecases.dart';
+// import '../../../domain/usecases/storage_usecases.dart';
 import '../auth/auth_notifier.dart';
 import 'product_form_state.dart';
 import 'products_notifier.dart';
@@ -56,15 +56,15 @@ class ProductFormNotifier extends AutoDisposeNotifier<ProductFormState> {
   Future<Result<int>> createProduct() async {
     try {
       final userId = _requireUserId();
-      final storageRepository = ref.read(storageRepositoryProvider);
+      // final storageRepository = ref.read(storageRepositoryProvider);
       final productRepository = ref.read(productRepositoryProvider);
 
       var imageUrl = state.imageUrl;
 
-      if (state.imageFile != null) {
-        final res = await UploadProductImageUsecase(storageRepository).call(state.imageFile!.path);
-        imageUrl = res.data;
-      }
+      // if (state.imageFile != null) {
+      //   final res = await UploadProductImageUsecase(storageRepository).call(state.imageFile!.path);
+      //   imageUrl = res.data;
+      // }
 
       cl('imageUrl $imageUrl');
 
@@ -91,15 +91,15 @@ class ProductFormNotifier extends AutoDisposeNotifier<ProductFormState> {
   Future<Result<void>> updatedProduct(int id) async {
     try {
       final userId = _requireUserId();
-      final storageRepository = ref.read(storageRepositoryProvider);
+      // final storageRepository = ref.read(storageRepositoryProvider);
       final productRepository = ref.read(productRepositoryProvider);
 
       var imageUrl = state.imageUrl;
 
-      if (state.imageFile != null) {
-        final res = await UploadProductImageUsecase(storageRepository).call(state.imageFile!.path);
-        imageUrl = res.data;
-      }
+      // if (state.imageFile != null) {
+      //   final res = await UploadProductImageUsecase(storageRepository).call(state.imageFile!.path);
+      //   imageUrl = res.data;
+      // }
 
       cl('imageUrl $imageUrl');
 

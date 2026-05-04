@@ -4,7 +4,7 @@ class ProductEntity extends Equatable {
   final int? id;
   final String createdById;
   final String name;
-  final String imageUrl;
+  final String? imageUrl;
   final int stock;
   final int? sold;
   final int price;
@@ -16,7 +16,7 @@ class ProductEntity extends Equatable {
     this.id,
     required this.createdById,
     required this.name,
-    required this.imageUrl,
+    this.imageUrl,
     required this.stock,
     this.sold,
     required this.price,

@@ -16,25 +16,26 @@ class ProductsNotifier extends Notifier<ProductsState> {
     return const ProductsState();
   }
 
-  String _requireUserId() {
-    final authState = ref.read(authNotifierProvider);
-    if (authState.isAuthenticated) return authState.user!.id;
-    throw 'Unauthenticated!';
-  }
+  // String _requireUserId() {
+  //   final authState = ref.read(authNotifierProvider);
+  //   if (authState.isAuthenticated) return authState.user!.id;
+  //   throw 'Unauthenticated!';
+  // }
 
   void resetProducts() {
     state = const ProductsState();
   }
 
   Future<void> getAllProducts({int? offset, String? contains}) async {
-    final userId = _requireUserId();
+    // final userId = _requireUserId();
 
     if (offset != null) {
       state = state.copyWith(isLoadingMore: true);
     }
 
     var params = BaseParams(
-      param: userId,
+      // param: userId,
+      param: "1", //TODO
       offset: offset,
       contains: contains,
     );
