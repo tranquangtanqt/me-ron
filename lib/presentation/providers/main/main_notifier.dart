@@ -36,23 +36,10 @@ class MainNotifier extends Notifier<MainState> {
 
   Future<void> startPingService() async {
     final deviceInfoService = ref.read(deviceInfoServiceProvider);
-    final pingService = ref.read(pingServiceProvider);
 
-    // Note: The ICMP protocol may not work on virtual devices
-    final isPhysicalDevice = await deviceInfoService.checkDeviceType();
-
-    pingService.startPing(host: isPhysicalDevice ? '8.8.8.8' : '127.0.0.1');
-    pingService.addConnectionStatusListener(
-      (isConnected) => onHasInternet(isConnected),
-    );
   }
 
   Future<void> checkAndSyncAllData() async {
-    final pingService = ref.read(pingServiceProvider);
-
-    // Prevent sync during first time app open
-    if (!state.isLoaded || !pingService.isConnected) return;
-
     try {
       state = state.copyWith(isSyncronizing: true);
 
@@ -77,25 +64,9 @@ class MainNotifier extends Notifier<MainState> {
   }
 
   Future<void> getAndSyncAllUserData() async {
-    final userId = _requireUserId();
     final userRepository = ref.read(userRepositoryProvider);
     final productRepository = ref.read(productRepositoryProvider);
     final transactionRepository = ref.read(transactionRepositoryProvider);
-
-    // Run multiple futures simultaneously
-    var res = await Future.wait([
-      GetUserUsecase(userRepository).call(userId),
-      SyncAllUserProductsUsecase(productRepository).call(userId),
-      SyncAllUserTransactionsUsecase(transactionRepository).call(userId),
-    ]);
-
-    // Set and notify user state
-    if (res.first.isSuccess) {
-      state = state.copyWith(user: res.first.data as UserEntity?);
-    }
-
-    if (res[1].isFailure) AppSnackBar.showError("Failed to sync product data");
-    if (res[2].isFailure) AppSnackBar.showError("Failed to sync transaction data");
 
     // Refresh products list
     ref.read(productsNotifierProvider.notifier).getAllProducts();
