@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,17 +15,8 @@ void main() async {
   // Initialize binding
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase (use `flutterfire configure` to generate the options)
-  await Firebase.initializeApp(
-    name: DefaultFirebaseOptions.currentPlatform.projectId,
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
   // Initialize app local db
   await DatabaseService.instance.init();
-
-  // Ensure persistence is cleared
-  await FirebaseFirestore.instance.clearPersistence();
 
   // Initialize date formatting
   await initializeDateFormatting();
@@ -34,7 +25,10 @@ void main() async {
   final sharedPreferences = await SharedPreferences.getInstance();
 
   // Set/lock screen orientation
-  await SystemChrome.setPreferredOrientations([]);
+  //await SystemChrome.setPreferredOrientations([]);
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
 
   // Set Default SystemUIOverlayStyle
   SystemChrome.setSystemUIOverlayStyle(
