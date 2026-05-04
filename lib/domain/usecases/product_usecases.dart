@@ -4,15 +4,6 @@ import '../entities/product_entity.dart';
 import '../repositories/product_repository.dart';
 import 'params/base_params.dart';
 
-class SyncAllUserProductsUsecase extends Usecase<Result, String> {
-  SyncAllUserProductsUsecase(this._productRepository);
-
-  final ProductRepository _productRepository;
-
-  @override
-  Future<Result<int>> call(String params) async => _productRepository.syncAllUserProducts(params);
-}
-
 class GetUserProductsUsecase extends Usecase<Result, BaseParams> {
   GetUserProductsUsecase(this._productRepository);
 
