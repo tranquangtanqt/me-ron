@@ -4,10 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../presentation/providers/auth/auth_notifier.dart';
 import '../../presentation/screens/account/about_screen.dart';
+import '../../presentation/screens/address/address_screen.dart';
 import '../../presentation/screens/account/account_screen.dart';
 import '../../presentation/screens/account/printer_settings_screen.dart';
 import '../../presentation/screens/account/profile_form_screen.dart';
-import '../../presentation/screens/auth/sign_in/sign_in_screen.dart';
+// import '../../presentation/screens/auth/sign_in/sign_in_screen.dart';
 import '../../presentation/screens/error/error_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/main/main_screen.dart';
@@ -18,6 +19,19 @@ import '../../presentation/screens/transactions/transaction_detail_screen.dart';
 import '../../presentation/screens/transactions/transactions_screen.dart';
 import '../../presentation/screens/welcome/welcome_screen.dart';
 import 'params/error_screen_param.dart';
+
+/// Route paths
+class AppRouteConst {
+  static const login = '/login';
+  static const home = '/home';
+  static const splash = '/';
+}
+
+final GlobalKey<NavigatorState> _rootNavigatorKey =
+GlobalKey<NavigatorState>();
+
+final GlobalKey<NavigatorState> _shellNavigatorKey =
+GlobalKey<NavigatorState>();
 
 /// App routes
 class AppRoutes {
@@ -47,35 +61,20 @@ class AppRoutes {
     _ref.listen(authNotifierProvider, (_, value) => authStateNotifier.value = value);
 
     _router = GoRouter(
-      initialLocation: '/',
+      initialLocation: AppRouteConst.splash,
       navigatorKey: rootNavigatorKey,
       refreshListenable: authStateNotifier,
       errorBuilder: (context, state) => ErrorScreen(param: ErrorScreenParam(error: state.error)),
       redirect: (context, state) {
-        final authState = _ref.read(authNotifierProvider);
-        final isChecking = authState.isChecking;
-        final isAuthenticated = authState.isAuthenticated;
-        final isSplashRoute = state.fullPath == '/';
-        final isAuthRoute = state.fullPath?.startsWith('/sign-in') ?? false;
-
-        if (isChecking) {
-          return '/';
+        final location = state.uri.toString();
+        if (location == AppRouteConst.splash) {
+          return AppRouteConst.home;
         }
-
-        if (!isAuthenticated && !isAuthRoute) {
-          return '/sign-in';
-        }
-
-        if (isAuthenticated && isAuthRoute) {
-          return '/home';
-        }
-
-        return isSplashRoute ? '/home' : null;
+        return null;
       },
       routes: [
         _splash(),
         _main(),
-        _signIn(),
         _error(),
       ],
     );
@@ -101,15 +100,6 @@ class AppRoutes {
     );
   }
 
-  GoRoute _signIn() {
-    return GoRoute(
-      path: '/sign-in',
-      builder: (context, state) {
-        return const SignInScreen();
-      },
-    );
-  }
-
   ShellRoute _main() {
     return ShellRoute(
       navigatorKey: navNavigatorKey,
@@ -121,6 +111,7 @@ class AppRoutes {
         _products(),
         _transactions(),
         _account(),
+        _address(),
       ],
     );
   }
@@ -163,6 +154,17 @@ class AppRoutes {
       routes: [
         _transactionDetail(),
       ],
+    );
+  }
+
+  GoRoute _address() {
+    return GoRoute(
+      path: '/address',
+      pageBuilder: (context, state) {
+        return const NoTransitionPage<void>(
+          child: AddressScreen(),
+        );
+      },
     );
   }
 
