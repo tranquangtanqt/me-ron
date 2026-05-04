@@ -74,7 +74,7 @@ class HomeNotifier extends AutoDisposeNotifier<HomeState> {
         quantity: qty,
         stock: product.stock,
         name: product.name,
-        imageUrl: product.imageUrl,
+        imageUrl: product.imageUrl ?? '',
         price: product.price,
       );
 
