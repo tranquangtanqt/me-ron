@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/di/app_providers.dart';
 import '../../../core/common/result.dart';
 import '../../../domain/entities/user_entity.dart' hide AuthProvider;
-import '../../../domain/usecases/storage_usecases.dart';
+// import '../../../domain/usecases/storage_usecases.dart';
 import '../../../domain/usecases/user_usecases.dart';
 import '../auth/auth_notifier.dart';
 import 'account_state.dart';
@@ -48,15 +48,15 @@ class AccountNotifier extends AutoDisposeNotifier<AccountFormState> {
   Future<Result<void>> updatedUser() async {
     try {
       final userId = _requireUserId();
-      final storageRepository = ref.read(storageRepositoryProvider);
+      // final storageRepository = ref.read(storageRepositoryProvider);
       final userRepository = ref.read(userRepositoryProvider);
 
       var imageUrl = state.imageUrl;
 
-      if (state.imageFile != null) {
-        final res = await UploadUserPhotoUsecase(storageRepository).call(state.imageFile!.path);
-        imageUrl = res.data;
-      }
+      // if (state.imageFile != null) {
+      //   final res = await UploadUserPhotoUsecase(storageRepository).call(state.imageFile!.path);
+      //   imageUrl = res.data;
+      // }
 
       var user = UserEntity(
         id: userId,
