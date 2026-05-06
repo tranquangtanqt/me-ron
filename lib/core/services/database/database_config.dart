@@ -3,8 +3,9 @@ class DatabaseConfig {
   DatabaseConfig._();
 
   static const String dbPath = 'app_database.db';
-  static const int version = 1;
+  static const int version = 2;
 
+  static const String addressTableName = 'Address';
   static const String userTableName = 'User';
   static const String productTableName = 'Product';
   static const String transactionTableName = 'Transaction';
@@ -25,6 +26,17 @@ CREATE TABLE IF NOT EXISTS '$userTableName' (
     'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
     'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY ('id')
+);
+''';
+
+  static const String createAddressTable =
+  '''
+CREATE TABLE IF NOT EXISTS '$addressTableName' (
+    'code' TEXT NOT NULL,
+    'name' TEXT,
+    'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
+    'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY ('code')
 );
 ''';
 

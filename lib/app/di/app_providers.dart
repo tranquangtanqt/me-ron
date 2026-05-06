@@ -15,16 +15,19 @@ import '../../data/datasources/local/product_local_datasource_impl.dart';
 import '../../data/datasources/local/queued_action_local_datasource_impl.dart';
 import '../../data/datasources/local/transaction_local_datasource_impl.dart';
 import '../../data/datasources/local/user_local_datasource_impl.dart';
+import '../../data/datasources/local/address_local_datasource_impl.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../data/repositories/product_repository_impl.dart';
 import '../../data/repositories/queued_action_repository_impl.dart';
 import '../../data/repositories/transaction_repository_impl.dart';
 import '../../data/repositories/user_repository_impl.dart';
+import '../../data/repositories/address_repository_impl.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/repositories/product_repository.dart';
 import '../../domain/repositories/queued_action_repository.dart';
 import '../../domain/repositories/transaction_repository.dart';
 import '../../domain/repositories/user_repository.dart';
+import '../../domain/repositories/address_repository.dart';
 import '../routes/app_routes.dart';
 
 // Startup overrides
@@ -58,6 +61,9 @@ final transactionLocalDatasourceProvider = Provider<TransactionLocalDatasourceIm
 final userLocalDatasourceProvider = Provider<UserLocalDatasourceImpl>(
   (ref) => UserLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
 );
+final addressLocalDatasourceProvider = Provider<AddressLocalDatasourceImpl>(
+      (ref) => AddressLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
+);
 final queuedActionLocalDatasourceProvider = Provider<QueuedActionLocalDatasourceImpl>(
   (ref) => QueuedActionLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
 );
@@ -78,6 +84,12 @@ final transactionRepositoryProvider = Provider<TransactionRepository>(
 final userRepositoryProvider = Provider<UserRepository>(
   (ref) => UserRepositoryImpl(
     userLocalDatasource: ref.watch(userLocalDatasourceProvider),
+    queuedActionLocalDatasource: ref.watch(queuedActionLocalDatasourceProvider),
+  ),
+);
+final addressRepositoryProvider = Provider<AddressRepository>(
+      (ref) => AddressRepositoryImpl(
+    addressLocalDatasource: ref.watch(addressLocalDatasourceProvider),
     queuedActionLocalDatasource: ref.watch(queuedActionLocalDatasourceProvider),
   ),
 );

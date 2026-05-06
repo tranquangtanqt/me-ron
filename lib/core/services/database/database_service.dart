@@ -31,22 +31,42 @@ class DatabaseService {
       // await dropDatabase(path);
     }
 
-    // Create database if not exists
-    File databaseFile = File(path);
-
-    if (!await databaseFile.exists()) await databaseFile.create();
-
     // Open database
-    database = await openDatabase(path);
+    database = await openDatabase(
+      path,
+      version: DatabaseConfig.version,
+      onCreate: (db, version) async {
+        await _createTables(db);
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        await _upgradeDatabase(db, oldVersion, newVersion);
+      },
+    );
+  }
 
-    // Create tables
+  // Create tables
+  Future<void> _createTables(Database db) async {
     await Future.wait([
-      database.execute(DatabaseConfig.createUserTable),
-      database.execute(DatabaseConfig.createProductTable),
-      database.execute(DatabaseConfig.createTransactionTable),
-      database.execute(DatabaseConfig.createOrderedProductTable),
-      database.execute(DatabaseConfig.createQueuedActionTable),
+      db.execute(DatabaseConfig.createUserTable),
+      db.execute(DatabaseConfig.createProductTable),
+      db.execute(DatabaseConfig.createTransactionTable),
+      db.execute(DatabaseConfig.createOrderedProductTable),
+      db.execute(DatabaseConfig.createQueuedActionTable),
+      db.execute(DatabaseConfig.createAddressTable),
     ]);
+  }
+
+  Future<void> _upgradeDatabase(
+      Database db,
+      int oldVersion,
+      int newVersion,
+      ) async {
+    if (oldVersion < 2) {
+      await db.execute(DatabaseConfig.createAddressTable);
+    }
+
+    // future version
+    // if (oldVersion < 3) { ... }
   }
 
   @visibleForTesting

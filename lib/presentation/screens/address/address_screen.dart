@@ -1,37 +1,59 @@
-import 'package:app_image/app_image.dart';
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/assets/assets.dart';
 import '../../../core/themes/app_sizes.dart';
-import '../../../core/utilities/external_launcher.dart';
 import 'package:go_router/go_router.dart';
 
-class AddressScreen extends StatefulWidget {
+import '../../widgets/app_button.dart';
+import '../../widgets/app_dialog.dart';
+import '../../widgets/app_snack_bar.dart';
+import '../../providers/address/address_notifier.dart';
+import '../../providers/address/address_form_notifier.dart';
+
+class AddressScreen extends ConsumerStatefulWidget {
   const AddressScreen({super.key});
 
   @override
-  State<AddressScreen> createState() => _AddressScreenState();
+  ConsumerState<AddressScreen> createState() => _AddressScreenState();
 }
 
-class _AddressScreenState extends State<AddressScreen> {
-
-  final List<Map<String, dynamic>> data = [
-    {"id": 1, "name": "Item 1"},
-    {"id": 2, "name": "Item 2"},
-    {"id": 3, "name": "Item 3"},
-  ];
+class _AddressScreenState extends ConsumerState<AddressScreen> {
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      setState(() {});
+      ref.read(addressNotifierProvider.notifier).getAllAddress();
     });
+  }
+
+  void updateAddress(String code) {
+    context.push('/address/address-edit/$code');
+  }
+
+  void deleteAddress(String code) async {
+    var res = await AppDialog.showProgress(() {
+      return ref.read(addressFormNotifierProvider.notifier).deleteAddress(code);
+    });
+
+    if (res.isSuccess) {
+      if (!mounted) return;
+      context.go('/address');
+      AppSnackBar.show('Xóa dữ liệu thành công!');
+    } else {
+      AppDialog.showError(error: res.error?.toString());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(addressNotifierProvider, (previous, next) {
+      print("error: ${next.error}");
+      print("data: ${next.allAddress}");
+    });
+
+    final allAddress = ref.watch(addressNotifierProvider.select((s) => s.allAddress));
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Địa chỉ'),
@@ -39,6 +61,9 @@ class _AddressScreenState extends State<AddressScreen> {
         leading: BackButton(
           onPressed: () => context.pop(),
         ),
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        actions: const [_AddButton()],
       ),
       body: Align(
         alignment: Alignment.topLeft,
@@ -47,22 +72,92 @@ class _AddressScreenState extends State<AddressScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Username"),
-              const SizedBox(height: AppSizes.padding),
-              TextField( // input
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: "Enter username",
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  columns: const [
+                    DataColumn(label: Text('Mã')),
+                    DataColumn(label: Text('Tên')),
+                    DataColumn(label: Text('Tùy chọn')),
+                  ],
+                  rows: (allAddress ?? []).map((item) {
+                    return DataRow(
+                      cells: [
+                        DataCell(Text(item.code.toString())),
+                        DataCell(Text(item.name ?? '')),
+                        DataCell(
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit, color: Colors.orange),
+                                onPressed: () {
+                                  updateAddress(item.code);
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () {
+                                  AppDialog.show(
+                                    title: 'Xác nhận',
+                                    text: 'Bạn có chắc chắn muốn xóa địa chỉ?',
+                                    leftButtonText: 'Hủy bỏ',
+                                    rightButtonText: 'Xóa',
+                                    rightButtonColor: Theme.of(context).colorScheme.errorContainer,
+                                    rightButtonTextColor: Theme.of(context).colorScheme.error,
+                                    onTapRightButton: (context) async {
+                                      context.pop();
+                                      deleteAddress(item.code);
+                                    },
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
                 ),
-              ),
-              const SizedBox(height: AppSizes.padding),
-              Text(
-                'Flutter POS',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _AddButton extends StatelessWidget {
+  const _AddButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: AppSizes.padding),
+      child: AppButton(
+        height: 26,
+        borderRadius: BorderRadius.circular(4),
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.padding / 2),
+        buttonColor: Theme.of(context).colorScheme.surfaceContainer,
+        child: Row(
+          children: [
+            Icon(
+              Icons.add,
+              size: 12,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: AppSizes.padding / 4),
+            Text(
+              'Thêm',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
+        onTap: () => context.push('/address/address-create'),
       ),
     );
   }

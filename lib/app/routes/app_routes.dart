@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../presentation/providers/auth/auth_notifier.dart';
 import '../../presentation/screens/account/about_screen.dart';
+import '../../presentation/screens/address/address_form_screen.dart';
 import '../../presentation/screens/address/address_screen.dart';
 import '../../presentation/screens/account/account_screen.dart';
 import '../../presentation/screens/account/printer_settings_screen.dart';
@@ -165,6 +166,10 @@ class AppRoutes {
           child: AddressScreen(),
         );
       },
+      routes: [
+        _addressCreate(),
+        _addressEdit(),
+      ],
     );
   }
 
@@ -262,6 +267,30 @@ class AppRoutes {
       path: 'printer-settings',
       builder: (context, state) {
         return const PrinterSettingsScreen();
+      },
+    );
+  }
+
+  GoRoute _addressCreate() {
+    return GoRoute(
+      path: 'address-create',
+      builder: (context, state) {
+        return const AddressFormScreen();
+      },
+    );
+  }
+
+  GoRoute _addressEdit() {
+    return GoRoute(
+      path: 'address-edit/:code',
+      builder: (context, state) {
+        String? code = state.pathParameters["code"] ?? '';
+
+        if (code.isEmpty) {
+          throw 'Required code is not provided!';
+        }
+
+        return AddressFormScreen(code: code);
       },
     );
   }

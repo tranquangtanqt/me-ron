@@ -86,7 +86,7 @@ class _AddressButton extends StatelessWidget {
             Row(
               children: [
                 const Icon(
-                  Icons.bar_chart,
+                  Icons.location_on,
                   size: 18,
                 ),
                 const SizedBox(width: AppSizes.padding / 1.5),
