@@ -18,18 +18,18 @@ class ProductRepositoryImpl extends ProductRepository {
     required this.queuedActionLocalDatasource,
   });
 
+
   @override
-  Future<Result<List<ProductEntity>>> getUserProducts(
-    String userId, {
-    String orderBy = 'createdAt',
-    String sortBy = 'DESC',
-    int limit = 10,
-    int? offset,
-    String? contains,
-  }) async {
+  Future<Result<List<ProductEntity>>> getAllProducts(
+      {
+        String orderBy = 'id',
+        String sortBy = 'ASC',
+        int limit = 10,
+        int? offset,
+        String? contains,
+      }) async {
     try {
-      final local = await productLocalDatasource.getUserProducts(
-        userId,
+      final local = await productLocalDatasource.getAllProducts(
         orderBy: orderBy,
         sortBy: sortBy,
         limit: limit,
@@ -45,6 +45,34 @@ class ProductRepositoryImpl extends ProductRepository {
       return Result.failure(error: e);
     }
   }
+
+  // @override
+  // Future<Result<List<ProductEntity>>> getUserProducts(
+  //   String userId, {
+  //   String orderBy = 'createdAt',
+  //   String sortBy = 'DESC',
+  //   int limit = 10,
+  //   int? offset,
+  //   String? contains,
+  // }) async {
+  //   try {
+  //     final local = await productLocalDatasource.getUserProducts(
+  //       userId,
+  //       orderBy: orderBy,
+  //       sortBy: sortBy,
+  //       limit: limit,
+  //       offset: offset,
+  //       contains: contains,
+  //     );
+  //
+  //     if (local.isFailure) return Result.failure(error: local.error!);
+  //
+  //     final list = local.data ?? [];
+  //     return Result.success(data: list.map((e) => e.toEntity()).toList());
+  //   } catch (e) {
+  //     return Result.failure(error: e);
+  //   }
+  // }
 
   @override
   Future<Result<ProductEntity?>> getProduct(int productId) async {

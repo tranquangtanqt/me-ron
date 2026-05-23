@@ -90,6 +90,7 @@ class DatabaseService {
     await Future.wait([
       db.execute(DatabaseConfig.insertAddressTable),
       db.execute(DatabaseConfig.insertCategoriesTable),
+      db.execute(DatabaseConfig.insertProductTable),
     ]);
   }
 

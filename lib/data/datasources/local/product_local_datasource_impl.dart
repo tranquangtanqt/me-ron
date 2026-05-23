@@ -12,16 +12,46 @@ class ProductLocalDatasourceImpl extends ProductDatasource {
   ProductLocalDatasourceImpl(this._databaseService);
 
   @override
+  Future<Result<List<ProductModel>>> getAllProducts(
+      {
+        String orderBy = 'id',
+        String sortBy = 'ASC',
+        int limit = 10,
+        int? offset,
+        String? contains,
+      }) async {
+    try {
+      var res = await _databaseService.database.query(
+        DatabaseConfig.productTableName,
+        // where: 'categoryId = ? AND name LIKE ?',
+        where: 'name LIKE ?',
+        whereArgs: ["%${contains ?? ''}%"],
+        orderBy: '$orderBy $sortBy',
+        limit: limit,
+        offset: offset,
+      );
+      print('orderBy = $orderBy $sortBy');
+      return res.isEmpty
+          ? Result.success(data: [])
+          : Result.success(
+        data: res.map((e) => ProductModel.fromJson(e)).toList(),
+      );
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
   Future<Result<int>> createProduct(ProductModel product) async {
     try {
-      await _databaseService.database.insert(
+      final id = await _databaseService.database.insert(
         DatabaseConfig.productTableName,
         product.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
       // The id has been generated in models
-      return Result.success(data: product.id);
+      return Result.success(data: id);
     } catch (e) {
       return Result.failure(error: e);
     }
@@ -76,49 +106,49 @@ class ProductLocalDatasourceImpl extends ProductDatasource {
     }
   }
 
-  @override
-  Future<Result<List<ProductModel>>> getAllUserProducts(String userId) async {
-    try {
-      var res = await _databaseService.database.query(
-        DatabaseConfig.productTableName,
-        where: 'createdById = ?',
-        whereArgs: [userId],
-      );
+  // @override
+  // Future<Result<List<ProductModel>>> getAllUserProducts(String userId) async {
+  //   try {
+  //     var res = await _databaseService.database.query(
+  //       DatabaseConfig.productTableName,
+  //       where: 'categoryId = ?',
+  //       whereArgs: [userId],
+  //     );
+  //
+  //     return Result.success(
+  //       data: res.map((e) => ProductModel.fromJson(e)).toList(),
+  //     );
+  //   } catch (e) {
+  //     return Result.failure(error: e);
+  //   }
+  // }
 
-      return Result.success(
-        data: res.map((e) => ProductModel.fromJson(e)).toList(),
-      );
-    } catch (e) {
-      return Result.failure(error: e);
-    }
-  }
-
-  @override
-  Future<Result<List<ProductModel>>> getUserProducts(
-    String userId, {
-    String orderBy = 'createdAt',
-    String sortBy = 'DESC',
-    int limit = 10,
-    int? offset,
-    String? contains,
-  }) async {
-    try {
-      var res = await _databaseService.database.query(
-        DatabaseConfig.productTableName,
-        where: 'createdById = ? AND name LIKE ?',
-        whereArgs: [userId, "%${contains ?? ''}%"],
-        orderBy: '$orderBy $sortBy',
-        limit: limit,
-        offset: offset,
-      );
-
-      return res.isEmpty
-        ? Result.success(data: [])
-        : Result.success(
-        data: res.map((e) => ProductModel.fromJson(e)).toList(),
-      );
-    } catch (e) {
-      return Result.failure(error: e);
-    }
-  }
+  // @override
+  // Future<Result<List<ProductModel>>> getUserProducts(
+  //   String userId, {
+  //   String orderBy = 'createdAt',
+  //   String sortBy = 'DESC',
+  //   int limit = 10,
+  //   int? offset,
+  //   String? contains,
+  // }) async {
+  //   try {
+  //     var res = await _databaseService.database.query(
+  //       DatabaseConfig.productTableName,
+  //       where: 'createdById = ? AND name LIKE ?',
+  //       whereArgs: [userId, "%${contains ?? ''}%"],
+  //       orderBy: '$orderBy $sortBy',
+  //       limit: limit,
+  //       offset: offset,
+  //     );
+  //
+  //     return res.isEmpty
+  //       ? Result.success(data: [])
+  //       : Result.success(
+  //       data: res.map((e) => ProductModel.fromJson(e)).toList(),
+  //     );
+  //   } catch (e) {
+  //     return Result.failure(error: e);
+  //   }
+  // }
 }

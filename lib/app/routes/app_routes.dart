@@ -142,7 +142,7 @@ class AppRoutes {
       routes: [
         _productCreate(),
         _productEdit(),
-        _productDetail(),
+        // _productDetail(),
       ],
     );
   }
@@ -232,20 +232,20 @@ class AppRoutes {
     );
   }
 
-  GoRoute _productDetail() {
-    return GoRoute(
-      path: 'product-detail/:id',
-      builder: (context, state) {
-        int? id = int.tryParse(state.pathParameters["id"] ?? '');
-
-        if (id == null) {
-          throw 'Required productId is not provided!';
-        }
-
-        return ProductDetailScreen(id: id);
-      },
-    );
-  }
+  // GoRoute _productDetail() {
+  //   return GoRoute(
+  //     path: 'product-detail/:id',
+  //     builder: (context, state) {
+  //       int? id = int.tryParse(state.pathParameters["id"] ?? '');
+  //
+  //       if (id == null) {
+  //         throw 'Required productId is not provided!';
+  //       }
+  //
+  //       return ProductDetailScreen(id: id);
+  //     },
+  //   );
+  // }
 
   GoRoute _transactionDetail() {
     return GoRoute(

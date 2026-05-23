@@ -56,6 +56,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           padding: EdgeInsets.all(AppSizes.padding),
           child: Column(
             children: [
+              _CategoryButton(),
               _ProductButton(),
               _AddressButton(),
             ],
@@ -71,8 +72,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-class _ProductButton extends StatelessWidget {
-  const _ProductButton();
+class _CategoryButton extends StatelessWidget {
+  const _CategoryButton();
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +108,48 @@ class _ProductButton extends StatelessWidget {
         ),
         onTap: () {
           context.push('/category');
+        },
+      ),
+    );
+  }
+}
+
+class _ProductButton extends StatelessWidget {
+  const _ProductButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSizes.padding),
+      child: AppButton(
+        buttonColor: Theme.of(context).colorScheme.surface,
+        borderColor: Theme.of(context).colorScheme.surfaceContainer,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.category,
+                  size: 18,
+                ),
+                const SizedBox(width: AppSizes.padding / 1.5),
+                Text(
+                  'Sản phẩm',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 18,
+            ),
+          ],
+        ),
+        onTap: () {
+          context.push('/products');
         },
       ),
     );

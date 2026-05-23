@@ -22,12 +22,6 @@ class ProductFormNotifier extends AutoDisposeNotifier<ProductFormState> {
     return const ProductFormState();
   }
 
-  String _requireUserId() {
-    final authState = ref.read(authNotifierProvider);
-    if (authState.isAuthenticated) return authState.user!.id;
-    throw 'Unauthenticated!';
-  }
-
   Future<void> initProductForm(int? productId) async {
     if (productId == null) {
       state = state.copyWith(isLoaded: true);
@@ -42,9 +36,9 @@ class ProductFormNotifier extends AutoDisposeNotifier<ProductFormState> {
 
       state = state.copyWith(
         imageUrl: product?.imageUrl,
+        categoryId: product?.categoryId,
         name: product?.name,
         price: product?.price,
-        stock: product?.stock,
         description: product?.description,
         isLoaded: true,
       );
@@ -55,7 +49,6 @@ class ProductFormNotifier extends AutoDisposeNotifier<ProductFormState> {
 
   Future<Result<int>> createProduct() async {
     try {
-      final userId = _requireUserId();
       // final storageRepository = ref.read(storageRepositoryProvider);
       final productRepository = ref.read(productRepositoryProvider);
 
@@ -69,10 +62,9 @@ class ProductFormNotifier extends AutoDisposeNotifier<ProductFormState> {
       cl('imageUrl $imageUrl');
 
       var product = ProductEntity(
-        createdById: userId,
+        categoryId: state.categoryId,
         name: state.name ?? '',
         imageUrl: imageUrl ?? '',
-        stock: state.stock ?? 0,
         price: state.price ?? 0,
         description: state.description ?? '',
       );
@@ -90,7 +82,6 @@ class ProductFormNotifier extends AutoDisposeNotifier<ProductFormState> {
 
   Future<Result<void>> updatedProduct(int id) async {
     try {
-      final userId = _requireUserId();
       // final storageRepository = ref.read(storageRepositoryProvider);
       final productRepository = ref.read(productRepositoryProvider);
 
@@ -105,10 +96,9 @@ class ProductFormNotifier extends AutoDisposeNotifier<ProductFormState> {
 
       var product = ProductEntity(
         id: id,
-        createdById: userId,
+        categoryId: state.categoryId,
         name: state.name!,
         imageUrl: imageUrl ?? '',
-        stock: state.stock ?? 0,
         price: state.price ?? 0,
         description: state.description ?? '',
       );
@@ -142,16 +132,16 @@ class ProductFormNotifier extends AutoDisposeNotifier<ProductFormState> {
     state = state.copyWith(imageFile: value);
   }
 
+  void onChangedCategory(int? value) {
+    state = state.copyWith(categoryId: value);
+  }
+
   void onChangedName(String value) {
     state = state.copyWith(name: value);
   }
 
   void onChangedPrice(String value) {
     state = state.copyWith(price: int.tryParse(value));
-  }
-
-  void onChangedStock(String value) {
-    state = state.copyWith(stock: int.tryParse(value));
   }
 
   void onChangedDesc(String value) {

@@ -2,6 +2,15 @@ import '../../core/common/result.dart';
 import '../entities/product_entity.dart';
 
 abstract class ProductRepository {
+  Future<Result<List<ProductEntity>>> getAllProducts(
+    {
+      String orderBy,
+      String sortBy,
+      int limit,
+      int? offset,
+      String? contains,
+    });
+
   Future<Result<ProductEntity?>> getProduct(int productId);
 
   Future<Result<int>> createProduct(ProductEntity product);
@@ -10,12 +19,12 @@ abstract class ProductRepository {
 
   Future<Result<void>> deleteProduct(int productId);
 
-  Future<Result<List<ProductEntity>>> getUserProducts(
-    String userId, {
-    String orderBy,
-    String sortBy,
-    int limit,
-    int? offset,
-    String? contains,
-  });
+  // Future<Result<List<ProductEntity>>> getUserProducts(
+  //   String userId, {
+  //   String orderBy,
+  //   String sortBy,
+  //   int limit,
+  //   int? offset,
+  //   String? contains,
+  // });
 }

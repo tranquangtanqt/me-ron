@@ -57,17 +57,15 @@ CREATE TABLE IF NOT EXISTS '$userTableName' (
       '''
 CREATE TABLE IF NOT EXISTS '$productTableName' (
     'id' INTEGER NOT NULL,
-    'createdById' TEXT,
+    'categoryId' INTEGER,
     'name' TEXT,
     'imageUrl' TEXT,
-    'stock' INTEGER,
-    'sold' INTEGER,
     'price' INTEGER,
     'description' TEXT,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY ('id'),
-    FOREIGN KEY ('createdById') REFERENCES 'User' ('id')
+    FOREIGN KEY ('categoryId') REFERENCES 'categories' ('id')
 );
 ''';
 
@@ -138,5 +136,13 @@ VALUES  ('Bánh bao', NULL),
        ('Sữa chua', NULL),
        ('Kem', NULL),
        ('Khác', NULL);
+''';
+
+  static const String insertProductTable =
+  '''
+INSERT INTO '$productTableName' ('categoryId', 'name', 'price')
+VALUES  (1, 'Bánh bao không nhân', 5000),
+       (1, 'Bánh bao thịt trứng', 10000),
+       (1, 'Bánh bao pho mai', 15000);
 ''';
 }

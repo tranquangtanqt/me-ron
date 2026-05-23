@@ -4,14 +4,13 @@ import '../entities/product_entity.dart';
 import '../repositories/product_repository.dart';
 import 'params/base_params.dart';
 
-class GetUserProductsUsecase extends Usecase<Result, BaseParams> {
-  GetUserProductsUsecase(this._productRepository);
+class GetAllProductsUsecase extends Usecase<Result, BaseParams> {
+  GetAllProductsUsecase(this._productRepository);
 
   final ProductRepository _productRepository;
 
   @override
-  Future<Result<List<ProductEntity>>> call(BaseParams params) async => _productRepository.getUserProducts(
-    params.param,
+  Future<Result<List<ProductEntity>>> call(BaseParams params) async => _productRepository.getAllProducts(
     orderBy: params.orderBy,
     sortBy: params.sortBy,
     limit: params.limit,
@@ -19,6 +18,22 @@ class GetUserProductsUsecase extends Usecase<Result, BaseParams> {
     contains: params.contains,
   );
 }
+
+// class GetUserProductsUsecase extends Usecase<Result, BaseParams> {
+//   GetUserProductsUsecase(this._productRepository);
+//
+//   final ProductRepository _productRepository;
+//
+//   @override
+//   Future<Result<List<ProductEntity>>> call(BaseParams params) async => _productRepository.getUserProducts(
+//     params.param,
+//     orderBy: params.orderBy,
+//     sortBy: params.sortBy,
+//     limit: params.limit,
+//     offset: params.offset,
+//     contains: params.contains,
+//   );
+// }
 
 class GetProductUsecase extends Usecase<Result, int> {
   GetProductUsecase(this._productRepository);

@@ -61,28 +61,28 @@ class HomeNotifier extends AutoDisposeNotifier<HomeState> {
     state = state.copyWith(isPanelExpanded: val);
   }
 
-  void onAddOrderedProduct(ProductEntity product, int qty) {
-    final orderedProducts = [...state.orderedProducts];
-    var currentIndex = orderedProducts.indexWhere((e) => e.productId == product.id);
-
-    if (currentIndex != -1) {
-      orderedProducts[currentIndex] = orderedProducts[currentIndex].copyWith(quantity: qty);
-    } else {
-      var order = OrderedProductEntity(
-        id: DateTime.now().millisecondsSinceEpoch,
-        productId: product.id!,
-        quantity: qty,
-        stock: product.stock,
-        name: product.name,
-        imageUrl: product.imageUrl ?? '',
-        price: product.price,
-      );
-
-      orderedProducts.add(order);
-    }
-
-    state = state.copyWith(orderedProducts: orderedProducts);
-  }
+  // void onAddOrderedProduct(ProductEntity product, int qty) {
+  //   final orderedProducts = [...state.orderedProducts];
+  //   var currentIndex = orderedProducts.indexWhere((e) => e.productId == product.id);
+  //
+  //   if (currentIndex != -1) {
+  //     orderedProducts[currentIndex] = orderedProducts[currentIndex].copyWith(quantity: qty);
+  //   } else {
+  //     var order = OrderedProductEntity(
+  //       id: DateTime.now().millisecondsSinceEpoch,
+  //       productId: product.id!,
+  //       quantity: qty,
+  //       stock: product.stock,
+  //       name: product.name,
+  //       imageUrl: product.imageUrl ?? '',
+  //       price: product.price,
+  //     );
+  //
+  //     orderedProducts.add(order);
+  //   }
+  //
+  //   state = state.copyWith(orderedProducts: orderedProducts);
+  // }
 
   void onRemoveOrderedProduct(OrderedProductEntity val) {
     state = state.copyWith(

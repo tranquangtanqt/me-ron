@@ -1,24 +1,20 @@
 import '../../domain/entities/product_entity.dart';
 
 class ProductModel {
-  int id;
-  String createdById;
+  int? id;
+  int? categoryId;
   String name;
   String? imageUrl;
-  int stock;
-  int sold;
   int price;
   String? description;
   String? createdAt;
   String? updatedAt;
 
   ProductModel({
-    required this.id,
-    required this.createdById,
+    this.id,
+    this.categoryId,
     required this.name,
     required this.imageUrl,
-    required this.stock,
-    required this.sold,
     required this.price,
     this.description,
     this.createdAt,
@@ -28,11 +24,9 @@ class ProductModel {
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
       id: json['id'],
-      createdById: json['createdById'] ?? '',
+      categoryId: json['categoryId'],
       name: json['name'] ?? '',
       imageUrl: json['imageUrl'] ?? '',
-      stock: json['stock'] ?? 0,
-      sold: json['sold'],
       price: json['price'] ?? 0,
       description: json['description'],
       createdAt: json['createdAt'],
@@ -43,11 +37,9 @@ class ProductModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'createdById': createdById,
+      'categoryId': categoryId,
       'name': name,
       'imageUrl': imageUrl,
-      'stock': stock,
-      'sold': sold,
       'price': price,
       'description': description,
       'createdAt': createdAt,
@@ -57,12 +49,10 @@ class ProductModel {
 
   factory ProductModel.fromEntity(ProductEntity entity) {
     return ProductModel(
-      id: entity.id ?? DateTime.now().millisecondsSinceEpoch,
-      createdById: entity.createdById,
+      id: entity.id,
+      categoryId: entity.categoryId,
       name: entity.name,
       imageUrl: entity.imageUrl,
-      stock: entity.stock,
-      sold: entity.sold ?? 0,
       price: entity.price,
       description: entity.description,
       createdAt: entity.createdAt ?? DateTime.now().toIso8601String(),
@@ -73,11 +63,9 @@ class ProductModel {
   ProductEntity toEntity() {
     return ProductEntity(
       id: id,
-      createdById: createdById ?? '',
+      categoryId: categoryId,
       name: name ?? '',
       imageUrl: imageUrl ?? '',
-      stock: stock ?? 0,
-      sold: sold,
       price: price ?? 0,
       description: description,
       createdAt: createdAt,

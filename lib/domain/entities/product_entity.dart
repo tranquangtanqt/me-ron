@@ -2,11 +2,9 @@ import 'package:equatable/equatable.dart';
 
 class ProductEntity extends Equatable {
   final int? id;
-  final String createdById;
+  final int? categoryId;
   final String name;
   final String? imageUrl;
-  final int stock;
-  final int? sold;
   final int price;
   final String? description;
   final String? createdAt;
@@ -14,11 +12,9 @@ class ProductEntity extends Equatable {
 
   const ProductEntity({
     this.id,
-    required this.createdById,
+    this.categoryId,
     required this.name,
     this.imageUrl,
-    required this.stock,
-    this.sold,
     required this.price,
     this.description,
     this.createdAt,
@@ -27,11 +23,9 @@ class ProductEntity extends Equatable {
 
   ProductEntity copyWith({
     int? id,
-    String? createdById,
+    int? categoryId,
     String? name,
     String? imageUrl,
-    int? stock,
-    int? sold,
     int? price,
     String? description,
     String? createdAt,
@@ -39,11 +33,9 @@ class ProductEntity extends Equatable {
   }) {
     return ProductEntity(
       id: id ?? this.id,
-      createdById: createdById ?? this.createdById,
+      categoryId: categoryId ?? this.categoryId,
       name: name ?? this.name,
       imageUrl: imageUrl ?? this.imageUrl,
-      stock: stock ?? this.stock,
-      sold: sold ?? this.sold,
       price: price ?? this.price,
       description: description ?? this.description,
       createdAt: createdAt ?? this.createdAt,
@@ -54,11 +46,9 @@ class ProductEntity extends Equatable {
   @override
   List<Object?> get props => [
     id,
-    createdById,
+    categoryId,
     name,
     imageUrl,
-    stock,
-    sold,
     price,
     description,
     createdAt,

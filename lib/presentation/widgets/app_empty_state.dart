@@ -32,7 +32,7 @@ class AppEmptyState extends StatelessWidget {
             ),
             const SizedBox(height: AppSizes.padding / 2),
             Text(
-              title ?? 'Nothing to show',
+              title ?? 'Không có gì để hiển thị',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.bold,

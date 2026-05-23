@@ -50,19 +50,19 @@ class TransactionLocalDatasourceImpl extends TransactionDatasource {
 
             if (rawProduct.isEmpty) continue;
 
-            var product = ProductModel.fromJson(rawProduct.first);
-
-            // Update product stock and sold
-            int stock = product.stock - orderedProduct.quantity;
-            int sold = product.sold + orderedProduct.quantity;
-
-            batch.update(
-              DatabaseConfig.productTableName,
-              {'stock': stock, 'sold': sold},
-              where: 'id = ?',
-              whereArgs: [product.id],
-              conflictAlgorithm: ConflictAlgorithm.replace,
-            );
+            // var product = ProductModel.fromJson(rawProduct.first);
+            //
+            // // Update product stock and sold
+            // int stock = product.stock - orderedProduct.quantity;
+            // int sold = product.sold + orderedProduct.quantity;
+            //
+            // batch.update(
+            //   DatabaseConfig.productTableName,
+            //   {'stock': stock, 'sold': sold},
+            //   where: 'id = ?',
+            //   whereArgs: [product.id],
+            //   conflictAlgorithm: ConflictAlgorithm.replace,
+            // );
           }
 
           // Commit batch operations
@@ -116,19 +116,19 @@ class TransactionLocalDatasourceImpl extends TransactionDatasource {
 
             if (rawProduct.isEmpty) continue;
 
-            var product = ProductModel.fromJson(rawProduct.first);
-
-            // Update product stock and sold
-            int stock = product.stock - orderedProduct.quantity;
-            int sold = product.sold + orderedProduct.quantity;
-
-            batch.update(
-              DatabaseConfig.productTableName,
-              {'stock': stock, 'sold': sold},
-              where: 'id = ?',
-              whereArgs: [product.id],
-              conflictAlgorithm: ConflictAlgorithm.replace,
-            );
+            // var product = ProductModel.fromJson(rawProduct.first);
+            //
+            // // Update product stock and sold
+            // int stock = product.stock - orderedProduct.quantity;
+            // int sold = product.sold + orderedProduct.quantity;
+            //
+            // batch.update(
+            //   DatabaseConfig.productTableName,
+            //   {'stock': stock, 'sold': sold},
+            //   where: 'id = ?',
+            //   whereArgs: [product.id],
+            //   conflictAlgorithm: ConflictAlgorithm.replace,
+            // );
           }
 
           // Commit batch operations
@@ -164,20 +164,20 @@ class TransactionLocalDatasourceImpl extends TransactionDatasource {
             whereArgs: [orderedProduct.productId],
           );
 
-          if (productResults.isNotEmpty) {
-            var product = ProductModel.fromJson(productResults.first);
-
-            int revertedStock = product.stock + orderedProduct.quantity;
-            int revertedSold = product.sold - orderedProduct.quantity;
-
-            // Update product stock and sold count
-            await trx.update(
-              DatabaseConfig.productTableName,
-              {'stock': revertedStock, 'sold': revertedSold},
-              where: 'id = ?',
-              whereArgs: [orderedProduct.productId],
-            );
-          }
+          // if (productResults.isNotEmpty) {
+          //   var product = ProductModel.fromJson(productResults.first);
+          //
+          //   int revertedStock = product.stock + orderedProduct.quantity;
+          //   int revertedSold = product.sold - orderedProduct.quantity;
+          //
+          //   // Update product stock and sold count
+          //   await trx.update(
+          //     DatabaseConfig.productTableName,
+          //     {'stock': revertedStock, 'sold': revertedSold},
+          //     where: 'id = ?',
+          //     whereArgs: [orderedProduct.productId],
+          //   );
+          // }
         }
 
         // Delete related ordered products

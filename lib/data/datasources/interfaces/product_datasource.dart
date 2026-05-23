@@ -10,14 +10,20 @@ abstract class ProductDatasource {
 
   Future<Result<ProductModel?>> getProduct(int id);
 
-  Future<Result<List<ProductModel>>> getAllUserProducts(String userId);
-
-  Future<Result<List<ProductModel>>> getUserProducts(
-    String userId, {
+  Future<Result<List<ProductModel>>> getAllProducts({
     String orderBy,
     String sortBy,
     int limit,
     int? offset,
     String? contains,
   });
+
+  // Future<Result<List<ProductModel>>> getUserProducts(
+  //   String userId, {
+  //   String orderBy,
+  //   String sortBy,
+  //   int limit,
+  //   int? offset,
+  //   String? contains,
+  // });
 }

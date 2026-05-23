@@ -9,6 +9,8 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/themes/app_sizes.dart';
+import '../../../domain/entities/category_entity.dart';
+import '../../providers/category/category_notifier.dart';
 import '../../providers/products/product_form_notifier.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_dialog.dart';
@@ -30,9 +32,9 @@ class ProductFormScreen extends ConsumerStatefulWidget {
 }
 
 class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
+  // int? selectedCategoryId;
   final nameController = TextEditingController();
   final priceController = TextEditingController();
-  final stockController = TextEditingController();
   final descController = TextEditingController();
 
   @override
@@ -44,7 +46,6 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       final state = ref.read(productFormNotifierProvider);
       nameController.text = state.name ?? '';
       priceController.text = state.price?.toString() ?? '';
-      stockController.text = state.stock?.toString() ?? '';
       descController.text = state.description ?? '';
     });
   }
@@ -53,7 +54,6 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   void dispose() {
     nameController.dispose();
     priceController.dispose();
-    stockController.dispose();
     descController.dispose();
     super.dispose();
   }
@@ -70,8 +70,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       sourcePath: pickedFile.path,
       aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
       uiSettings: [
-        AndroidUiSettings(toolbarTitle: 'Crop Photo'),
-        IOSUiSettings(title: 'Crop Photo'),
+        AndroidUiSettings(toolbarTitle: 'Cắt Photo'),
+        IOSUiSettings(title: 'Cắt Photo'),
       ],
     );
 
@@ -89,7 +89,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     if (res.isSuccess) {
       if (!mounted) return;
       context.go('/products');
-      AppSnackBar.show('Product created');
+      AppSnackBar.show('Thêm mới dữ liệu thành công');
     } else {
       AppDialog.showError(error: res.error?.toString());
     }
@@ -103,7 +103,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     if (res.isSuccess) {
       if (!mounted) return;
       context.pop();
-      AppSnackBar.show('Product updated');
+      AppSnackBar.show('Cập nhật dữ liệu thành công');
     } else {
       AppDialog.showError(error: res.error?.toString());
     }
@@ -117,7 +117,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     if (res.isSuccess) {
       if (!mounted) return;
       context.go('/products');
-      AppSnackBar.show('Product deleted');
+      AppSnackBar.show('Xóa dữ liệu thành công');
     } else {
       AppDialog.showError(error: res.error?.toString());
     }
@@ -125,13 +125,20 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(categoryNotifierProvider, (previous, next) {
+      print("error: ${next.error}");
+      print("data: ${next.allCategory}");
+    });
+    final formState = ref.watch(productFormNotifierProvider);
+
+    final allCategory = ref.watch(categoryNotifierProvider.select((s) => s.allCategory)) ?? [];
     final notifier = ref.read(productFormNotifierProvider.notifier);
 
-    final isLoaded = ref.watch(productFormNotifierProvider.select((s) => s.isLoaded));
+    final isLoaded = formState.isLoaded;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.id == null ? 'Create Product' : 'Edit Product'),
+        title: Text(widget.id == null ? 'Thêm sản phẩm' : 'Chỉnh sửa sản phẩm'),
         titleSpacing: 0,
       ),
       body: !isLoaded
@@ -141,7 +148,12 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _ImageSection(onTapImage: onTapImage),
+                  // _ImageSection(onTapImage: onTapImage),
+                  _CategoryDropdown(
+                    selected: formState.categoryId,
+                    categories: allCategory,
+                    onChanged: notifier.onChangedCategory,
+                  ),
                   _NameField(
                     controller: nameController,
                     onChanged: notifier.onChangedName,
@@ -149,10 +161,6 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                   _PriceField(
                     controller: priceController,
                     onChanged: notifier.onChangedPrice,
-                  ),
-                  _StockField(
-                    controller: stockController,
-                    onChanged: notifier.onChangedStock,
                   ),
                   _DescriptionField(
                     controller: descController,
@@ -188,7 +196,7 @@ class _ImageSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Product Image',
+          'Hình ảnh',
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -234,6 +242,42 @@ class _ImageSection extends ConsumerWidget {
   }
 }
 
+class _CategoryDropdown extends StatelessWidget {
+  final int? selected;
+  final List<CategoryEntity> categories;
+  final ValueChanged<int?> onChanged;
+
+  const _CategoryDropdown({
+    required this.selected,
+    required this.categories,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSizes.padding),
+      child: DropdownButtonFormField<int>(
+        value: categories.any((e) => e.id == selected)
+            ? selected
+            : null,
+        decoration: const InputDecoration(
+          labelText: 'Danh mục',
+          border: OutlineInputBorder(),
+        ),
+        isExpanded: true,
+        items: categories.map((item) {
+          return DropdownMenuItem<int>(
+            value: item.id,
+            child: Text(item.name ?? ''),
+          );
+        }).toList(),
+        onChanged: onChanged,
+      ),
+    );
+  }
+}
+
 class _NameField extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
@@ -249,8 +293,8 @@ class _NameField extends StatelessWidget {
       padding: const EdgeInsets.only(top: AppSizes.padding),
       child: AppTextField(
         controller: controller,
-        labelText: 'Name',
-        hintText: 'Product name...',
+        labelText: 'Tên sản phẩm',
+        hintText: 'Nhập tên sản phẩm...',
         onChanged: onChanged,
       ),
     );
@@ -272,34 +316,9 @@ class _PriceField extends StatelessWidget {
       padding: const EdgeInsets.only(top: AppSizes.padding),
       child: AppTextField(
         controller: controller,
-        labelText: 'Price',
-        hintText: 'Product price...',
+        labelText: 'Giá bán',
+        hintText: 'Nhập giá bán...',
         type: AppTextFieldType.currency,
-        onChanged: onChanged,
-      ),
-    );
-  }
-}
-
-class _StockField extends StatelessWidget {
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
-
-  const _StockField({
-    required this.controller,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSizes.padding),
-      child: AppTextField(
-        controller: controller,
-        labelText: 'Stock',
-        hintText: 'Product stock...',
-        keyboardType: TextInputType.number,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         onChanged: onChanged,
       ),
     );
@@ -321,8 +340,8 @@ class _DescriptionField extends StatelessWidget {
       padding: const EdgeInsets.only(top: AppSizes.padding),
       child: AppTextField(
         controller: controller,
-        labelText: 'Description',
-        hintText: 'Product description...',
+        labelText: 'Mô tả',
+        hintText: 'Nhập mô tả sản phẩm...',
         maxLines: 4,
         onChanged: onChanged,
       ),
@@ -345,14 +364,14 @@ class _CreateOrUpdateButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isFormValid = ref.watch(
       productFormNotifierProvider.select((s) {
-        return (s.name?.isNotEmpty ?? false) && (s.price ?? 0) > 0 && (s.stock ?? 0) > 0;
+        return (s.name?.isNotEmpty ?? false) && (s.price ?? 0) > 0;
       }),
     );
 
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.padding * 1.5),
       child: AppButton(
-        text: id == null ? 'Add Product' : 'Update Product',
+        text: id == null ? 'Thêm mới sản phẩm' : 'Chỉnh sửa sản phẩm',
         enabled: isFormValid,
         onTap: () {
           if (id != null) {
