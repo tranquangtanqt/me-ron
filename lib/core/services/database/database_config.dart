@@ -3,14 +3,38 @@ class DatabaseConfig {
   DatabaseConfig._();
 
   static const String dbPath = 'app_database.db';
-  static const int version = 2;
+  static const int version = 1;
 
   static const String addressTableName = 'Address';
-  static const String userTableName = 'User';
-  static const String productTableName = 'Product';
-  static const String transactionTableName = 'Transaction';
-  static const String orderedProductTableName = 'OrderedProduct';
-  static const String queuedActionTableName = 'QueuedAction';
+  static const String userTableName = 'Users';
+  static const String categoriesTableName = 'Categories';
+  static const String productTableName = 'Products';
+  static const String transactionTableName = 'Transactions';
+  static const String orderedProductTableName = 'OrderedProducts';
+  static const String queuedActionTableName = 'QueuedActions';
+
+  static const String createAddressTable =
+  '''
+CREATE TABLE IF NOT EXISTS '$addressTableName' (
+    'code' TEXT NOT NULL,
+    'name' TEXT,
+    'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
+    'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY ('code')
+);
+''';
+
+  static const String createCategoryTable =
+  '''
+CREATE TABLE IF NOT EXISTS '$categoriesTableName' (
+    'id' INTEGER NOT NULL,
+    'name' TEXT,
+    'description' TEXT,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY ('id')
+);
+''';
 
   static const String createUserTable =
       '''
@@ -26,17 +50,6 @@ CREATE TABLE IF NOT EXISTS '$userTableName' (
     'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
     'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY ('id')
-);
-''';
-
-  static const String createAddressTable =
-  '''
-CREATE TABLE IF NOT EXISTS '$addressTableName' (
-    'code' TEXT NOT NULL,
-    'name' TEXT,
-    'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
-    'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY ('code')
 );
 ''';
 
@@ -106,5 +119,24 @@ CREATE TABLE IF NOT EXISTS '$queuedActionTableName' (
     'isCritical' INTEGER,
     'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+''';
+
+  static const String insertAddressTable =
+  '''
+INSERT INTO '$addressTableName' ('code', 'name')
+VALUES  ('W1', 'Tòa nhà W1'),
+       ('W2', 'Tòa nhà W2'),
+       ('W3', 'Tòa nhà W3'),
+       ('W4', 'Tòa nhà W4'),
+       ('00', 'Khác');
+''';
+
+  static const String insertCategoriesTable =
+  '''
+INSERT INTO '$categoriesTableName' ('name', 'description')
+VALUES  ('Bánh bao', NULL),
+       ('Sữa chua', NULL),
+       ('Kem', NULL),
+       ('Khác', NULL);
 ''';
 }

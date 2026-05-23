@@ -6,6 +6,8 @@ import '../../presentation/providers/auth/auth_notifier.dart';
 import '../../presentation/screens/account/about_screen.dart';
 import '../../presentation/screens/address/address_form_screen.dart';
 import '../../presentation/screens/address/address_screen.dart';
+import '../../presentation/screens/category/category_form_screen.dart';
+import '../../presentation/screens/category/category_screen.dart';
 import '../../presentation/screens/account/account_screen.dart';
 import '../../presentation/screens/account/printer_settings_screen.dart';
 import '../../presentation/screens/account/profile_form_screen.dart';
@@ -113,6 +115,7 @@ class AppRoutes {
         _transactions(),
         _account(),
         _address(),
+        _category(),
       ],
     );
   }
@@ -169,6 +172,21 @@ class AppRoutes {
       routes: [
         _addressCreate(),
         _addressEdit(),
+      ],
+    );
+  }
+
+  GoRoute _category() {
+    return GoRoute(
+      path: '/category',
+      pageBuilder: (context, state) {
+        return const NoTransitionPage<void>(
+          child: CategoryScreen(),
+        );
+      },
+      routes: [
+        _categoryCreate(),
+        _categoryEdit(),
       ],
     );
   }
@@ -291,6 +309,31 @@ class AppRoutes {
         }
 
         return AddressFormScreen(code: code);
+      },
+    );
+  }
+
+
+  GoRoute _categoryCreate() {
+    return GoRoute(
+      path: 'category-create',
+      builder: (context, state) {
+        return const CategoryFormScreen();
+      },
+    );
+  }
+
+  GoRoute _categoryEdit() {
+    return GoRoute(
+      path: 'category-edit/:id',
+      builder: (context, state) {
+        int? id = int.tryParse(state.pathParameters["id"] ?? '');
+
+        if (id == null) {
+          throw 'Required id is not provided!';
+        }
+
+        return CategoryFormScreen(id: id);
       },
     );
   }

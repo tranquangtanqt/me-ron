@@ -47,13 +47,16 @@ class DatabaseService {
   // Create tables
   Future<void> _createTables(Database db) async {
     await Future.wait([
+      db.execute(DatabaseConfig.createAddressTable),
+      db.execute(DatabaseConfig.createCategoryTable),
       db.execute(DatabaseConfig.createUserTable),
       db.execute(DatabaseConfig.createProductTable),
       db.execute(DatabaseConfig.createTransactionTable),
       db.execute(DatabaseConfig.createOrderedProductTable),
       db.execute(DatabaseConfig.createQueuedActionTable),
-      db.execute(DatabaseConfig.createAddressTable),
     ]);
+
+    await _seedData(db);
   }
 
   Future<void> _upgradeDatabase(
@@ -61,9 +64,9 @@ class DatabaseService {
       int oldVersion,
       int newVersion,
       ) async {
-    if (oldVersion < 2) {
-      await db.execute(DatabaseConfig.createAddressTable);
-    }
+    // if (oldVersion < 2) {
+    //   await db.execute(DatabaseConfig.createAddressTable);
+    // }
 
     // future version
     // if (oldVersion < 3) { ... }
@@ -80,6 +83,13 @@ class DatabaseService {
       database.execute(DatabaseConfig.createTransactionTable),
       database.execute(DatabaseConfig.createOrderedProductTable),
       database.execute(DatabaseConfig.createQueuedActionTable),
+    ]);
+  }
+
+  Future<void> _seedData(Database db) async {
+    await Future.wait([
+      db.execute(DatabaseConfig.insertAddressTable),
+      db.execute(DatabaseConfig.insertCategoriesTable),
     ]);
   }
 
