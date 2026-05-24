@@ -30,7 +30,6 @@ class ProductLocalDatasourceImpl extends ProductDatasource {
         limit: limit,
         offset: offset,
       );
-      print('orderBy = $orderBy $sortBy');
       return res.isEmpty
           ? Result.success(data: [])
           : Result.success(

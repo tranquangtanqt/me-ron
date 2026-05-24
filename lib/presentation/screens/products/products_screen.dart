@@ -155,10 +155,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                               dataRowMinHeight: 40,
                               dataRowMaxHeight: 48,
                               dividerThickness: 0, // tắt line mặc định
-                              border: TableBorder.all(
-                                color: Colors.grey,
-                                width: 1,
-                              ),
+                              // border: TableBorder.all(
+                              //   color: Colors.grey,
+                              //   width: 1,
+                              // ),
                               columns: const [
                                 DataColumn(label: Padding(
                                   padding: EdgeInsets.only(left: 8),
@@ -166,7 +166,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                                 ),),
                                 DataColumn(label: Text('Tên')),
                                 DataColumn(label: Text('Giá')),
-                                DataColumn(label: Text('cate')),
+                                // DataColumn(label: Text('cate')),
                                 DataColumn(label: Text('Tùy chọn')),
                               ],
                               rows: (allProducts ?? []).map((item) {
@@ -178,7 +178,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                                     ),),
                                     DataCell(Text(item.name ?? '')),
                                     DataCell(Text(item.price.toString() ?? '')),
-                                    DataCell(Text(item.categoryId.toString() ?? '')),
+                                    // DataCell(Text(item.categoryId.toString() ?? '')),
                                     DataCell(
                                       Row(
                                         children: [
