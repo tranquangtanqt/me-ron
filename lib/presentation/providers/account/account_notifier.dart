@@ -20,9 +20,9 @@ class AccountNotifier extends AutoDisposeNotifier<AccountFormState> {
     return const AccountFormState();
   }
 
-  String _requireUserId() {
+  int _requireUserId() {
     final authState = ref.read(authNotifierProvider);
-    if (authState.isAuthenticated) return authState.user!.id;
+    if (authState.isAuthenticated) return authState.user!.id!;
     throw 'Unauthenticated!';
   }
 
@@ -34,9 +34,9 @@ class AccountNotifier extends AutoDisposeNotifier<AccountFormState> {
 
     if (res.isSuccess) {
       state = state.copyWith(
-        imageUrl: res.data?.imageUrl,
+        // imageUrl: res.data?.imageUrl,
         name: res.data?.name,
-        email: res.data?.email,
+        // email: res.data?.email,
         phone: res.data?.phone,
         isLoaded: true,
       );
@@ -60,13 +60,13 @@ class AccountNotifier extends AutoDisposeNotifier<AccountFormState> {
 
       var user = UserEntity(
         id: userId,
-        email: state.email,
+        // email: state.email,
         phone: state.phone,
         name: state.name!,
-        imageUrl: imageUrl ?? '',
+        // imageUrl: imageUrl ?? '',
       );
 
-      var res = await UpateUserUsecase(userRepository).call(user);
+      var res = await UpdateUserUsecase(userRepository).call(user);
 
       return res;
     } catch (e) {

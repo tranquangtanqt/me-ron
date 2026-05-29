@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import '../../core/common/result.dart';
-import '../../core/constants/constants.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/user_repository.dart';
 import '../datasources/local/queued_action_local_datasource_impl.dart';
@@ -19,9 +18,25 @@ class UserRepositoryImpl extends UserRepository {
   });
 
   @override
-  Future<Result<UserEntity?>> getUser(String userId) async {
+  Future<Result<List<UserEntity>>> getAllUser() async {
     try {
-      var local = await userLocalDatasource.getUser(userId);
+      var local = await userLocalDatasource.getAllUser();
+      if (local.isFailure) return Result.failure(error: local.error!);
+
+      final data = local.data ?? [];
+
+      return Result.success(
+        data: data.map((e) => e.toEntity()).toList(),
+      );
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<UserEntity?>> getUser(int id) async {
+    try {
+      var local = await userLocalDatasource.getUser(id);
       if (local.isFailure) return Result.failure(error: local.error!);
 
       return Result.success(data: local.data?.toEntity());
@@ -31,7 +46,7 @@ class UserRepositoryImpl extends UserRepository {
   }
 
   @override
-  Future<Result<String>> createUser(UserEntity user) async {
+  Future<Result<int>> createUser(UserEntity user) async {
     try {
       var local = await userLocalDatasource.createUser(UserModel.fromEntity(user));
       if (local.isFailure) return Result.failure(error: local.error!);
@@ -56,17 +71,17 @@ class UserRepositoryImpl extends UserRepository {
   }
 
   @override
-  Future<Result<void>> deleteUser(String userId) async {
+  Future<Result<void>> updateUser(UserEntity user) async {
     try {
-      final local = await userLocalDatasource.deleteUser(userId);
+      final local = await userLocalDatasource.updateUser(UserModel.fromEntity(user));
       if (local.isFailure) return Result.failure(error: local.error!);
 
       final res = await queuedActionLocalDatasource.createQueuedAction(
         QueuedActionModel(
           id: DateTime.now().millisecondsSinceEpoch,
           repository: 'UserRepositoryImpl',
-          method: 'deleteUser',
-          param: userId,
+          method: 'updateUser',
+          param: jsonEncode(UserModel.fromEntity(user).toJson()),
           isCritical: false,
           createdAt: DateTime.now().toIso8601String(),
         ),
@@ -81,17 +96,17 @@ class UserRepositoryImpl extends UserRepository {
   }
 
   @override
-  Future<Result<void>> updateUser(UserEntity user) async {
+  Future<Result<void>> deleteUser(int id) async {
     try {
-      final local = await userLocalDatasource.updateUser(UserModel.fromEntity(user));
+      final local = await userLocalDatasource.deleteUser(id);
       if (local.isFailure) return Result.failure(error: local.error!);
 
       final res = await queuedActionLocalDatasource.createQueuedAction(
         QueuedActionModel(
           id: DateTime.now().millisecondsSinceEpoch,
           repository: 'UserRepositoryImpl',
-          method: 'updateUser',
-          param: jsonEncode(UserModel.fromEntity(user).toJson()),
+          method: 'deleteUser',
+          param: id.toString(),
           isCritical: false,
           createdAt: DateTime.now().toIso8601String(),
         ),

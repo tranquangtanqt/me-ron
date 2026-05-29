@@ -80,8 +80,8 @@ class DatabaseService {
     await Future.wait([
       database.execute(DatabaseConfig.createUserTable),
       database.execute(DatabaseConfig.createProductTable),
-      database.execute(DatabaseConfig.createTransactionTable),
       database.execute(DatabaseConfig.createOrderedProductTable),
+      database.execute(DatabaseConfig.createTransactionTable),
       database.execute(DatabaseConfig.createQueuedActionTable),
     ]);
   }
@@ -91,6 +91,7 @@ class DatabaseService {
       db.execute(DatabaseConfig.insertAddressTable),
       db.execute(DatabaseConfig.insertCategoriesTable),
       db.execute(DatabaseConfig.insertProductTable),
+      db.execute(DatabaseConfig.insertUserTable),
     ]);
   }
 

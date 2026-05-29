@@ -46,14 +46,14 @@ class _UserInfo extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: AppSizes.padding),
       child: Column(
         children: [
-          AppImage(
-            image: user?.imageUrl ?? '',
-            width: 120,
-            height: 120,
-            borderRadius: BorderRadius.circular(100),
-            backgroundColor: Theme.of(context).colorScheme.surface,
-          ),
-          const SizedBox(height: AppSizes.padding),
+          // AppImage(
+          //   image: user?.imageUrl ?? '',
+          //   width: 120,
+          //   height: 120,
+          //   borderRadius: BorderRadius.circular(100),
+          //   backgroundColor: Theme.of(context).colorScheme.surface,
+          // ),
+          // const SizedBox(height: AppSizes.padding),
           Text(
             user?.name ?? '(No Name)',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -62,7 +62,7 @@ class _UserInfo extends ConsumerWidget {
           ),
           const SizedBox(height: AppSizes.padding / 4),
           Text(
-            user?.email ?? '',
+            user?.address ?? '',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

@@ -12,16 +12,49 @@ class UserLocalDatasourceImpl extends UserDatasource {
   UserLocalDatasourceImpl(this._databaseService);
 
   @override
-  Future<Result<String>> createUser(UserModel user) async {
+  Future<Result<List<UserModel>>> getAllUser() async {
     try {
-      await _databaseService.database.insert(
+      var res = await _databaseService.database.query(
+        DatabaseConfig.userTableName,
+      );
+
+      final data = res
+          .map((e) => UserModel.fromJson(e))
+          .toList();
+
+      return Result.success(data: data);
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<UserModel?>> getUser(int id) async {
+    try {
+      var res = await _databaseService.database.query(
+        DatabaseConfig.userTableName,
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+
+      if (res.isEmpty) return Result.success(data: null);
+
+      return Result.success(data: UserModel.fromJson(res.first));
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<int>> createUser(UserModel user) async {
+    try {
+      final id = await _databaseService.database.insert(
         DatabaseConfig.userTableName,
         user.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
-      // The id is uid from GoogleSignIn credential
-      return Result.success(data: user.id);
+      return Result.success(data: id);
     } catch (e) {
       return Result.failure(error: e);
     }
@@ -45,7 +78,7 @@ class UserLocalDatasourceImpl extends UserDatasource {
   }
 
   @override
-  Future<Result<void>> deleteUser(String id) async {
+  Future<Result<void>> deleteUser(int id) async {
     try {
       await _databaseService.database.delete(
         DatabaseConfig.userTableName,
@@ -54,23 +87,6 @@ class UserLocalDatasourceImpl extends UserDatasource {
       );
 
       return Result.success(data: null);
-    } catch (e) {
-      return Result.failure(error: e);
-    }
-  }
-
-  @override
-  Future<Result<UserModel?>> getUser(String id) async {
-    try {
-      var res = await _databaseService.database.query(
-        DatabaseConfig.userTableName,
-        where: 'id = ?',
-        whereArgs: [id],
-      );
-
-      if (res.isEmpty) return Result.success(data: null);
-
-      return Result.success(data: UserModel.fromJson(res.first));
     } catch (e) {
       return Result.failure(error: e);
     }

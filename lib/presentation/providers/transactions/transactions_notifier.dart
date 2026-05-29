@@ -18,7 +18,7 @@ class TransactionsNotifier extends Notifier<TransactionsState> {
 
   String _requireUserId() {
     final authState = ref.read(authNotifierProvider);
-    if (authState.isAuthenticated) return authState.user!.id;
+    if (authState.isAuthenticated) return authState.user!.id.toString();
     throw 'Unauthenticated!';
   }
 

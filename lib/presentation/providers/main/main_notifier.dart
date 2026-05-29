@@ -23,11 +23,11 @@ class MainNotifier extends Notifier<MainState> {
     return const MainState();
   }
 
-  String _requireUserId() {
-    final authState = ref.read(authNotifierProvider);
-    if (authState.isAuthenticated) return authState.user!.id;
-    throw 'Unauthenticated!';
-  }
+  // String _requireUserId() {
+  //   final authState = ref.read(authNotifierProvider);
+  //   if (authState.isAuthenticated) return authState.user!.id;
+  //   throw 'Unauthenticated!';
+  // }
 
   Future<void> initMainProvider() async {
     await startPingService();

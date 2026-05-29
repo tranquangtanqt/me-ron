@@ -39,14 +39,11 @@ CREATE TABLE IF NOT EXISTS '$categoriesTableName' (
   static const String createUserTable =
       '''
 CREATE TABLE IF NOT EXISTS '$userTableName' (
-    'id' TEXT NOT NULL,
-    'email' TEXT,
-    'phone' TEXT,
+    'id' INTEGER NOT NULL,
     'name' TEXT,
-    'gender' TEXT,
-    'birthdate' TEXT,
-    'imageUrl' TEXT,
-    'authProvider' TEXT,
+    'address' TEXT,
+    'phone' TEXT,
+    'note' TEXT,
     'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
     'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY ('id')
@@ -144,5 +141,12 @@ INSERT INTO '$productTableName' ('categoryId', 'name', 'price')
 VALUES  (1, 'Bánh bao không nhân', 5000),
        (1, 'Bánh bao thịt trứng', 10000),
        (1, 'Bánh bao pho mai', 15000);
+''';
+
+  static const String insertUserTable =
+  '''
+INSERT INTO '$userTableName' ('name', 'address', 'phone')
+VALUES  ('W2 907 Chị Huyền', 'Tòa nhà W2', '0123456789'),
+       ('W3 Tên người dùng', 'Tòa nhà W2', '0123456789');
 ''';
 }

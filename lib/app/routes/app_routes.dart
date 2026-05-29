@@ -20,6 +20,8 @@ import '../../presentation/screens/products/product_form_screen.dart';
 import '../../presentation/screens/products/products_screen.dart';
 import '../../presentation/screens/transactions/transaction_detail_screen.dart';
 import '../../presentation/screens/transactions/transactions_screen.dart';
+import '../../presentation/screens/user/user_form_screen.dart';
+import '../../presentation/screens/user/user_screen.dart';
 import '../../presentation/screens/welcome/welcome_screen.dart';
 import 'params/error_screen_param.dart';
 
@@ -116,6 +118,7 @@ class AppRoutes {
         _account(),
         _address(),
         _category(),
+        _user(),
       ],
     );
   }
@@ -187,6 +190,21 @@ class AppRoutes {
       routes: [
         _categoryCreate(),
         _categoryEdit(),
+      ],
+    );
+  }
+
+  GoRoute _user() {
+    return GoRoute(
+      path: '/user',
+      pageBuilder: (context, state) {
+        return const NoTransitionPage<void>(
+          child: UserScreen(),
+        );
+      },
+      routes: [
+        _userCreate(),
+        _userEdit(),
       ],
     );
   }
@@ -313,7 +331,6 @@ class AppRoutes {
     );
   }
 
-
   GoRoute _categoryCreate() {
     return GoRoute(
       path: 'category-create',
@@ -334,6 +351,31 @@ class AppRoutes {
         }
 
         return CategoryFormScreen(id: id);
+      },
+    );
+  }
+
+
+  GoRoute _userCreate() {
+    return GoRoute(
+      path: 'user-create',
+      builder: (context, state) {
+        return const UserFormScreen();
+      },
+    );
+  }
+
+  GoRoute _userEdit() {
+    return GoRoute(
+      path: 'user-edit/:id',
+      builder: (context, state) {
+        int? id = int.tryParse(state.pathParameters["id"] ?? '');
+
+        if (id == null) {
+          throw 'Required id is not provided!';
+        }
+
+        return UserFormScreen(id: id);
       },
     );
   }

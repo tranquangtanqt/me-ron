@@ -1,51 +1,39 @@
 import 'package:equatable/equatable.dart';
 
 class UserEntity extends Equatable {
-  final String id;
-  final String? email;
-  final String? phone;
+  final int? id;
   final String? name;
-  final String? gender;
-  final String? birthdate;
-  final String? imageUrl;
-  final AuthProvider? authProvider;
+  final String? address;
+  final String? phone;
+  final String? note;
   final String? createdAt;
   final String? updatedAt;
 
   const UserEntity({
-    required this.id,
-    this.phone,
-    this.email,
+    this.id,
     this.name,
-    this.gender,
-    this.birthdate,
-    this.imageUrl,
-    this.authProvider,
+    this.address,
+    this.phone,
+    this.note,
     this.createdAt,
     this.updatedAt,
   });
 
   UserEntity copyWith({
-    String? id,
-    String? phone,
-    String? email,
+    int? id,
     String? name,
-    String? gender,
-    String? birthdate,
-    String? imageUrl,
-    AuthProvider? authProvider,
+    String? address,
+    String? phone,
+    String? note,
     String? createdAt,
     String? updatedAt,
   }) {
     return UserEntity(
       id: id ?? this.id,
-      email: email ?? this.email,
-      phone: phone ?? this.phone,
       name: name ?? this.name,
-      gender: gender ?? this.gender,
-      birthdate: birthdate ?? this.birthdate,
-      imageUrl: imageUrl ?? this.imageUrl,
-      authProvider: authProvider ?? this.authProvider,
+      address: address ?? this.address,
+      phone: phone ?? this.phone,
+      note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -54,13 +42,10 @@ class UserEntity extends Equatable {
   @override
   List<Object?> get props => [
     id,
-    email,
-    phone,
     name,
-    gender,
-    birthdate,
-    imageUrl,
-    authProvider,
+    address,
+    phone,
+    note,
     createdAt,
     updatedAt,
   ];

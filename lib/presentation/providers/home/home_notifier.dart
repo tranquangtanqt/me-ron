@@ -32,7 +32,7 @@ class HomeNotifier extends AutoDisposeNotifier<HomeState> {
         customerName: state.customerName,
         description: state.description,
         orderedProducts: state.orderedProducts,
-        createdById: user.id,
+        createdById: "1", // user.id,
         createdBy: user,
         receivedAmount: state.receivedAmount,
         returnAmount: state.receivedAmount - getTotalAmount(),

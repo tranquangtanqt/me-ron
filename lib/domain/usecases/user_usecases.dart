@@ -1,15 +1,26 @@
+import 'package:flutter_pos/domain/usecases/params/base_params.dart';
+
 import '../../core/common/result.dart';
 import '../../core/usecase/usecase.dart';
 import '../entities/user_entity.dart';
 import '../repositories/user_repository.dart';
 
-class GetUserUsecase extends Usecase<Result, String> {
+class GetAllUserUsecase extends Usecase<Result, BaseParams> {
+  GetAllUserUsecase(this._userRepository);
+
+  final UserRepository _userRepository;
+
+  @override
+  Future<Result<List<UserEntity>>> call(BaseParams params) async => _userRepository.getAllUser();
+}
+
+class GetUserUsecase extends Usecase<Result, int> {
   GetUserUsecase(this._userRepository);
 
   final UserRepository _userRepository;
 
   @override
-  Future<Result<UserEntity?>> call(String params) async => _userRepository.getUser(params);
+  Future<Result<UserEntity?>> call(int params) async => _userRepository.getUser(params);
 }
 
 class CreateUserUsecase extends Usecase<Result, UserEntity> {
@@ -18,19 +29,21 @@ class CreateUserUsecase extends Usecase<Result, UserEntity> {
   final UserRepository _userRepository;
 
   @override
-  Future<Result<String>> call(UserEntity params) async {
-    final currentUser = await _userRepository.getUser(params.id);
+  Future<Result<int>> call(UserEntity params) async {
+    if (params.id != null) {
+      final currentUser = await _userRepository.getUser(params.id!);
 
-    if (currentUser.data != null) {
-      return Result.success(data: currentUser.data!.id);
+      if (currentUser.data != null) {
+        return Result.success(data: currentUser.data!.id!);
+      }
     }
 
     return await _userRepository.createUser(params);
   }
 }
 
-class UpateUserUsecase extends Usecase<Result<void>, UserEntity> {
-  UpateUserUsecase(this._userRepository);
+class UpdateUserUsecase extends Usecase<Result<void>, UserEntity> {
+  UpdateUserUsecase(this._userRepository);
 
   final UserRepository _userRepository;
 
@@ -38,11 +51,11 @@ class UpateUserUsecase extends Usecase<Result<void>, UserEntity> {
   Future<Result<void>> call(UserEntity params) async => _userRepository.updateUser(params);
 }
 
-class DeleteUserUsecase extends Usecase<Result<void>, String> {
+class DeleteUserUsecase extends Usecase<Result<void>, int> {
   DeleteUserUsecase(this._userRepository);
 
   final UserRepository _userRepository;
 
   @override
-  Future<Result<void>> call(String params) async => _userRepository.deleteUser(params);
+  Future<Result<void>> call(int params) async => _userRepository.deleteUser(params);
 }
