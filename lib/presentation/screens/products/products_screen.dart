@@ -50,7 +50,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
     if (res.isSuccess) {
       if (!mounted) return;
-      context.go('/products');
+      // context.go('/products');
+      ref.read(productsNotifierProvider.notifier).getAllProducts();
       AppSnackBar.show('Xóa dữ liệu thành công!');
     } else {
       AppDialog.showError(error: res.error?.toString());

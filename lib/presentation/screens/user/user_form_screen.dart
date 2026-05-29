@@ -90,7 +90,7 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
 
     if (res.isSuccess) {
       if (!mounted) return;
-      context.go('/user');
+      context.pop();
       AppSnackBar.show('Xóa dữ liệu thành công!');
     } else {
       AppDialog.showError(error: res.error?.toString());

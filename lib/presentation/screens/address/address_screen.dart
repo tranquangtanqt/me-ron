@@ -38,7 +38,8 @@ class _AddressScreenState extends ConsumerState<AddressScreen> {
 
     if (res.isSuccess) {
       if (!mounted) return;
-      context.go('/address');
+      // context.go('/address');
+      ref.read(addressNotifierProvider.notifier).getAllAddress();
       AppSnackBar.show('Xóa dữ liệu thành công!');
     } else {
       AppDialog.showError(error: res.error?.toString());

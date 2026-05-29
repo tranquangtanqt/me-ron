@@ -53,7 +53,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
 
     if (res.isSuccess) {
       if (!mounted) return;
-      context.go('/category');
+      context.pop();
       AppSnackBar.show('Thêm mới dữ liệu thành công');
     } else {
       AppDialog.showError(error: res.error?.toString());
@@ -81,7 +81,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
 
     if (res.isSuccess) {
       if (!mounted) return;
-      context.go('/category');
+      context.pop();
       AppSnackBar.show('Xóa dữ liệu thành công!');
     } else {
       AppDialog.showError(error: res.error?.toString());

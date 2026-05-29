@@ -53,7 +53,7 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
 
     if (res.isSuccess) {
       if (!mounted) return;
-      context.go('/address');
+      context.pop();
       AppSnackBar.show('Thêm mới địa chỉ thành công');
     } else {
       AppDialog.showError(error: res.error?.toString());
@@ -81,7 +81,7 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
 
     if (res.isSuccess) {
       if (!mounted) return;
-      context.go('/address');
+      context.pop();
       AppSnackBar.show('Xóa dữ liệu thành công!');
     } else {
       AppDialog.showError(error: res.error?.toString());

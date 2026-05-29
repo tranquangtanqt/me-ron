@@ -38,7 +38,8 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
 
     if (res.isSuccess) {
       if (!mounted) return;
-      context.go('/category');
+      // context.go('/category');
+      ref.read(categoryNotifierProvider.notifier).getAllCategory();
       AppSnackBar.show('Xóa dữ liệu thành công!');
     } else {
       AppDialog.showError(error: res.error?.toString());
