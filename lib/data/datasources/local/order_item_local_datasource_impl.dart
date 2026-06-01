@@ -47,11 +47,11 @@ class OrderItemLocalDatasourceImpl extends OrderItemDatasource {
   }
 
   @override
-  Future<Result<int>> createOrderItem(OrderItemModel order) async {
+  Future<Result<int>> createOrderItem(OrderItemModel orderItem) async {
     try {
       final id = await _databaseService.database.insert(
-        DatabaseConfig.orderTableName,
-        order.toJson(),
+        DatabaseConfig.orderItemTableName,
+        orderItem.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
@@ -66,7 +66,7 @@ class OrderItemLocalDatasourceImpl extends OrderItemDatasource {
   Future<Result<void>> updateOrderItem(OrderItemModel order) async {
     try {
       await _databaseService.database.update(
-        DatabaseConfig.orderTableName,
+        DatabaseConfig.orderItemTableName,
         order.toJson(),
         where: 'id = ?',
         whereArgs: [order.id],
@@ -83,7 +83,7 @@ class OrderItemLocalDatasourceImpl extends OrderItemDatasource {
   Future<Result<void>> deleteOrderItem(int id) async {
     try {
       await _databaseService.database.delete(
-        DatabaseConfig.orderTableName,
+        DatabaseConfig.orderItemTableName,
         where: 'id = ?',
         whereArgs: [id],
       );

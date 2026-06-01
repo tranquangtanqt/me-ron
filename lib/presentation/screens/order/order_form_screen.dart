@@ -156,6 +156,9 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                           onQuantityChanged: (qty) {
                             ref.read(orderFormNotifierProvider.notifier).updateQuantity(i, qty);
                           },
+                          onProductChanged: (product) {
+                            ref.read(orderFormNotifierProvider.notifier).updateProduct(i, product);
+                          },
                         )
                     ],
                   ),
@@ -520,6 +523,7 @@ class _OrderItemRow extends StatelessWidget {
   final List<ProductEntity> products;
   final VoidCallback onDelete;
   final ValueChanged<int> onQuantityChanged;
+  final ValueChanged<ProductEntity?> onProductChanged;
 
   const _OrderItemRow({
     required this.index,
@@ -527,6 +531,7 @@ class _OrderItemRow extends StatelessWidget {
     required this.products,
     required this.onDelete,
     required this.onQuantityChanged,
+    required this.onProductChanged,
   });
 
   @override
@@ -559,7 +564,7 @@ class _OrderItemRow extends StatelessWidget {
                 );
               }).toList(),
               onChanged: (value) {
-                // update product
+                onProductChanged(value);
               },
             ),
           ),

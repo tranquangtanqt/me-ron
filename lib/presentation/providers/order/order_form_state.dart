@@ -4,7 +4,6 @@ import '../../../data/models/order_model.dart';
 import '../../screens/order/components/order_item_form.dart';
 
 class OrderFormState {
-  final File? imageFile;
   final int? userId;
   final int? status;
   final String? deliveryDatetime;
@@ -16,7 +15,6 @@ class OrderFormState {
   final List<OrderItemForm>? items;
 
   const OrderFormState({
-    this.imageFile,
     this.userId,
     this.status,
     this.deliveryDatetime,
@@ -29,7 +27,6 @@ class OrderFormState {
   });
 
   OrderFormState copyWith({
-    File? imageFile,
     int? userId,
     int? status,
     String? deliveryDatetime,
@@ -41,7 +38,6 @@ class OrderFormState {
     List<OrderItemForm>? items,
   }) {
     return OrderFormState(
-      imageFile: imageFile ?? this.imageFile,
       userId: userId ?? this.userId,
       status: status ?? this.status,
       deliveryDatetime: deliveryDatetime ?? this.deliveryDatetime,
@@ -76,7 +72,6 @@ class OrderFormState {
     }
 
     return OrderFormState(
-      imageFile: imageFile ?? this.imageFile,
       userId: userId ?? this.userId,
       status: status ?? this.status,
       deliveryDatetime: deliveryDatetime ?? this.deliveryDatetime,

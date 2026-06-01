@@ -6,12 +6,12 @@ import '../repositories/order_item_repository.dart';
 import 'params/base_params.dart';
 
 class GetAllOrderItemUsecase extends Usecase<Result, BaseParams> {
-  GetAllOrderItemUsecase(this._orderRepository);
+  GetAllOrderItemUsecase(this._orderItemRepository);
 
-  final OrderItemRepository _orderRepository;
+  final OrderItemRepository _orderItemRepository;
 
   @override
-  Future<Result<List<OrderItemModel>>> call(BaseParams params) async => _orderRepository.getAllOrderItems(
+  Future<Result<List<OrderItemModel>>> call(BaseParams params) async => _orderItemRepository.getAllOrderItems(
     orderBy: params.orderBy,
     sortBy: params.sortBy,
     limit: params.limit,
@@ -21,37 +21,37 @@ class GetAllOrderItemUsecase extends Usecase<Result, BaseParams> {
 }
 
 class GetOrderItemUsecase extends Usecase<Result, int> {
-  GetOrderItemUsecase(this._orderRepository);
+  GetOrderItemUsecase(this._orderItemRepository);
 
-  final OrderItemRepository _orderRepository;
+  final OrderItemRepository _orderItemRepository;
 
   @override
-  Future<Result<OrderItemEntity?>> call(int params) async => _orderRepository.getOrderItem(params);
+  Future<Result<OrderItemEntity?>> call(int params) async => _orderItemRepository.getOrderItem(params);
 }
 
 class CreateOrderItemUsecase extends Usecase<Result, OrderItemEntity> {
-  CreateOrderItemUsecase(this._orderRepository);
+  CreateOrderItemUsecase(this._orderItemRepository);
 
-  final OrderItemRepository _orderRepository;
+  final OrderItemRepository _orderItemRepository;
 
   @override
-  Future<Result<int>> call(OrderItemEntity params) async => _orderRepository.createOrderItem(params);
+  Future<Result<int>> call(OrderItemEntity params) async => _orderItemRepository.createOrderItem(params);
 }
 
 class UpdateOrderItemUsecase extends Usecase<Result<void>, OrderItemEntity> {
-  UpdateOrderItemUsecase(this._orderRepository);
+  UpdateOrderItemUsecase(this._orderItemRepository);
 
-  final OrderItemRepository _orderRepository;
+  final OrderItemRepository _orderItemRepository;
 
   @override
-  Future<Result<void>> call(OrderItemEntity params) async => _orderRepository.updateOrderItem(params);
+  Future<Result<void>> call(OrderItemEntity params) async => _orderItemRepository.updateOrderItem(params);
 }
 
 class DeleteOrderItemUsecase extends Usecase<Result<void>, int> {
-  DeleteOrderItemUsecase(this._orderRepository);
+  DeleteOrderItemUsecase(this._orderItemRepository);
 
-  final OrderItemRepository _orderRepository;
+  final OrderItemRepository _orderItemRepository;
 
   @override
-  Future<Result<void>> call(int params) async => _orderRepository.deleteOrderItem(params);
+  Future<Result<void>> call(int params) async => _orderItemRepository.deleteOrderItem(params);
 }

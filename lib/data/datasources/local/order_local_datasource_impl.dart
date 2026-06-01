@@ -3,6 +3,7 @@ import 'package:sqflite/sqflite.dart';
 import '../../../core/common/result.dart';
 import '../../../core/services/database/database_config.dart';
 import '../../../core/services/database/database_service.dart';
+import '../../models/order_item_model.dart';
 import '../../models/order_model.dart';
 import '../interfaces/order_datasource.dart';
 

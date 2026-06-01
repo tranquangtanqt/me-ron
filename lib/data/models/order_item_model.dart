@@ -57,6 +57,7 @@ class OrderItemModel {
       id: entity.id,
       orderId: entity.orderId,
       productId: entity.productId,
+      snapshotName: entity.snapshotName,
       snapshotPrice: entity.snapshotPrice,
       quantity: entity.quantity,
       lineTotal: entity.lineTotal,

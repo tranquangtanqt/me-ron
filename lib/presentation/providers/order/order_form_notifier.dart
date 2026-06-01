@@ -1,12 +1,18 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/app_providers.dart';
 import '../../../core/common/result.dart';
 import '../../../core/enums/order_status.dart';
 import '../../../core/utilities/console_logger.dart';
+import '../../../data/models/order_item_model.dart';
+import '../../../data/models/order_model.dart';
 import '../../../domain/entities/order_entity.dart';
+import '../../../domain/entities/order_item_entity.dart';
+import '../../../domain/entities/product_entity.dart';
+import '../../../domain/usecases/order_item_usecases.dart';
 import '../../../domain/usecases/order_usecases.dart';
 // import '../../../domain/usecases/storage_usecases.dart';
 import '../../screens/order/components/order_item_form.dart';
@@ -58,6 +64,7 @@ class OrderFormNotifier extends AutoDisposeNotifier<OrderFormState> {
       final orderRepository = ref.read(orderRepositoryProvider);
 
       var order = OrderEntity(
+        id: null,
         userId: state.userId,
         status: state.status ?? OrderStatus.shipping.value,
         deliveryDatetime: state.deliveryDatetime ?? '',
@@ -68,6 +75,30 @@ class OrderFormNotifier extends AutoDisposeNotifier<OrderFormState> {
       );
 
       var res = await CreateOrderUsecase(orderRepository).call(order);
+
+      final orderItemRepository = ref.read(orderItemRepositoryProvider);
+
+      var total = 0;
+      for (final OrderItemForm item in state.items ?? []) {
+        var oderItem = OrderItemEntity(
+          orderId: res.data,
+          productId: item.product?.id,
+          snapshotName: item.product?.name,
+          snapshotPrice: item.product?.price ?? 0,
+          quantity: item.quantity,
+          lineTotal: (item.product?.price ?? 0) * item.quantity
+        );
+
+        await CreateOrderItemUsecase(orderItemRepository).call(oderItem);
+        total += oderItem.lineTotal;
+      }
+
+      final updatedOrder = order.copyWith(
+        id: res.data,
+        total: total,
+      );
+
+      await UpdateOrderUsecase(orderRepository).call(updatedOrder);
 
       // Refresh orders
       ref.read(orderNotifierProvider.notifier).getAllOrder();
@@ -169,6 +200,16 @@ class OrderFormNotifier extends AutoDisposeNotifier<OrderFormState> {
 
     state = state.copyWith(
       items: updatedItems,
+    );
+  }
+
+  void updateProduct(int index, ProductEntity? product) {
+    state = state.copyWith(
+      items: [
+        ...?state.items,
+      ]..[index] = state.items![index].copyWith(
+        product: product,
+      ),
     );
   }
 
