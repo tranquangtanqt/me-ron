@@ -15,6 +15,8 @@ import '../../presentation/screens/account/profile_form_screen.dart';
 import '../../presentation/screens/error/error_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/main/main_screen.dart';
+import '../../presentation/screens/order/order_form_screen.dart';
+import '../../presentation/screens/order/order_screen.dart';
 import '../../presentation/screens/products/product_detail_screen.dart';
 import '../../presentation/screens/products/product_form_screen.dart';
 import '../../presentation/screens/products/products_screen.dart';
@@ -113,12 +115,13 @@ class AppRoutes {
       },
       routes: [
         _home(),
-        _products(),
+        _product(),
         _transactions(),
         _account(),
         _address(),
         _category(),
         _user(),
+        _order(),
       ],
     );
   }
@@ -134,9 +137,9 @@ class AppRoutes {
     );
   }
 
-  GoRoute _products() {
+  GoRoute _product() {
     return GoRoute(
-      path: '/products',
+      path: '/product',
       pageBuilder: (context, state) {
         return const NoTransitionPage<void>(
           child: ProductsScreen(),
@@ -145,7 +148,6 @@ class AppRoutes {
       routes: [
         _productCreate(),
         _productEdit(),
-        // _productDetail(),
       ],
     );
   }
@@ -209,6 +211,21 @@ class AppRoutes {
     );
   }
 
+  GoRoute _order() {
+    return GoRoute(
+      path: '/order',
+      pageBuilder: (context, state) {
+        return const NoTransitionPage<void>(
+          child: OrderScreen(),
+        );
+      },
+      routes: [
+        _orderCreate(),
+        _orderEdit(),
+      ],
+    );
+  }
+
   GoRoute _account() {
     return GoRoute(
       path: '/account',
@@ -246,6 +263,31 @@ class AppRoutes {
         }
 
         return ProductFormScreen(id: id);
+      },
+    );
+  }
+
+  GoRoute _orderCreate() {
+    return GoRoute(
+      path: 'order-create',
+      parentNavigatorKey: navNavigatorKey,
+      builder: (context, state) {
+        return const OrderFormScreen();
+      },
+    );
+  }
+
+  GoRoute _orderEdit() {
+    return GoRoute(
+      path: 'order-edit/:id',
+      builder: (context, state) {
+        int? id = int.tryParse(state.pathParameters["id"] ?? '');
+
+        if (id == null) {
+          throw 'Required productId is not provided!';
+        }
+
+        return OrderFormScreen(id: id);
       },
     );
   }

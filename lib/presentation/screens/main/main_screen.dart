@@ -55,11 +55,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_customize_outlined),
-            label: 'Products',
+            label: 'Orders',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.receipt_long_rounded),
-            label: 'Transactions',
+            label: 'Products',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.account_circle_outlined),
@@ -79,11 +79,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       return 0;
     }
 
-    if (location.startsWith('/products')) {
+    if (location.startsWith('/order')) {
       return 1;
     }
 
-    if (location.startsWith('/transactions')) {
+    if (location.startsWith('/product')) {
       return 2;
     }
 
@@ -101,9 +101,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       case 0:
         router.go('/home');
       case 1:
-        router.go('/products');
+        router.go('/order');
       case 2:
-        router.go('/transactions');
+        router.go('/product');
       case 3:
         router.go('/account');
     }

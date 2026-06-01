@@ -43,6 +43,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await ref.read(productFormNotifierProvider.notifier).initProductForm(widget.id);
 
+      ref.read(categoryNotifierProvider.notifier).getAllCategory();
+
       final state = ref.read(productFormNotifierProvider);
       nameController.text = state.name ?? '';
       priceController.text = state.price?.toString() ?? '';
@@ -88,7 +90,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
 
     if (res.isSuccess) {
       if (!mounted) return;
-      context.go('/products');
+      context.pop();
       AppSnackBar.show('Thêm mới dữ liệu thành công');
     } else {
       AppDialog.showError(error: res.error?.toString());
@@ -116,7 +118,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
 
     if (res.isSuccess) {
       if (!mounted) return;
-      context.go('/products');
+      context.pop();
       AppSnackBar.show('Xóa dữ liệu thành công');
     } else {
       AppDialog.showError(error: res.error?.toString());
@@ -149,7 +151,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // _ImageSection(onTapImage: onTapImage),
-                  _CategoryDropdown(
+                  _CategoryAutocomplete(
                     selected: formState.categoryId,
                     categories: allCategory,
                     onChanged: notifier.onChangedCategory,
@@ -242,12 +244,12 @@ class _ImageSection extends ConsumerWidget {
   }
 }
 
-class _CategoryDropdown extends StatelessWidget {
+class _CategoryAutocomplete extends StatelessWidget {
   final int? selected;
   final List<CategoryEntity> categories;
   final ValueChanged<int?> onChanged;
 
-  const _CategoryDropdown({
+  const _CategoryAutocomplete({
     required this.selected,
     required this.categories,
     required this.onChanged,
@@ -255,24 +257,73 @@ class _CategoryDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final selectedCategory = categories
+        .where((e) => e.id == selected)
+        .cast<CategoryEntity?>()
+        .firstOrNull;
+
     return Padding(
-      padding: const EdgeInsets.only(top: AppSizes.padding),
-      child: DropdownButtonFormField<int>(
-        value: categories.any((e) => e.id == selected)
-            ? selected
-            : null,
-        decoration: const InputDecoration(
-          labelText: 'Danh mục',
-          border: OutlineInputBorder(),
-        ),
-        isExpanded: true,
-        items: categories.map((item) {
-          return DropdownMenuItem<int>(
-            value: item.id,
-            child: Text(item.name ?? ''),
+      padding: const EdgeInsets.only(top: 16),
+      child: Autocomplete<CategoryEntity>(
+        displayStringForOption: (c) => c.name ?? '',
+
+        optionsBuilder: (TextEditingValue value) {
+          final query = value.text.trim().toLowerCase();
+
+          if (query.isEmpty) {
+            return categories;
+          }
+
+          return categories.where((c) {
+            final name = (c.name ?? '').toLowerCase();
+            return name.contains(query);
+          });
+        },
+
+        onSelected: (CategoryEntity selection) {
+          onChanged(selection.id);
+        },
+
+        fieldViewBuilder:
+            (context, textController, focusNode, onFieldSubmitted) {
+          // sync selected text khi edit
+          if (selectedCategory != null &&
+              textController.text.isEmpty) {
+            textController.text = selectedCategory.name ?? '';
+          }
+
+          return TextFormField(
+            controller: textController, // ✅ dùng controller của Autocomplete
+            focusNode: focusNode,
+            decoration: const InputDecoration(
+              labelText: 'Danh mục',
+              border: OutlineInputBorder(),
+            ),
           );
-        }).toList(),
-        onChanged: onChanged,
+        },
+
+        optionsViewBuilder: (context, onSelected, options) {
+          return Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              elevation: 4,
+              child: SizedBox(
+                height: 220,
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  itemCount: options.length,
+                  itemBuilder: (context, index) {
+                    final option = options.elementAt(index);
+                    return ListTile(
+                      title: Text(option.name ?? ''),
+                      onTap: () => onSelected(option),
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -404,15 +455,15 @@ class _DeleteButton extends StatelessWidget {
         bottom: AppSizes.padding * 2,
       ),
       child: AppButton(
-        text: 'Delete',
+        text: 'Xóa',
         textColor: Theme.of(context).colorScheme.error,
         buttonColor: Theme.of(context).colorScheme.surfaceContainerLowest,
         onTap: () {
           AppDialog.show(
-            title: 'Confirm',
-            text: 'Are you sure want to delete this product?',
-            leftButtonText: 'Cancel',
-            rightButtonText: 'Delete',
+            title: 'Xác nhận',
+            text: 'Bạn có chắc chắn muốn xóa dữ liệu?',
+            leftButtonText: 'Hủy',
+            rightButtonText: 'Xóa',
             rightButtonColor: Theme.of(context).colorScheme.errorContainer,
             rightButtonTextColor: Theme.of(context).colorScheme.error,
             onTapRightButton: (context) async {

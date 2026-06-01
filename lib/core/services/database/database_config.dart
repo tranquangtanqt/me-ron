@@ -10,7 +10,8 @@ class DatabaseConfig {
   static const String categoriesTableName = 'Categories';
   static const String productTableName = 'Products';
   static const String transactionTableName = 'Transactions';
-  static const String orderedProductTableName = 'OrderedProducts';
+  static const String orderTableName = 'Orders';
+  static const String orderItemTableName = 'OrderItems';
   static const String queuedActionTableName = 'QueuedActions';
 
   static const String createAddressTable =
@@ -66,6 +67,46 @@ CREATE TABLE IF NOT EXISTS '$productTableName' (
 );
 ''';
 
+  static const String createOrderTable =
+  '''
+CREATE TABLE IF NOT EXISTS '$orderTableName' (
+    'id' INTEGER NOT NULL,
+    'userId' INTEGER,
+    'status' INTEGER,
+    'deliveryDatetime' DATETIME DEFAULT CURRENT_TIMESTAMP,
+    'discountValue' INTEGER,
+    'subTotal' INTEGER,
+    'total' INTEGER,
+    'note' TEXT,
+    'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
+    'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY ('id'),
+    FOREIGN KEY ('userId') REFERENCES 'users' ('id')
+);
+''';
+// total = subTotal - discountValue
+//  tong = tong - giam gia
+
+  static const String createOrderItemTable =
+  '''
+CREATE TABLE IF NOT EXISTS '$orderItemTableName' (
+    'id' INTEGER NOT NULL,
+    'orderId' INTEGER,
+    'productId' INTEGER,
+    'snapshotName' TEXT,
+    'snapshotPrice' INTEGER,
+    'quantity' INTEGER,
+    'lineTotal' INTEGER,
+    'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
+    'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY ('id'),
+    FOREIGN KEY ('orderId') REFERENCES 'orders' ('id'),
+    FOREIGN KEY ('productId') REFERENCES 'products' ('id')
+);
+''';
+// lineTotal = snapshotPrice * quantity
+// tong cua dong hien tai = gia * so luong
+
   static const String createTransactionTable =
       '''
 CREATE TABLE IF NOT EXISTS '$transactionTableName' (
@@ -82,25 +123,6 @@ CREATE TABLE IF NOT EXISTS '$transactionTableName' (
     'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY ('id'),
     FOREIGN KEY ('createdById') REFERENCES 'User' ('id')
-);
-''';
-
-  static const String createOrderedProductTable =
-      '''
-CREATE TABLE IF NOT EXISTS '$orderedProductTableName' (
-    'id' INTEGER NOT NULL,
-    'transactionId' INTEGER,
-    'productId' INTEGER,
-    'quantity' INTEGER,
-    'stock' INTEGER,
-    'name' TEXT,
-    'imageUrl' TEXT,
-    'price' INTEGER,
-    'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
-    'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY ('id'),
-    FOREIGN KEY ('transactionId') REFERENCES 'Transaction' ('id'),
-    FOREIGN KEY ('productId') REFERENCES 'Product' ('id')
 );
 ''';
 
@@ -146,7 +168,26 @@ VALUES  (1, 'Bánh bao không nhân', 5000),
   static const String insertUserTable =
   '''
 INSERT INTO '$userTableName' ('name', 'address', 'phone')
-VALUES  ('W2 907 Chị Huyền', 'Tòa nhà W2', '0123456789'),
-       ('W3 Tên người dùng', 'Tòa nhà W2', '0123456789');
+VALUES  
+  ('W2 907 Chị Huyền', 'Tòa nhà W2', '0123456789'),
+  ('W2 911 Chị Dung', 'Tòa nhà W2', '0123456789'),
+  ('W3 Tên người dùng', 'Tòa nhà W2', '0123456789');
+''';
+
+  static const String insertOrderTable =
+  '''
+INSERT INTO '$orderTableName' ('userId', 'status', 'discountValue', 'subTotal', 'total')
+VALUES  ('1', '1', 1000, 5000, 4000),
+       ('1', '1', 2000, 5000, 3000),
+       ('2', '1', 3000, 5000, 2000);
+''';
+
+  static const String insertOrderItemTable =
+  '''
+INSERT INTO '$orderItemTableName' ('orderId', 'productId', 'snapshotName', 'snapshotPrice', 'quantity', 'lineTotal')
+VALUES  
+  ('1', '1', 'snapshotName 1', 1000, 1, 1000),
+  ('1', '2', 'snapshotName 2', 2000, 2, 4000),
+  ('2', '1', 'snapshotName 3', 2000, 2, 4000);
 ''';
 }

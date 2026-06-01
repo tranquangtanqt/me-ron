@@ -56,6 +56,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           padding: EdgeInsets.all(AppSizes.padding),
           child: Column(
             children: [
+              _OrderButton(),
               _UserButton(),
               _CategoryButton(),
               _ProductButton(),
@@ -68,6 +69,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         footer: CartPanelFooter(panelController: panelController),
         onPanelOpened: () => homeNotifier.onChangedIsPanelExpanded(true),
         onPanelClosed: () => homeNotifier.onChangedIsPanelExpanded(false),
+      ),
+    );
+  }
+}
+
+class _OrderButton extends StatelessWidget {
+  const _OrderButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSizes.padding),
+      child: AppButton(
+        buttonColor: Theme.of(context).colorScheme.surface,
+        borderColor: Theme.of(context).colorScheme.surfaceContainer,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.receipt_long,
+                  size: 18,
+                ),
+                const SizedBox(width: AppSizes.padding / 1.5),
+                Text(
+                  'Order',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 18,
+            ),
+          ],
+        ),
+        onTap: () {
+          context.push('/order');
+        },
       ),
     );
   }
@@ -89,7 +132,7 @@ class _UserButton extends StatelessWidget {
             Row(
               children: [
                 const Icon(
-                  Icons.category,
+                  Icons.person,
                   size: 18,
                 ),
                 const SizedBox(width: AppSizes.padding / 1.5),
@@ -173,7 +216,7 @@ class _ProductButton extends StatelessWidget {
             Row(
               children: [
                 const Icon(
-                  Icons.category,
+                  Icons.inventory,
                   size: 18,
                 ),
                 const SizedBox(width: AppSizes.padding / 1.5),
@@ -192,7 +235,7 @@ class _ProductButton extends StatelessWidget {
           ],
         ),
         onTap: () {
-          context.push('/products');
+          context.push('/product');
         },
       ),
     );

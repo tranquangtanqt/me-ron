@@ -34,6 +34,7 @@ class AppTextField extends StatefulWidget {
   final bool showCounter;
   final bool showBorder;
   final AppTextFieldType type;
+  final Widget? suffixIcon;
 
   const AppTextField({
     super.key,
@@ -59,6 +60,7 @@ class AppTextField extends StatefulWidget {
     this.showCounter = false,
     this.showBorder = true,
     this.type = AppTextFieldType.general,
+    this.suffixIcon,
   });
 
   @override

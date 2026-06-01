@@ -36,4 +36,15 @@ class CurrencyFormatter {
       locale: AppLocale.defaultLocale.countryCode,
     ).currencySymbol;
   }
+
+  static String formatVND(num data, {int? decimalDigits}) {
+    final formatter = NumberFormat.currency(
+      locale: 'vi_VN',
+      symbol: '₫',
+      decimalDigits: 0,
+    );
+
+    String result = formatter.format(data);
+    return result;
+  }
 }

@@ -51,8 +51,9 @@ class DatabaseService {
       db.execute(DatabaseConfig.createCategoryTable),
       db.execute(DatabaseConfig.createUserTable),
       db.execute(DatabaseConfig.createProductTable),
+      db.execute(DatabaseConfig.createOrderTable),
+      db.execute(DatabaseConfig.createOrderItemTable),
       db.execute(DatabaseConfig.createTransactionTable),
-      db.execute(DatabaseConfig.createOrderedProductTable),
       db.execute(DatabaseConfig.createQueuedActionTable),
     ]);
 
@@ -80,7 +81,7 @@ class DatabaseService {
     await Future.wait([
       database.execute(DatabaseConfig.createUserTable),
       database.execute(DatabaseConfig.createProductTable),
-      database.execute(DatabaseConfig.createOrderedProductTable),
+      database.execute(DatabaseConfig.createOrderTable),
       database.execute(DatabaseConfig.createTransactionTable),
       database.execute(DatabaseConfig.createQueuedActionTable),
     ]);
@@ -92,6 +93,8 @@ class DatabaseService {
       db.execute(DatabaseConfig.insertCategoriesTable),
       db.execute(DatabaseConfig.insertProductTable),
       db.execute(DatabaseConfig.insertUserTable),
+      db.execute(DatabaseConfig.insertOrderTable),
+      db.execute(DatabaseConfig.insertOrderItemTable),
     ]);
   }
 

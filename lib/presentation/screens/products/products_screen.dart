@@ -27,20 +27,18 @@ class ProductsScreen extends ConsumerStatefulWidget {
 class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   final scrollController = ScrollController();
   final searchFieldController = TextEditingController();
-  List<CategoryEntity> allCategory = [];
 
   @override
   void initState() {
     scrollController.addListener(scrollListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(productsNotifierProvider.notifier).getAllProducts();
-      ref.read(categoryNotifierProvider.notifier).getAllCategory();
     });
     super.initState();
   }
 
   void updateProduct(int id) {
-    context.push('/products/product-edit/$id');
+    context.push('/product/product-edit/$id');
   }
 
   void deleteProduct(int id) async {
@@ -106,17 +104,17 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             // Disable scroll when data is null or empty
             physics: (allProducts?.isEmpty ?? true) ? const NeverScrollableScrollPhysics() : null,
             slivers: [
-              SliverAppBar(
-                floating: true,
-                snap: true,
-                automaticallyImplyLeading: false,
-                collapsedHeight: 70,
-                titleSpacing: 0,
-                title: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.padding),
-                  child: _SearchField(controller: searchFieldController),
-                ),
-              ),
+              // SliverAppBar(
+              //   floating: true,
+              //   snap: true,
+              //   automaticallyImplyLeading: false,
+              //   collapsedHeight: 70,
+              //   titleSpacing: 0,
+              //   title: Padding(
+              //     padding: const EdgeInsets.symmetric(horizontal: AppSizes.padding),
+              //     child: _SearchField(controller: searchFieldController),
+              //   ),
+              // ),
               SliverLayoutBuilder(
                 builder: (context, _) {
                   if (allProducts == null) {
@@ -253,7 +251,7 @@ class _AddButton extends StatelessWidget {
             ),
             const SizedBox(width: AppSizes.padding / 4),
             Text(
-              'Add Product',
+              'Thêm',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
@@ -262,7 +260,7 @@ class _AddButton extends StatelessWidget {
             ),
           ],
         ),
-        onTap: () => context.go('/products/product-create'),
+        onTap: () => context.go('/product/product-create'),
       ),
     );
   }
