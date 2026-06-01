@@ -47,41 +47,14 @@ class OrderRepositoryImpl extends OrderRepository {
     }
   }
 
-  // @override
-  // Future<Result<List<OrderEntity>>> getUserOrders(
-  //   String userId, {
-  //   String orderBy = 'createdAt',
-  //   String sortBy = 'DESC',
-  //   int limit = 10,
-  //   int? offset,
-  //   String? contains,
-  // }) async {
-  //   try {
-  //     final local = await orderLocalDatasource.getUserOrders(
-  //       userId,
-  //       orderBy: orderBy,
-  //       sortBy: sortBy,
-  //       limit: limit,
-  //       offset: offset,
-  //       contains: contains,
-  //     );
-  //
-  //     if (local.isFailure) return Result.failure(error: local.error!);
-  //
-  //     final list = local.data ?? [];
-  //     return Result.success(data: list.map((e) => e.toEntity()).toList());
-  //   } catch (e) {
-  //     return Result.failure(error: e);
-  //   }
-  // }
-
   @override
-  Future<Result<OrderEntity?>> getOrder(int orderId) async {
+  Future<Result<List<OrderModel>>> getOrder(int orderId) async {
     try {
       final local = await orderLocalDatasource.getOrder(orderId);
       if (local.isFailure) return Result.failure(error: local.error!);
 
-      return Result.success(data: local.data?.toEntity());
+      final list = local.data ?? [];
+      return Result.success(data: list.toList());
     } catch (e) {
       return Result.failure(error: e);
     }

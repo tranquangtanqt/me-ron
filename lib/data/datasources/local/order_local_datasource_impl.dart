@@ -28,6 +28,7 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
             O.*, 
             U.name AS userName,
             D.orderId AS orderId,
+            D.productId AS productId,
             D.snapshotName As snapshotName,
             D.snapshotPrice As snapshotPrice,
             D.quantity As quantity,
@@ -105,7 +106,7 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
   }
 
   @override
-  Future<Result<OrderModel?>> getOrder(int id) async {
+  Future<Result<List<OrderModel>>> getOrder(int id) async {
     try {
       // var res = await _databaseService.database.query(
       //   DatabaseConfig.orderTableName,
@@ -119,6 +120,7 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
             O.*, 
             U.name AS userName,
             D.orderId AS orderId,
+            D.productId AS productId,
             D.snapshotName As snapshotName,
             D.snapshotPrice As snapshotPrice,
             D.quantity As quantity,
@@ -133,9 +135,12 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
           [id],
       );
 
-      if (res.isEmpty) return Result.success(data: null);
+      return res.isEmpty
+          ? Result.success(data: [])
+          : Result.success(
+        data: res.map((e) => OrderModel.fromJson(e)).toList(),
+      );
 
-      return Result.success(data: OrderModel.fromJson(res.first));
     } catch (e) {
       return Result.failure(error: e);
     }

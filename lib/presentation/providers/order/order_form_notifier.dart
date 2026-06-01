@@ -16,6 +16,7 @@ import '../../../domain/usecases/order_item_usecases.dart';
 import '../../../domain/usecases/order_usecases.dart';
 // import '../../../domain/usecases/storage_usecases.dart';
 import '../../screens/order/components/order_item_form.dart';
+import '../products/products_notifier.dart';
 import 'order_form_state.dart';
 import 'order_notifier.dart';
 
@@ -30,27 +31,54 @@ class OrderFormNotifier extends AutoDisposeNotifier<OrderFormState> {
   }
 
   Future<void> initOrderForm(int? orderId) async {
+    final now = DateTime.now();
+    final today = "${now.day.toString().padLeft(2, '0')}/"
+        "${now.month.toString().padLeft(2, '0')}/"
+        "${now.year}";
+
     if (orderId == null) {
-      state = state.copyWith(isLoaded: true);
+      state = state.copyWith(
+        deliveryDatetime: today,
+        isLoaded: true,
+      );
       return;
     }
 
     final orderRepository = ref.read(orderRepositoryProvider);
     var res = await GetOrderUsecase(orderRepository).call(orderId);
 
-    if (res.isSuccess) {
-      var order = res.data;
+    final allProduct = ref.read(productsNotifierProvider).allProducts ?? [];
 
-      // state = state.copyWith(
-      //   userId: order?.userId,
-      //   status: order?.status,
-      //   deliveryDatetime: order?.deliveryDatetime,
-      //   discountValue: order?.discountValue,
-      //   subTotal: order?.subTotal,
-      //   total: order?.total,
-      //   note: order?.note,
-      //   isLoaded: true,
-      // );
+
+    if (res.isSuccess) {
+      final orders = res.data;
+
+      state = state.copyWith(
+        userId: orders?[0].userId,
+        status: orders?[0].status,
+        deliveryDatetime: orders?[0].deliveryDatetime,
+        discountValue: orders?[0].discountValue,
+        subTotal: orders?[0].subTotal,
+        total: orders?[0].total,
+        note: orders?[0].note,
+        isLoaded: true,
+      );
+
+      for (OrderModel order in orders ?? []) {
+        final item = OrderItemForm(
+            product: allProduct.firstWhere(
+                  (p) => p.id == order.productId,
+            ),
+            quantity: order.quantity ?? 0
+        );
+
+        final current = state.items ?? [];
+        state = state.copyWith(
+          items: [...current, item],
+        );
+
+      }
+
      // state = state.copyWithGroup(order: res.data ?? [], isLoadingMore: false);
       print(state);
     } else {
@@ -217,10 +245,15 @@ class OrderFormNotifier extends AutoDisposeNotifier<OrderFormState> {
     state = state.copyWith(note: value);
   }
 
-  void addItem() {
-    final current = state.items;
+  void addItem(ProductEntity? defaultProduct) {
     state = state.copyWith(
-      items: [...?current, OrderItemForm()],
+      items: [
+        ...?state.items,
+        OrderItemForm(
+          product: defaultProduct,
+          quantity: 1,
+        ),
+      ],
     );
   }
 }

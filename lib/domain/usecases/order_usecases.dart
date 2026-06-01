@@ -26,7 +26,7 @@ class GetOrderUsecase extends Usecase<Result, int> {
   final OrderRepository _orderRepository;
 
   @override
-  Future<Result<OrderEntity?>> call(int params) async => _orderRepository.getOrder(params);
+  Future<Result<List<OrderModel>>> call(int params) async => _orderRepository.getOrder(params);
 }
 
 class CreateOrderUsecase extends Usecase<Result, OrderEntity> {

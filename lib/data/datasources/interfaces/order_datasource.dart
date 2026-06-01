@@ -8,7 +8,7 @@ abstract class OrderDatasource {
 
   Future<Result<void>> deleteOrder(int id);
 
-  Future<Result<OrderModel?>> getOrder(int id);
+  Future<Result<List<OrderModel>>> getOrder(int id);
 
   Future<Result<List<OrderModel>>> getAllOrders({
     String orderBy,

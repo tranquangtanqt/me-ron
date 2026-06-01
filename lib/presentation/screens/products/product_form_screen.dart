@@ -32,7 +32,6 @@ class ProductFormScreen extends ConsumerStatefulWidget {
 }
 
 class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
-  // int? selectedCategoryId;
   final nameController = TextEditingController();
   final priceController = TextEditingController();
   final descController = TextEditingController();

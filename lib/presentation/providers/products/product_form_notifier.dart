@@ -7,8 +7,6 @@ import '../../../core/common/result.dart';
 import '../../../core/utilities/console_logger.dart';
 import '../../../domain/entities/product_entity.dart';
 import '../../../domain/usecases/product_usecases.dart';
-// import '../../../domain/usecases/storage_usecases.dart';
-import '../auth/auth_notifier.dart';
 import 'product_form_state.dart';
 import 'products_notifier.dart';
 

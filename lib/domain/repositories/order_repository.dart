@@ -12,7 +12,7 @@ abstract class OrderRepository {
       String? contains,
     });
 
-  Future<Result<OrderEntity?>> getOrder(int orderId);
+  Future<Result<List<OrderModel>>> getOrder(int orderId);
 
   Future<Result<int>> createOrder(OrderEntity order);
 

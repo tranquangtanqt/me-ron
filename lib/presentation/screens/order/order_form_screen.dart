@@ -114,17 +114,15 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
       print("data: ${next.allOrder}");
     });
 
-    final formState = ref.watch(orderFormNotifierProvider);
-
     final allUser = ref.watch(userNotifierProvider.select((s) => s.allUser)) ?? [];
-    // final state = ref.watch(userNotifierProvider);
-    // print(state.allUser);
 
     final allProduct = ref.watch(productsNotifierProvider.select((s) => s.allProducts)) ?? [];
     
     final notifier = ref.read(orderFormNotifierProvider.notifier);
 
+    final formState = ref.watch(orderFormNotifierProvider);
     final isLoaded = formState.isLoaded;
+    print("isLoaded:" + isLoaded.toString());
 
     return Scaffold(
       appBar: AppBar(
@@ -163,7 +161,11 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                     ],
                   ),
                   TextButton.icon(
-                    onPressed: notifier.addItem,
+                    onPressed: () {
+                      notifier.addItem(
+                        allProduct.isNotEmpty ? allProduct.first : null,
+                      );
+                    },
                     icon: const Icon(Icons.add),
                     label: const Text('Thêm món'),
                   ),
