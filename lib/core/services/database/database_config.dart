@@ -28,33 +28,31 @@ CREATE TABLE IF NOT EXISTS '$addressTableName' (
   static const String createCategoryTable =
   '''
 CREATE TABLE IF NOT EXISTS '$categoriesTableName' (
-    'id' INTEGER NOT NULL,
+    'id' INTEGER PRIMARY KEY AUTOINCREMENT,
     'name' TEXT,
     'description' TEXT,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY ('id')
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ''';
 
   static const String createUserTable =
       '''
 CREATE TABLE IF NOT EXISTS '$userTableName' (
-    'id' INTEGER NOT NULL,
+    'id' INTEGER PRIMARY KEY AUTOINCREMENT,
     'name' TEXT,
     'address' TEXT,
     'phone' TEXT,
     'note' TEXT,
     'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
-    'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY ('id')
+    'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ''';
 
   static const String createProductTable =
       '''
 CREATE TABLE IF NOT EXISTS '$productTableName' (
-    'id' INTEGER NOT NULL,
+    'id' INTEGER PRIMARY KEY AUTOINCREMENT,
     'categoryId' INTEGER,
     'name' TEXT,
     'imageUrl' TEXT,
@@ -62,7 +60,6 @@ CREATE TABLE IF NOT EXISTS '$productTableName' (
     'description' TEXT,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY ('id'),
     FOREIGN KEY ('categoryId') REFERENCES 'categories' ('id')
 );
 ''';
@@ -70,7 +67,7 @@ CREATE TABLE IF NOT EXISTS '$productTableName' (
   static const String createOrderTable =
   '''
 CREATE TABLE IF NOT EXISTS '$orderTableName' (
-    'id' INTEGER NOT NULL,
+    'id' INTEGER PRIMARY KEY AUTOINCREMENT,
     'userId' INTEGER,
     'status' INTEGER,
     'deliveryDatetime' DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -80,7 +77,6 @@ CREATE TABLE IF NOT EXISTS '$orderTableName' (
     'note' TEXT,
     'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
     'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY ('id'),
     FOREIGN KEY ('userId') REFERENCES 'users' ('id')
 );
 ''';
@@ -90,7 +86,7 @@ CREATE TABLE IF NOT EXISTS '$orderTableName' (
   static const String createOrderItemTable =
   '''
 CREATE TABLE IF NOT EXISTS '$orderItemTableName' (
-    'id' INTEGER NOT NULL,
+    'id' INTEGER PRIMARY KEY AUTOINCREMENT,
     'orderId' INTEGER,
     'productId' INTEGER,
     'snapshotName' TEXT,
@@ -99,7 +95,6 @@ CREATE TABLE IF NOT EXISTS '$orderItemTableName' (
     'lineTotal' INTEGER,
     'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
     'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY ('id'),
     FOREIGN KEY ('orderId') REFERENCES 'orders' ('id'),
     FOREIGN KEY ('productId') REFERENCES 'products' ('id')
 );
@@ -110,7 +105,7 @@ CREATE TABLE IF NOT EXISTS '$orderItemTableName' (
   static const String createTransactionTable =
       '''
 CREATE TABLE IF NOT EXISTS '$transactionTableName' (
-    'id' INTEGER NOT NULL,
+    'id' INTEGER PRIMARY KEY AUTOINCREMENT,
     'paymentMethod' TEXT,
     'customerName' TEXT,
     'description' TEXT,
@@ -121,7 +116,6 @@ CREATE TABLE IF NOT EXISTS '$transactionTableName' (
     'totalOrderedProduct' INTEGER,
     'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
     'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY ('id'),
     FOREIGN KEY ('createdById') REFERENCES 'User' ('id')
 );
 ''';
@@ -129,7 +123,7 @@ CREATE TABLE IF NOT EXISTS '$transactionTableName' (
   static const String createQueuedActionTable =
       '''
 CREATE TABLE IF NOT EXISTS '$queuedActionTableName' (
-    'id' INTEGER NOT NULL,
+    'id' INTEGER PRIMARY KEY AUTOINCREMENT,
     'repository' TEXT,
     'method' TEXT,
     'param' TEXT,
@@ -176,10 +170,10 @@ VALUES
 
   static const String insertOrderTable =
   '''
-INSERT INTO '$orderTableName' ('userId', 'status', 'discountValue', 'subTotal', 'total')
-VALUES  ('1', '1', 1000, 5000, 4000),
-       ('1', '1', 2000, 5000, 3000),
-       ('2', '1', 3000, 5000, 2000);
+INSERT INTO '$orderTableName' ('userId', 'status', 'discountValue', 'subTotal', 'total', 'deliveryDatetime')
+VALUES  ('1', '1', 1000, 5000, 4000, '2026-06-02T00:00:00.000'),
+       ('1', '1', 2000, 5000, 3000, '2026-06-02T00:00:00.000'),
+       ('2', '1', 3000, 5000, 2000, '2026-06-02T00:00:00.000');
 ''';
 
   static const String insertOrderItemTable =

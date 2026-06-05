@@ -1,4 +1,5 @@
 import '../../../core/common/result.dart';
+import '../../../domain/usecases/params/base_params.dart';
 import '../../models/order_model.dart';
 
 abstract class OrderDatasource {
@@ -10,11 +11,5 @@ abstract class OrderDatasource {
 
   Future<Result<List<OrderModel>>> getOrder(int id);
 
-  Future<Result<List<OrderModel>>> getAllOrders({
-    String orderBy,
-    String sortBy,
-    int limit,
-    int? offset,
-    String? contains,
-  });
+  Future<Result<List<OrderModel>>> getAllOrders(BaseParams params);
 }

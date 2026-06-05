@@ -6,7 +6,7 @@ import '../../screens/order/components/order_item_form.dart';
 class OrderFormState {
   final int? userId;
   final int? status;
-  final String? deliveryDatetime;
+  final DateTime? deliveryDatetime;
   final int? discountValue;
   final int? subTotal;
   final int? total;
@@ -29,7 +29,7 @@ class OrderFormState {
   OrderFormState copyWith({
     int? userId,
     int? status,
-    String? deliveryDatetime,
+    DateTime? deliveryDatetime,
     int? discountValue,
     int? subTotal,
     int? total,

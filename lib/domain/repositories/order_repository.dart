@@ -1,16 +1,10 @@
 import '../../core/common/result.dart';
 import '../../data/models/order_model.dart';
 import '../entities/order_entity.dart';
+import '../usecases/params/base_params.dart';
 
 abstract class OrderRepository {
-  Future<Result<List<OrderModel>>> getAllOrders(
-    {
-      String orderBy,
-      String sortBy,
-      int limit,
-      int? offset,
-      String? contains,
-    });
+  Future<Result<List<OrderModel>>> getAllOrders(BaseParams params);
 
   Future<Result<List<OrderModel>>> getOrder(int orderId);
 

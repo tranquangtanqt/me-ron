@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 import '../../domain/entities/order_entity.dart';
 import 'order_item_model.dart';
 
@@ -6,7 +8,7 @@ class OrderModel {
   int? userId;
   String? userName;
   int? status;
-  String? deliveryDatetime;
+  DateTime? deliveryDatetime;
   int discountValue;
   int subTotal;
   int total;
@@ -14,6 +16,7 @@ class OrderModel {
   String? createdAt;
   String? updatedAt;
   List<OrderItemModel>? items;
+  int? orderItemId;
   int? orderId;
   int? productId;
   String? snapshotName;
@@ -34,6 +37,7 @@ class OrderModel {
     this.createdAt,
     this.updatedAt,
     this.items,
+    this.orderItemId,
     this.orderId,
     this.productId,
     this.snapshotName,
@@ -48,7 +52,9 @@ class OrderModel {
       userId: json['userId'],
       userName: json['userName'],
       status: json['status'],
-      deliveryDatetime: json['deliveryDatetime'] ?? '',
+      deliveryDatetime: json['deliveryDatetime'] != null
+          ? DateTime.parse(json['deliveryDatetime'])
+          : null,
       discountValue: json['discountValue'] ?? '',
       subTotal: json['subTotal'] ?? '',
       total: json['total'] ?? 0,
@@ -56,6 +62,7 @@ class OrderModel {
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
       orderId: json['orderId'],
+      orderItemId: json['orderItemId'],
       productId: json['productId'],
       snapshotName: json['snapshotName'],
       snapshotPrice: json['snapshotPrice'],
@@ -69,7 +76,7 @@ class OrderModel {
       'id': id,
       'userId': userId,
       'status': status,
-      'deliveryDatetime': deliveryDatetime,
+      'deliveryDatetime': deliveryDatetime?.toIso8601String(),
       'discountValue': discountValue,
       'subTotal': subTotal,
       'total': total,
@@ -99,7 +106,7 @@ class OrderModel {
       id: id,
       userId: userId,
       status: status ?? 0,
-      deliveryDatetime: deliveryDatetime ?? '',
+      deliveryDatetime: deliveryDatetime,
       discountValue: discountValue ?? 0,
       subTotal: subTotal ?? 0,
       total: total ?? 0,
@@ -123,6 +130,7 @@ class OrderModel {
         'note: $note, '
         'createdAt: $createdAt, '
         'updatedAt: $updatedAt, '
+        'orderItemId: $orderItemId, '
         'items: $items, '
         ')\n';
   }

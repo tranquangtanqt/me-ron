@@ -1,9 +1,10 @@
+import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../core/common/result.dart';
 import '../../../core/services/database/database_config.dart';
 import '../../../core/services/database/database_service.dart';
-import '../../models/order_item_model.dart';
+import '../../../domain/usecases/params/base_params.dart';
 import '../../models/order_model.dart';
 import '../interfaces/order_datasource.dart';
 
@@ -13,20 +14,13 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
   OrderLocalDatasourceImpl(this._databaseService);
 
   @override
-  Future<Result<List<OrderModel>>> getAllOrders(
-      {
-        String orderBy = 'createdAt',
-        String sortBy = 'DESC',
-        int limit = 10,
-        int? offset,
-        String? contains,
-      }) async {
+  Future<Result<List<OrderModel>>> getAllOrders(BaseParams params) async {
     try {
-      var res = await _databaseService.database.rawQuery(
-        '''
+      String sql = '''
           SELECT 
             O.*, 
             U.name AS userName,
+            D.id AS orderItemId,
             D.orderId AS orderId,
             D.productId AS productId,
             D.snapshotName As snapshotName,
@@ -38,15 +32,39 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
               ON O.userId = U.id
             LEFT JOIN ${DatabaseConfig.orderItemTableName} AS D
               ON O.id = D.orderId
-          ORDER BY createdAt DESC
-          LIMIT ?
-          OFFSET ?
-          ''',
-            [
-              limit,
-              offset ?? 0,
-            ],
-      );
+          
+        ''';
+
+      List<dynamic> args = [];
+
+      final format = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+      String sqlWhere = '';
+
+      if (params.startDate != null) {
+        sqlWhere += 'deliveryDatetime >= ?';
+        args.add(format.format(params.startDate!));
+      }
+
+      if (params.endDate != null) {
+        if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
+        sqlWhere += 'deliveryDatetime <= ?';
+        args.add(format.format(params.endDate!));
+      }
+
+      if (params.status != null) {
+        if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
+        sqlWhere += 'status = ?';
+        args.add(params.status);
+      }
+
+      if (sqlWhere.isNotEmpty) {
+        sql += ' WHERE $sqlWhere';
+      }
+
+      sql += ' ORDER BY deliveryDatetime DESC';
+
+      var res = await _databaseService.database.rawQuery(sql, args);
+
       return res.isEmpty
           ? Result.success(data: [])
           : Result.success(
@@ -119,6 +137,7 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
           SELECT 
             O.*, 
             U.name AS userName,
+            D.id AS orderItemId,
             D.orderId AS orderId,
             D.productId AS productId,
             D.snapshotName As snapshotName,

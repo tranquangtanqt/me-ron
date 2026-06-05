@@ -1,10 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pos/domain/entities/product_entity.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/enums/order_status.dart';
 import '../../../core/themes/app_sizes.dart';
@@ -48,12 +47,12 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
       final state = ref.read(orderFormNotifierProvider);
 
       final now = DateTime.now();
-      final today = "${now.day.toString().padLeft(2, '0')}/"
-          "${now.month.toString().padLeft(2, '0')}/"
-          "${now.year}";
+      final today = DateFormat('dd/MM/yyyy').format(now);
 
       deliveryDatetimeController.text =
-          state.deliveryDatetime ?? today;
+      state.deliveryDatetime != null
+          ? DateFormat('dd/MM/yyyy').format(state.deliveryDatetime!)
+          : today;
       noteController.text = state.note ?? '';
     });
   }
@@ -122,7 +121,6 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
 
     final formState = ref.watch(orderFormNotifierProvider);
     final isLoaded = formState.isLoaded;
-    print("isLoaded:" + isLoaded.toString());
 
     return Scaffold(
       appBar: AppBar(
@@ -322,7 +320,7 @@ class _StatusDropdown extends StatelessWidget {
 
 class _DeliveryDatetimeField extends StatelessWidget {
   final TextEditingController controller;
-  final ValueChanged<String> onChanged;
+  final ValueChanged<DateTime> onChanged;
 
   const _DeliveryDatetimeField({
     required this.controller,
@@ -330,21 +328,27 @@ class _DeliveryDatetimeField extends StatelessWidget {
   });
 
   Future<void> _pickDate(BuildContext context) async {
+    DateTime initialDate = DateTime.now();
+
+    if (controller.text.isNotEmpty) {
+      try {
+        initialDate = DateFormat('dd/MM/yyyy').parse(controller.text);
+      } catch (_) {}
+    }
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.tryParse(controller.text) ?? DateTime.now(),
+      initialDate: initialDate,
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
     );
 
     if (picked != null) {
-      final formatted =
-          "${picked.day.toString().padLeft(2, '0')}/"
-          "${picked.month.toString().padLeft(2, '0')}/"
-          "${picked.year}";
+      final formatted = DateFormat('dd/MM/yyyy').format(picked);
 
       controller.text = formatted;
-      onChanged(formatted);
+      onChanged(picked);
+      // onChanged(formatted);
     }
   }
 

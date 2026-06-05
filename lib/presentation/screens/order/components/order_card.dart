@@ -1,8 +1,10 @@
 import 'package:app_image/app_image.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/themes/app_sizes.dart';
 import '../../../../core/utilities/currency_formatter.dart';
+import '../../../../data/models/order_item_model.dart';
 import '../../../../data/models/order_model.dart';
 
 class OrderCard extends StatelessWidget {
@@ -44,22 +46,43 @@ class OrderCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  order.userName.toString(),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    // color: Theme.of(context).colorScheme.primary,
-                  ),
+                // Text(
+                //   order.userName.toString(),
+                //   maxLines: 2,
+                //   overflow: TextOverflow.ellipsis,
+                //   style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                //     fontWeight: FontWeight.bold,
+                //     // color: Theme.of(context).colorScheme.primary,
+                //   ),
+                // ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        order.userName.toString(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      order.deliveryDatetime != null
+                          ? DateFormat('dd/MM/yyyy').format(order.deliveryDatetime!)
+                          : '',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 4),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    for (final item in (order.items ?? []))
+                    for (OrderItemModel item in (order.items ?? []))
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
+                        padding: const EdgeInsets.only(bottom: 1),
                         child: Row(
                           children: [
                             Icon(
@@ -73,7 +96,7 @@ class OrderCard extends StatelessWidget {
                             Expanded(
                               flex: 3,
                               child: Text(
-                                item.snapshotName ?? '',
+                                  item.snapshotName ?? '',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -122,7 +145,6 @@ class OrderCard extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: 8),
                 // Row(
                 //   children: [
                 //     Icon(
@@ -137,12 +159,37 @@ class OrderCard extends StatelessWidget {
                 //     ),
                 //   ],
                 // ),
-                const SizedBox(height: 8),
-                Text(
-                  "Tổng tiền: ${CurrencyFormatter.formatVND(order.total)}",
-                  // textAlign: TextAlign.end,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
-                ),
+                const SizedBox(height: 4),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text.rich(
+                    TextSpan(
+                      text: "Tổng: ",
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: CurrencyFormatter.formatVND(order.total),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+                // Align(
+                //   alignment: Alignment.centerRight,
+                //   child: Text(
+                //     "Tổng: ${CurrencyFormatter.formatVND(order.total)}",
+                //     style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                //       fontWeight: FontWeight.bold,
+                //       color: Theme.of(context).colorScheme.primary,
+                //     ),
+                //   ),
+                // )
               ],
             ),
           ),

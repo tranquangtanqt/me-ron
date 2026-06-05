@@ -4,6 +4,7 @@ import '../../../app/di/app_providers.dart';
 import '../../../core/common/result.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../../domain/usecases/user_usecases.dart';
+import '../base/base_form_notifier.dart';
 import 'user_form_state.dart';
 import 'user_notifier.dart';
 
@@ -11,7 +12,7 @@ final userFormNotifierProvider = NotifierProvider.autoDispose<UserFormNotifier, 
   UserFormNotifier.new,
 );
 
-class UserFormNotifier extends AutoDisposeNotifier<UserFormState> {
+class UserFormNotifier extends BaseFormNotifier<UserFormState> {
   @override
   UserFormState build() {
     return const UserFormState();
@@ -42,62 +43,51 @@ class UserFormNotifier extends AutoDisposeNotifier<UserFormState> {
   }
 
   Future<Result<int>> createUser() async {
-    try {
-      final userRepository = ref.read(userRepositoryProvider);
-
-      var user = UserEntity(
-        name: state.name ?? '',
-        address: state.address ?? '',
-        phone: state.phone ?? '',
-        note: state.note ?? '',
-      );
-
-      var res = await CreateUserUsecase(userRepository).call(user);
-
-      // Refresh user
-      ref.read(userNotifierProvider.notifier).getAllUser();
-
-      return res;
-    } catch (e) {
-      return Result.failure(error: e);
-    }
+    return performCreate(
+      execute: () async {
+        final userRepository = ref.read(userRepositoryProvider);
+        final user = UserEntity(
+          name: state.name ?? '',
+          address: state.address ?? '',
+          phone: state.phone ?? '',
+          note: state.note ?? '',
+        );
+        return await CreateUserUsecase(userRepository).call(user);
+      },
+      onSuccess: () => ref.read(userNotifierProvider.notifier).getAllUser(),
+    );
   }
 
   Future<Result<void>> updatedUser(int id) async {
-    try {
-      final userRepository = ref.read(userRepositoryProvider);
-
-      var user = UserEntity(
-        id: id,
-        name: state.name!,
-        address: state.address,
-        phone: state.phone,
-        note: state.note,
-      );
-
-      var res = await UpdateUserUsecase(userRepository).call(user);
-
-      // Refresh user
-      ref.read(userNotifierProvider.notifier).getAllUser();
-
-      return res;
-    } catch (e) {
-      return Result.failure(error: e);
-    }
+    return performUpdate(
+      execute: () async {
+        final userRepository = ref.read(userRepositoryProvider);
+        final user = UserEntity(
+          id: id,
+          name: state.name!,
+          address: state.address,
+          phone: state.phone,
+          note: state.note,
+        );
+        return await UpdateUserUsecase(userRepository).call(user);
+      },
+      onSuccess: () => ref.read(userNotifierProvider.notifier).getAllUser(),
+    );
   }
 
   Future<Result<void>> deleteUser(int id) async {
-    try {
-      final userRepository = ref.read(userRepositoryProvider);
-      var res = await DeleteUserUsecase(userRepository).call(id);
+    return performDelete(
+      execute: () async {
+        final userRepository = ref.read(userRepositoryProvider);
+        return await DeleteUserUsecase(userRepository).call(id);
+      },
+      onSuccess: () => ref.read(userNotifierProvider.notifier).getAllUser(),
+    );
+  }
 
-      // Refresh user
-      ref.read(userNotifierProvider.notifier).getAllUser();
-
-      return res;
-    } catch (e) {
-      return Result.failure(error: e);
-    }
+  @override
+  void refreshParentNotifier() {
+    ref.read(userNotifierProvider.notifier).getAllUser();
   }
 
   void onChangedName(String value) {

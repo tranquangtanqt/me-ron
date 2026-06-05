@@ -6,6 +6,7 @@ import '../../../app/di/app_providers.dart';
 import '../../../core/common/result.dart';
 import '../../../domain/entities/order_item_entity.dart';
 import '../../../domain/usecases/order_item_usecases.dart';
+import '../base/base_form_notifier.dart';
 import 'order_item_form_state.dart';
 import 'order_item_notifier.dart';
 
@@ -13,7 +14,7 @@ final orderItemFormNotifierProvider = NotifierProvider.autoDispose<OrderItemForm
   OrderItemFormNotifier.new,
 );
 
-class OrderItemFormNotifier extends AutoDisposeNotifier<OrderItemFormState> {
+class OrderItemFormNotifier extends BaseFormNotifier<OrderItemFormState> {
   @override
   OrderItemFormState build() {
     return const OrderItemFormState();
@@ -46,88 +47,59 @@ class OrderItemFormNotifier extends AutoDisposeNotifier<OrderItemFormState> {
   }
 
   Future<Result<int>> createOrderItem() async {
-    try {
-      // final storageRepository = ref.read(storageRepositoryProvider);
-      final orderItemRepository = ref.read(orderItemRepositoryProvider);
-
-      var orderItem = OrderItemEntity(
-        orderId: state.orderId,
-        productId: state.productId,
-        snapshotName: state.snapshotName ?? '',
-        snapshotPrice: state.snapshotPrice ?? 0,
-        quantity: state.quantity ?? 0,
-        lineTotal: state.lineTotal ?? 0,
-      );
-
-      var res = await CreateOrderItemUsecase(orderItemRepository).call(orderItem);
-
-      // Refresh orders
-      ref.read(orderItemNotifierProvider.notifier).getAllOrderItem();
-
-      return res;
-    } catch (e) {
-      return Result.failure(error: e);
-    }
+    return performCreate(
+      execute: () async {
+        final orderItemRepository = ref.read(orderItemRepositoryProvider);
+        final orderItem = OrderItemEntity(
+          orderId: state.orderId,
+          productId: state.productId,
+          snapshotName: state.snapshotName ?? '',
+          snapshotPrice: state.snapshotPrice ?? 0,
+          quantity: state.quantity ?? 0,
+          lineTotal: state.lineTotal ?? 0,
+        );
+        return await CreateOrderItemUsecase(orderItemRepository).call(
+            orderItem);
+      },
+      onSuccess: () =>
+          ref.read(orderItemNotifierProvider.notifier).getAllOrderItem(),
+    );
   }
 
   Future<Result<void>> updatedOrderItem(int id) async {
-    try {
-      // final storageRepository = ref.read(storageRepositoryProvider);
-      final orderItemRepository = ref.read(orderItemRepositoryProvider);
-
-      // if (state.imageFile != null) {
-      //   final res = await UploadOrderImageUsecase(storageRepository).call(state.imageFile!.path);
-      //   userId = res.data;
-      // }
-
-      var orderItem = OrderItemEntity(
-        id: id,
-        orderId: state.orderId,
-        productId: state.productId,
-        snapshotName: state.snapshotName ?? '',
-        snapshotPrice: state.snapshotPrice ?? 0,
-        quantity: state.quantity ?? 0,
-        lineTotal: state.lineTotal ?? 0,
-      );
-
-      var res = await UpdateOrderItemUsecase(orderItemRepository).call(orderItem);
-
-      // Refresh orders
-      ref.read(orderItemNotifierProvider.notifier).getAllOrderItem();
-
-      return res;
-    } catch (e) {
-      return Result.failure(error: e);
-    }
+    return performUpdate(
+      execute: () async {
+        final orderItemRepository = ref.read(orderItemRepositoryProvider);
+        final orderItem = OrderItemEntity(
+          id: id,
+          orderId: state.orderId,
+          productId: state.productId,
+          snapshotName: state.snapshotName ?? '',
+          snapshotPrice: state.snapshotPrice ?? 0,
+          quantity: state.quantity ?? 0,
+          lineTotal: state.lineTotal ?? 0,
+        );
+        return await UpdateOrderItemUsecase(orderItemRepository).call(
+            orderItem);
+      },
+      onSuccess: () =>
+          ref.read(orderItemNotifierProvider.notifier).getAllOrderItem(),
+    );
   }
 
   Future<Result<void>> deleteOrderItem(int id) async {
-    try {
-      final orderItemRepository = ref.read(orderItemRepositoryProvider);
-      var res = await DeleteOrderItemUsecase(orderItemRepository).call(id);
-
-      // Refresh orders
-      ref.read(orderItemNotifierProvider.notifier).getAllOrderItem();
-
-      return res;
-    } catch (e) {
-      return Result.failure(error: e);
-    }
+    return performDelete(
+      execute: () async {
+        final orderItemRepository = ref.read(orderItemRepositoryProvider);
+        return await DeleteOrderItemUsecase(orderItemRepository).call(id);
+      },
+      onSuccess: () =>
+          ref.read(orderItemNotifierProvider.notifier).getAllOrderItem(),
+    );
   }
 
-  // void onChangedCategory(int? value) {
-  //   state = state.copyWith(status: value);
-  // }
-  //
-  // void onChangedName(String value) {
-  //   state = state.copyWith(deliveryDatetime: value);
-  // }
-  //
-  // void onChangedPrice(String value) {
-  //   state = state.copyWith(discountValue: int.tryParse(value));
-  // }
-  //
-  // void onChangedDesc(String value) {
-  //   state = state.copyWith(note: value);
-  // }
+  @override
+  void refreshParentNotifier() {
+    ref.read(orderItemNotifierProvider.notifier).getAllOrderItem();
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/app_providers.dart';
+import '../../../core/enums/order_status.dart';
 import '../../../domain/usecases/params/base_params.dart';
 import '../../../domain/usecases/order_usecases.dart';
 import 'order_state.dart';
@@ -16,36 +17,71 @@ class OrderNotifier extends Notifier<OrderState> {
   }
 
   void resetOrder() {
-    state = const OrderState();
+    state = const OrderState(
+      allOrder: [],
+      // isLoadingMore: false,
+      error: null,
+    );
   }
 
-  Future<void> getAllOrder({int? offset, String? contains}) async {
-    if (offset != null) {
-      state = state.copyWith(isLoadingMore: true);
+  Future<void> getAllOrder(bool resetDataFlg, {int? offset, String? contains,
+  DateTime? startDate, DateTime? endDate, int? status}) async {
+    if (resetDataFlg == true) {
+      state = const OrderState(
+        allOrder: [],
+        // isLoadingMore: false,
+        error: null,
+      );
     }
 
-    var params = BaseParams(
+    status ??= OrderStatus.shipping.value;
+
+    if (status == -1) {
+      status = null;
+    }
+
+    // if (offset != null && state.isLoadingMore) return;
+
+    if (offset != null) {
+      // state = state.copyWith(isLoadingMore: true);
+      state = state.copyWith();
+    }
+
+    final params = BaseParams(
       orderBy: 'id',
       sortBy: 'ASC',
       offset: offset,
       contains: contains,
+      startDate: startDate,
+      endDate: endDate,
+      status: status,
     );
 
     final orderRepository = ref.read(orderRepositoryProvider);
-    var res = await GetAllOrderUsecase(orderRepository).call(params);
+    final res = await GetAllOrderUsecase(orderRepository).call(params);
 
     if (res.isSuccess) {
+      final newData = res.data ?? [];
+
       if (offset == null) {
-        state = state.copyWithGroup(allOrder: res.data ?? [], isLoadingMore: false);
+        state = state.copyWithGroup(
+          allOrder: newData,
+          isLoadingMore: false,
+        );
       } else {
         final current = state.allOrder ?? [];
-        state = state.copyWithGroup(
-          allOrder: [...current, ...res.data ?? []],
-          isLoadingMore: false,
+
+        state = state.copyWith(
+          allOrder: [
+            ...current,
+            ...newData,
+          ],
+          // isLoadingMore: false,
         );
       }
     } else {
-      state = state.copyWith(isLoadingMore: false);
+      // state = state.copyWith(isLoadingMore: false);
+      state = state.copyWith();
       throw Exception(res.error?.toString() ?? 'Failed to load data');
     }
   }

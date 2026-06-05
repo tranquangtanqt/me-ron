@@ -11,13 +11,7 @@ class GetAllOrderUsecase extends Usecase<Result, BaseParams> {
   final OrderRepository _orderRepository;
 
   @override
-  Future<Result<List<OrderModel>>> call(BaseParams params) async => _orderRepository.getAllOrders(
-    orderBy: params.orderBy,
-    sortBy: params.sortBy,
-    limit: params.limit,
-    offset: params.offset,
-    contains: params.contains,
-  );
+  Future<Result<List<OrderModel>>> call(BaseParams params) async => _orderRepository.getAllOrders(params);
 }
 
 class GetOrderUsecase extends Usecase<Result, int> {

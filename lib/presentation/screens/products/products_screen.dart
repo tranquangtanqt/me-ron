@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/themes/app_sizes.dart';
+import '../../../core/utilities/currency_formatter.dart';
 import '../../../domain/entities/category_entity.dart';
 import '../../../domain/entities/product_entity.dart';
 import '../../providers/category/category_notifier.dart';
@@ -154,10 +155,6 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                               dataRowMinHeight: 40,
                               dataRowMaxHeight: 48,
                               dividerThickness: 0, // tắt line mặc định
-                              // border: TableBorder.all(
-                              //   color: Colors.grey,
-                              //   width: 1,
-                              // ),
                               columns: const [
                                 DataColumn(label: Padding(
                                   padding: EdgeInsets.only(left: 8),
@@ -176,7 +173,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                                       child: Text(item.id.toString()),
                                     ),),
                                     DataCell(Text(item.name ?? '')),
-                                    DataCell(Text(item.price.toString() ?? '')),
+                                    DataCell(Text(CurrencyFormatter.formatVND(item.price))),
                                     // DataCell(Text(item.categoryId.toString() ?? '')),
                                     DataCell(
                                       Row(

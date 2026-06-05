@@ -63,13 +63,13 @@ class OrderItemLocalDatasourceImpl extends OrderItemDatasource {
   }
 
   @override
-  Future<Result<void>> updateOrderItem(OrderItemModel order) async {
+  Future<Result<void>> updateOrderItem(OrderItemModel orderItem) async {
     try {
       await _databaseService.database.update(
         DatabaseConfig.orderItemTableName,
-        order.toJson(),
+        orderItem.toJson(),
         where: 'id = ?',
-        whereArgs: [order.id],
+        whereArgs: [orderItem.id],
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 

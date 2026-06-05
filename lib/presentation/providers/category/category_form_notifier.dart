@@ -4,6 +4,7 @@ import '../../../app/di/app_providers.dart';
 import '../../../core/common/result.dart';
 import '../../../domain/entities/category_entity.dart';
 import '../../../domain/usecases/category_usecases.dart';
+import '../base/base_form_notifier.dart';
 import 'category_form_state.dart';
 import 'category_notifier.dart';
 
@@ -11,7 +12,7 @@ final categoryFormNotifierProvider = NotifierProvider.autoDispose<CategoryFormNo
   CategoryFormNotifier.new,
 );
 
-class CategoryFormNotifier extends AutoDisposeNotifier<CategoryFormState> {
+class CategoryFormNotifier extends BaseFormNotifier<CategoryFormState> {
   @override
   CategoryFormState build() {
     return const CategoryFormState();
@@ -40,58 +41,47 @@ class CategoryFormNotifier extends AutoDisposeNotifier<CategoryFormState> {
   }
 
   Future<Result<int>> createCategory() async {
-    try {
-      final categoryRepository = ref.read(categoryRepositoryProvider);
-
-      var category = CategoryEntity(
-        name: state.name ?? '',
-        description: state.description ?? '',
-      );
-
-      var res = await CreateCategoryUsecase(categoryRepository).call(category);
-
-      // Refresh category
-      ref.read(categoryNotifierProvider.notifier).getAllCategory();
-
-      return res;
-    } catch (e) {
-      return Result.failure(error: e);
-    }
+    return performCreate(
+      execute: () async {
+        final categoryRepository = ref.read(categoryRepositoryProvider);
+        final category = CategoryEntity(
+          name: state.name ?? '',
+          description: state.description ?? '',
+        );
+        return await CreateCategoryUsecase(categoryRepository).call(category);
+      },
+      onSuccess: () => ref.read(categoryNotifierProvider.notifier).getAllCategory(),
+    );
   }
 
   Future<Result<void>> updatedCategory(int id) async {
-    try {
-      final categoryRepository = ref.read(categoryRepositoryProvider);
-
-      var category = CategoryEntity(
-        id: id,
-        name: state.name!,
-        description: state.description,
-      );
-
-      var res = await UpdateCategoryUsecase(categoryRepository).call(category);
-
-      // Refresh category
-      ref.read(categoryNotifierProvider.notifier).getAllCategory();
-
-      return res;
-    } catch (e) {
-      return Result.failure(error: e);
-    }
+    return performUpdate(
+      execute: () async {
+        final categoryRepository = ref.read(categoryRepositoryProvider);
+        final category = CategoryEntity(
+          id: id,
+          name: state.name!,
+          description: state.description,
+        );
+        return await UpdateCategoryUsecase(categoryRepository).call(category);
+      },
+      onSuccess: () => ref.read(categoryNotifierProvider.notifier).getAllCategory(),
+    );
   }
 
   Future<Result<void>> deleteCategory(int id) async {
-    try {
-      final categoryRepository = ref.read(categoryRepositoryProvider);
-      var res = await DeleteCategoryUsecase(categoryRepository).call(id);
+    return performDelete(
+      execute: () async {
+        final categoryRepository = ref.read(categoryRepositoryProvider);
+        return await DeleteCategoryUsecase(categoryRepository).call(id);
+      },
+      onSuccess: () => ref.read(categoryNotifierProvider.notifier).getAllCategory(),
+    );
+  }
 
-      // Refresh category
-      ref.read(categoryNotifierProvider.notifier).getAllCategory();
-
-      return res;
-    } catch (e) {
-      return Result.failure(error: e);
-    }
+  @override
+  void refreshParentNotifier() {
+    ref.read(categoryNotifierProvider.notifier).getAllCategory();
   }
 
   void onChangedName(String value) {

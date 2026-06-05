@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../app/di/app_providers.dart';
 import '../../../core/common/result.dart';
@@ -14,7 +15,7 @@ import '../../../domain/entities/order_item_entity.dart';
 import '../../../domain/entities/product_entity.dart';
 import '../../../domain/usecases/order_item_usecases.dart';
 import '../../../domain/usecases/order_usecases.dart';
-// import '../../../domain/usecases/storage_usecases.dart';
+import '../base/base_form_notifier.dart';
 import '../../screens/order/components/order_item_form.dart';
 import '../products/products_notifier.dart';
 import 'order_form_state.dart';
@@ -24,7 +25,7 @@ final orderFormNotifierProvider = NotifierProvider.autoDispose<OrderFormNotifier
   OrderFormNotifier.new,
 );
 
-class OrderFormNotifier extends AutoDisposeNotifier<OrderFormState> {
+class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
   @override
   OrderFormState build() {
     return const OrderFormState();
@@ -38,7 +39,7 @@ class OrderFormNotifier extends AutoDisposeNotifier<OrderFormState> {
 
     if (orderId == null) {
       state = state.copyWith(
-        deliveryDatetime: today,
+        deliveryDatetime: now,
         isLoaded: true,
       );
       return;
@@ -48,7 +49,6 @@ class OrderFormNotifier extends AutoDisposeNotifier<OrderFormState> {
     var res = await GetOrderUsecase(orderRepository).call(orderId);
 
     final allProduct = ref.read(productsNotifierProvider).allProducts ?? [];
-
 
     if (res.isSuccess) {
       final orders = res.data;
@@ -66,6 +66,7 @@ class OrderFormNotifier extends AutoDisposeNotifier<OrderFormState> {
 
       for (OrderModel order in orders ?? []) {
         final item = OrderItemForm(
+            id: order.orderItemId,
             product: allProduct.firstWhere(
                   (p) => p.id == order.productId,
             ),
@@ -76,7 +77,6 @@ class OrderFormNotifier extends AutoDisposeNotifier<OrderFormState> {
         state = state.copyWith(
           items: [...current, item],
         );
-
       }
 
      // state = state.copyWithGroup(order: res.data ?? [], isLoadingMore: false);
@@ -87,104 +87,136 @@ class OrderFormNotifier extends AutoDisposeNotifier<OrderFormState> {
   }
 
   Future<Result<int>> createOrder() async {
-    try {
-      // final storageRepository = ref.read(storageRepositoryProvider);
-      final orderRepository = ref.read(orderRepositoryProvider);
+    return performCreate(
+      execute: () async {
+        final orderRepository = ref.read(orderRepositoryProvider);
 
-      var order = OrderEntity(
-        id: null,
-        userId: state.userId,
-        status: state.status ?? OrderStatus.shipping.value,
-        deliveryDatetime: state.deliveryDatetime ?? '',
-        discountValue: state.discountValue ?? 0,
-        subTotal: state.subTotal ?? 0,
-        total: state.total ?? 0,
-        note: state.note ?? '',
-      );
-
-      var res = await CreateOrderUsecase(orderRepository).call(order);
-
-      final orderItemRepository = ref.read(orderItemRepositoryProvider);
-
-      var total = 0;
-      for (final OrderItemForm item in state.items ?? []) {
-        var oderItem = OrderItemEntity(
-          orderId: res.data,
-          productId: item.product?.id,
-          snapshotName: item.product?.name,
-          snapshotPrice: item.product?.price ?? 0,
-          quantity: item.quantity,
-          lineTotal: (item.product?.price ?? 0) * item.quantity
+        final order = OrderEntity(
+          id: null,
+          userId: state.userId,
+          status: state.status ?? OrderStatus.shipping.value,
+          deliveryDatetime: state.deliveryDatetime,
+          discountValue: state.discountValue ?? 0,
+          subTotal: state.subTotal ?? 0,
+          total: state.total ?? 0,
+          note: state.note ?? '',
         );
 
-        await CreateOrderItemUsecase(orderItemRepository).call(oderItem);
-        total += oderItem.lineTotal;
-      }
+        final res = await CreateOrderUsecase(orderRepository).call(order);
 
-      final updatedOrder = order.copyWith(
-        id: res.data,
-        total: total,
-      );
+        final orderItemRepository = ref.read(orderItemRepositoryProvider);
 
-      await UpdateOrderUsecase(orderRepository).call(updatedOrder);
+        var total = 0;
+        for (final OrderItemForm item in state.items ?? []) {
+          final oderItem = OrderItemEntity(
+            orderId: res.data,
+            productId: item.product?.id,
+            snapshotName: item.product?.name,
+            snapshotPrice: item.product?.price ?? 0,
+            quantity: item.quantity,
+            lineTotal: (item.product?.price ?? 0) * item.quantity,
+          );
 
-      // Refresh orders
-      ref.read(orderNotifierProvider.notifier).getAllOrder();
+          await CreateOrderItemUsecase(orderItemRepository).call(oderItem);
+          total += oderItem.lineTotal;
+        }
 
-      return res;
-    } catch (e) {
-      return Result.failure(error: e);
-    }
+        final updatedOrder = order.copyWith(
+          id: res.data,
+          total: total,
+        );
+
+        await UpdateOrderUsecase(orderRepository).call(updatedOrder);
+
+        return res;
+      },
+      onSuccess: () => ref.read(orderNotifierProvider.notifier).getAllOrder(true),
+    );
   }
 
   Future<Result<void>> updatedOrder(int id) async {
-    try {
-      // final storageRepository = ref.read(storageRepositoryProvider);
-      final orderRepository = ref.read(orderRepositoryProvider);
+    return performUpdate(
+      execute: () async {
+        final orderRepository = ref.read(orderRepositoryProvider);
 
-      var userId = state.userId;
+        final order = OrderEntity(
+          id: id,
+          userId: state.userId,
+          status: state.status ?? OrderStatus.shipping.value,
+          deliveryDatetime: state.deliveryDatetime,
+          discountValue: state.discountValue ?? 0,
+          subTotal: state.subTotal ?? 0,
+          total: state.total ?? 0,
+          note: state.note ?? '',
+        );
 
-      // if (state.imageFile != null) {
-      //   final res = await UploadOrderImageUsecase(storageRepository).call(state.imageFile!.path);
-      //   userId = res.data;
-      // }
+        final res = await UpdateOrderUsecase(orderRepository).call(order);
 
-      cl('userId $userId');
+        final orderItemRepository = ref.read(orderItemRepositoryProvider);
 
-      var order = OrderEntity(
-        id: id,
-        userId: state.userId,
-        status: state.status ?? OrderStatus.shipping.value,
-        deliveryDatetime: state.deliveryDatetime!,
-        discountValue: state.discountValue ?? 0,
-        subTotal: state.subTotal ?? 0,
-        total: state.total ?? 0,
-        note: state.note ?? '',
-      );
+        var total = 0;
+        for (final OrderItemForm item in state.items ?? []) {
+          OrderItemEntity oderItem;
+          if (item.id != null) {
+            oderItem = OrderItemEntity(
+              id: item.id,
+              orderId: id,
+              productId: item.product?.id,
+              snapshotName: item.product?.name,
+              snapshotPrice: item.product?.price ?? 0,
+              quantity: item.quantity,
+              lineTotal: (item.product?.price ?? 0) * item.quantity,
+            );
+            await UpdateOrderItemUsecase(orderItemRepository).call(oderItem);
+          } else {
+            oderItem = OrderItemEntity(
+              orderId: id,
+              productId: item.product?.id,
+              snapshotName: item.product?.name,
+              snapshotPrice: item.product?.price ?? 0,
+              quantity: item.quantity,
+              lineTotal: (item.product?.price ?? 0) * item.quantity,
+            );
+            await CreateOrderItemUsecase(orderItemRepository).call(oderItem);
+          }
 
-      var res = await UpdateOrderUsecase(orderRepository).call(order);
+          total += oderItem.lineTotal;
+        }
 
-      // Refresh orders
-      ref.read(orderNotifierProvider.notifier).getAllOrder();
+        final updatedOrder = order.copyWith(
+          id: id,
+          total: total,
+        );
 
-      return res;
-    } catch (e) {
-      return Result.failure(error: e);
-    }
+        await UpdateOrderUsecase(orderRepository).call(updatedOrder);
+
+        return res;
+      },
+      onSuccess: () => ref.read(orderNotifierProvider.notifier).getAllOrder(true),
+    );
   }
 
   Future<Result<void>> deleteOrder(int id) async {
-    try {
-      final orderRepository = ref.read(orderRepositoryProvider);
-      var res = await DeleteOrderUsecase(orderRepository).call(id);
+    return performDelete(
+      execute: () async {
+        final orderRepository = ref.read(orderRepositoryProvider);
+        final res = await DeleteOrderUsecase(orderRepository).call(id);
 
-      // Refresh orders
-      ref.read(orderNotifierProvider.notifier).getAllOrder();
+        final orderItemRepository = ref.read(orderItemRepositoryProvider);
 
-      return res;
-    } catch (e) {
-      return Result.failure(error: e);
-    }
+        for (final OrderItemForm item in state.items ?? []) {
+          await DeleteOrderItemUsecase(orderItemRepository).call(item.id!);
+        }
+
+        return res;
+      },
+      onSuccess: () => ref.read(orderNotifierProvider.notifier).getAllOrder(true),
+    );
+  }
+
+  @override
+  void refreshParentNotifier() {
+    ref.read(orderNotifierProvider.notifier).getAllOrder(true);
   }
 
   void onChangedUser(int? value) {
@@ -197,7 +229,7 @@ class OrderFormNotifier extends AutoDisposeNotifier<OrderFormState> {
     state = state.copyWith(status: value.value);
   }
 
-  void onChangedDeliveryDatetime(String value) {
+  void onChangedDeliveryDatetime(DateTime value) {
     state = state.copyWith(deliveryDatetime: value);
   }
 

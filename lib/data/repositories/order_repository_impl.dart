@@ -4,6 +4,7 @@ import '../../core/common/result.dart';
 import '../../core/constants/constants.dart';
 import '../../domain/entities/order_entity.dart';
 import '../../domain/repositories/order_repository.dart';
+import '../../domain/usecases/params/base_params.dart';
 import '../datasources/local/order_local_datasource_impl.dart';
 import '../datasources/local/queued_action_local_datasource_impl.dart';
 import '../models/order_model.dart';
@@ -20,22 +21,9 @@ class OrderRepositoryImpl extends OrderRepository {
 
 
   @override
-  Future<Result<List<OrderModel>>> getAllOrders(
-      {
-        String orderBy = 'id',
-        String sortBy = 'ASC',
-        int limit = 10,
-        int? offset,
-        String? contains,
-      }) async {
+  Future<Result<List<OrderModel>>> getAllOrders(BaseParams params) async {
     try {
-      final local = await orderLocalDatasource.getAllOrders(
-        orderBy: orderBy,
-        sortBy: sortBy,
-        limit: limit,
-        offset: offset,
-        contains: contains,
-      );
+      final local = await orderLocalDatasource.getAllOrders(params);
 
       if (local.isFailure) return Result.failure(error: local.error!);
 

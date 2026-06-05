@@ -7,6 +7,7 @@ import '../../../core/common/result.dart';
 import '../../../core/utilities/console_logger.dart';
 import '../../../domain/entities/product_entity.dart';
 import '../../../domain/usecases/product_usecases.dart';
+import '../base/base_form_notifier.dart';
 import 'product_form_state.dart';
 import 'products_notifier.dart';
 
@@ -14,7 +15,7 @@ final productFormNotifierProvider = NotifierProvider.autoDispose<ProductFormNoti
   ProductFormNotifier.new,
 );
 
-class ProductFormNotifier extends AutoDisposeNotifier<ProductFormState> {
+class ProductFormNotifier extends BaseFormNotifier<ProductFormState> {
   @override
   ProductFormState build() {
     return const ProductFormState();
@@ -46,84 +47,63 @@ class ProductFormNotifier extends AutoDisposeNotifier<ProductFormState> {
   }
 
   Future<Result<int>> createProduct() async {
-    try {
-      // final storageRepository = ref.read(storageRepositoryProvider);
-      final productRepository = ref.read(productRepositoryProvider);
+    return performCreate(
+      execute: () async {
+        final productRepository = ref.read(productRepositoryProvider);
+        final imageUrl = state.imageUrl;
 
-      var imageUrl = state.imageUrl;
+        cl('imageUrl $imageUrl');
 
-      // if (state.imageFile != null) {
-      //   final res = await UploadProductImageUsecase(storageRepository).call(state.imageFile!.path);
-      //   imageUrl = res.data;
-      // }
+        final product = ProductEntity(
+          categoryId: state.categoryId,
+          name: state.name ?? '',
+          imageUrl: imageUrl ?? '',
+          price: state.price ?? 0,
+          description: state.description ?? '',
+        );
 
-      cl('imageUrl $imageUrl');
-
-      var product = ProductEntity(
-        categoryId: state.categoryId,
-        name: state.name ?? '',
-        imageUrl: imageUrl ?? '',
-        price: state.price ?? 0,
-        description: state.description ?? '',
-      );
-
-      var res = await CreateProductUsecase(productRepository).call(product);
-
-      // Refresh products
-      ref.read(productsNotifierProvider.notifier).getAllProducts();
-
-      return res;
-    } catch (e) {
-      return Result.failure(error: e);
-    }
+        return await CreateProductUsecase(productRepository).call(product);
+      },
+      onSuccess: () => ref.read(productsNotifierProvider.notifier).getAllProducts(),
+    );
   }
 
   Future<Result<void>> updatedProduct(int id) async {
-    try {
-      // final storageRepository = ref.read(storageRepositoryProvider);
-      final productRepository = ref.read(productRepositoryProvider);
+    return performUpdate(
+      execute: () async {
+        final productRepository = ref.read(productRepositoryProvider);
+        final imageUrl = state.imageUrl;
 
-      var imageUrl = state.imageUrl;
+        cl('imageUrl $imageUrl');
 
-      // if (state.imageFile != null) {
-      //   final res = await UploadProductImageUsecase(storageRepository).call(state.imageFile!.path);
-      //   imageUrl = res.data;
-      // }
+        final product = ProductEntity(
+          id: id,
+          categoryId: state.categoryId,
+          name: state.name!,
+          imageUrl: imageUrl ?? '',
+          price: state.price ?? 0,
+          description: state.description ?? '',
+        );
 
-      cl('imageUrl $imageUrl');
-
-      var product = ProductEntity(
-        id: id,
-        categoryId: state.categoryId,
-        name: state.name!,
-        imageUrl: imageUrl ?? '',
-        price: state.price ?? 0,
-        description: state.description ?? '',
-      );
-
-      var res = await UpdateProductUsecase(productRepository).call(product);
-
-      // Refresh products
-      ref.read(productsNotifierProvider.notifier).getAllProducts();
-
-      return res;
-    } catch (e) {
-      return Result.failure(error: e);
-    }
+        return await UpdateProductUsecase(productRepository).call(product);
+      },
+      onSuccess: () => ref.read(productsNotifierProvider.notifier).getAllProducts(),
+    );
   }
 
   Future<Result<void>> deleteProduct(int id) async {
-    try {
-      final productRepository = ref.read(productRepositoryProvider);
-      var res = await DeleteProductUsecase(productRepository).call(id);
+    return performDelete(
+      execute: () async {
+        final productRepository = ref.read(productRepositoryProvider);
+        return await DeleteProductUsecase(productRepository).call(id);
+      },
+      onSuccess: () => ref.read(productsNotifierProvider.notifier).getAllProducts(),
+    );
+  }
 
-      // Refresh products
-      ref.read(productsNotifierProvider.notifier).getAllProducts();
-
-      return res;
-    } catch (e) {
-      return Result.failure(error: e);
-    }
+  @override
+  void refreshParentNotifier() {
+    ref.read(productsNotifierProvider.notifier).getAllProducts();
   }
 
   void onChangedImage(File value) {

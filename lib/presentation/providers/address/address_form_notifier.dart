@@ -4,6 +4,7 @@ import '../../../app/di/app_providers.dart';
 import '../../../core/common/result.dart';
 import '../../../domain/entities/address_entity.dart';
 import '../../../domain/usecases/address_usecases.dart';
+import '../base/base_form_notifier.dart';
 import 'address_form_state.dart';
 import 'address_notifier.dart';
 
@@ -11,7 +12,7 @@ final addressFormNotifierProvider = NotifierProvider.autoDispose<AddressFormNoti
   AddressFormNotifier.new,
 );
 
-class AddressFormNotifier extends AutoDisposeNotifier<AddressFormState> {
+class AddressFormNotifier extends BaseFormNotifier<AddressFormState> {
   @override
   AddressFormState build() {
     return const AddressFormState();
@@ -40,57 +41,46 @@ class AddressFormNotifier extends AutoDisposeNotifier<AddressFormState> {
   }
 
   Future<Result<String>> createAddress() async {
-    try {
-      final addressRepository = ref.read(addressRepositoryProvider);
-
-      var address = AddressEntity(
-        code: state.code ?? '',
-        name: state.name ?? '',
-      );
-
-      var res = await CreateAddressUsecase(addressRepository).call(address);
-
-      // Refresh address
-      ref.read(addressNotifierProvider.notifier).getAllAddress();
-
-      return res;
-    } catch (e) {
-      return Result.failure(error: e);
-    }
+    return performCreate(
+      execute: () async {
+        final addressRepository = ref.read(addressRepositoryProvider);
+        final address = AddressEntity(
+          code: state.code ?? '',
+          name: state.name ?? '',
+        );
+        return await CreateAddressUsecase(addressRepository).call(address);
+      },
+      onSuccess: () => ref.read(addressNotifierProvider.notifier).getAllAddress(),
+    );
   }
 
   Future<Result<void>> updatedAddress(String code) async {
-    try {
-      final addressRepository = ref.read(addressRepositoryProvider);
-
-      var address = AddressEntity(
-        code: code,
-        name: state.name!,
-      );
-
-      var res = await UpdateAddressUsecase(addressRepository).call(address);
-
-      // Refresh address
-      ref.read(addressNotifierProvider.notifier).getAllAddress();
-
-      return res;
-    } catch (e) {
-      return Result.failure(error: e);
-    }
+    return performUpdate(
+      execute: () async {
+        final addressRepository = ref.read(addressRepositoryProvider);
+        final address = AddressEntity(
+          code: code,
+          name: state.name!,
+        );
+        return await UpdateAddressUsecase(addressRepository).call(address);
+      },
+      onSuccess: () => ref.read(addressNotifierProvider.notifier).getAllAddress(),
+    );
   }
 
   Future<Result<void>> deleteAddress(String code) async {
-    try {
-      final addressRepository = ref.read(addressRepositoryProvider);
-      var res = await DeleteAddressUsecase(addressRepository).call(code);
+    return performDelete(
+      execute: () async {
+        final addressRepository = ref.read(addressRepositoryProvider);
+        return await DeleteAddressUsecase(addressRepository).call(code);
+      },
+      onSuccess: () => ref.read(addressNotifierProvider.notifier).getAllAddress(),
+    );
+  }
 
-      // Refresh address
-      ref.read(addressNotifierProvider.notifier).getAllAddress();
-
-      return res;
-    } catch (e) {
-      return Result.failure(error: e);
-    }
+  @override
+  void refreshParentNotifier() {
+    ref.read(addressNotifierProvider.notifier).getAllAddress();
   }
 
   void onChangedCode(String value) {

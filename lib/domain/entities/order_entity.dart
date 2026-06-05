@@ -4,7 +4,7 @@ class OrderEntity extends Equatable {
   final int? id;
   final int? userId;
   final int status;
-  final String? deliveryDatetime;
+  final DateTime? deliveryDatetime;
   final int discountValue;
   final int subTotal;
   final int total;
@@ -29,7 +29,7 @@ class OrderEntity extends Equatable {
     final int? id,
     final int? userId,
     final int? status,
-    final String? deliveryDatetime,
+    final DateTime? deliveryDatetime,
     final int? discountValue,
     final int? subTotal,
     final int? total,
