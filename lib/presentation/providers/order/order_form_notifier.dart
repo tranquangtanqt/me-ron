@@ -40,6 +40,9 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
     if (orderId == null) {
       state = state.copyWith(
         deliveryDatetime: now,
+        discountValue: 0,
+        subTotal: 0,
+        total: 0,
         isLoaded: true,
       );
       return;
@@ -106,7 +109,7 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
 
         final orderItemRepository = ref.read(orderItemRepositoryProvider);
 
-        var total = 0;
+        // var total = 0;
         for (final OrderItemForm item in state.items ?? []) {
           final oderItem = OrderItemEntity(
             orderId: res.data,
@@ -118,15 +121,15 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
           );
 
           await CreateOrderItemUsecase(orderItemRepository).call(oderItem);
-          total += oderItem.lineTotal;
+          // total += oderItem.lineTotal;
         }
 
-        final updatedOrder = order.copyWith(
-          id: res.data,
-          total: total,
-        );
-
-        await UpdateOrderUsecase(orderRepository).call(updatedOrder);
+        // final updatedOrder = order.copyWith(
+        //   id: res.data,
+        //   total: total,
+        // );
+        //
+        // await UpdateOrderUsecase(orderRepository).call(updatedOrder);
 
         return res;
       },
@@ -154,7 +157,7 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
 
         final orderItemRepository = ref.read(orderItemRepositoryProvider);
 
-        var total = 0;
+        // var total = 0;
         for (final OrderItemForm item in state.items ?? []) {
           OrderItemEntity oderItem;
           if (item.id != null) {
@@ -180,15 +183,15 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
             await CreateOrderItemUsecase(orderItemRepository).call(oderItem);
           }
 
-          total += oderItem.lineTotal;
+          // total += oderItem.lineTotal;
         }
 
-        final updatedOrder = order.copyWith(
-          id: id,
-          total: total,
-        );
-
-        await UpdateOrderUsecase(orderRepository).call(updatedOrder);
+        // final updatedOrder = order.copyWith(
+        //   id: id,
+        //   total: total,
+        // );
+        //
+        // await UpdateOrderUsecase(orderRepository).call(updatedOrder);
 
         return res;
       },
@@ -229,6 +232,18 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
     state = state.copyWith(status: value.value);
   }
 
+  void onChangedDiscountValue(String value) {
+    // state = state.copyWith(discountValue: int.tryParse(value));
+    final discount = int.tryParse(value) ?? 0;
+
+    final subTotal = state.subTotal ?? 0;
+
+    state = state.copyWith(
+      discountValue: discount,
+      total: _calcTotal(subTotal, discount),
+    );
+  }
+
   void onChangedDeliveryDatetime(DateTime value) {
     state = state.copyWith(deliveryDatetime: value);
   }
@@ -242,6 +257,11 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
 
     state = state.copyWith(
       items: updatedItems,
+      subTotal: _calcSubTotal(updatedItems),
+      total: _calcTotal(
+        _calcSubTotal(updatedItems),
+        state.discountValue ?? 0,
+      ),
     );
   }
 
@@ -260,15 +280,24 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
 
     state = state.copyWith(
       items: updatedItems,
+      subTotal: _calcSubTotal(updatedItems),
+      total: _calcTotal(
+        _calcSubTotal(updatedItems),
+        state.discountValue ?? 0,
+      ),
     );
   }
 
   void updateProduct(int index, ProductEntity? product) {
+    final items = [...?state.items];
+    items[index] = items[index].copyWith(product: product);
+
     state = state.copyWith(
-      items: [
-        ...?state.items,
-      ]..[index] = state.items![index].copyWith(
-        product: product,
+      items: items,
+      subTotal: _calcSubTotal(items),
+      total: _calcTotal(
+        _calcSubTotal(items),
+        state.discountValue ?? 0,
       ),
     );
   }
@@ -278,14 +307,36 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
   }
 
   void addItem(ProductEntity? defaultProduct) {
+    final items = [
+      ...?state.items,
+      OrderItemForm(
+        product: defaultProduct,
+        quantity: 1,
+      ),
+    ];
+
+    final subTotal = _calcSubTotal(items);
+
     state = state.copyWith(
-      items: [
-        ...?state.items,
-        OrderItemForm(
-          product: defaultProduct,
-          quantity: 1,
-        ),
-      ],
+      items: items,
+      subTotal: subTotal,
+      total: _calcTotal(
+        subTotal,
+        state.discountValue ?? 0,
+      ),
     );
+  }
+
+  int _calcSubTotal(List<OrderItemForm> items) {
+    return items.fold<int>(
+      0,
+          (sum, item) =>
+      sum + ((item.product?.price ?? 0) * item.quantity),
+    );
+  }
+
+  int _calcTotal(int subTotal, int discountValue) {
+    final result = subTotal - discountValue;
+    return result < 0 ? 0 : result;
   }
 }

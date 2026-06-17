@@ -179,7 +179,7 @@ class _CategoryButton extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSizes.padding / 1.5),
                 Text(
-                  'Danh mục sản phẩm',
+                  'Danh mục món ăn',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -221,7 +221,7 @@ class _ProductButton extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSizes.padding / 1.5),
                 Text(
-                  'Sản phẩm',
+                  'Món ăn',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),

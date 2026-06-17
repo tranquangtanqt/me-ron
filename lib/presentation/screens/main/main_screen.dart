@@ -51,7 +51,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.maps_home_work_outlined),
-            label: 'Home',
+            label: 'Trang chủ',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_customize_outlined),
@@ -59,11 +59,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.receipt_long_rounded),
-            label: 'Products',
+            label: 'Món ăn',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle_outlined),
-            label: 'Account',
+            icon: Icon(Icons.settings_outlined),
+            label: 'Cài đặt',
           ),
         ],
         currentIndex: _calculateSelectedIndex(),

@@ -22,4 +22,14 @@ class Constants {
   static const nonCriticalErrorLibraries = {
     'image resource service',
   };
+
+  static const orderDateFilters = [
+    ('1', 'Hôm nay'),
+    ('2', 'Hôm qua'),
+    ('3', 'Tuần này'),
+    ('4', 'Tuần trước'),
+    ('5', 'Tháng này'),
+    ('6', 'Tháng trước'),
+  ];
+
 }

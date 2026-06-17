@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/enums/order_status.dart';
 import '../../../core/themes/app_sizes.dart';
+import '../../../core/utilities/currency_formatter.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../providers/order/order_form_notifier.dart';
 import '../../providers/order/order_notifier.dart';
@@ -33,6 +34,7 @@ class OrderFormScreen extends ConsumerStatefulWidget {
 
 class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
   final deliveryDatetimeController = TextEditingController();
+  final discountValueController = TextEditingController();
   final noteController = TextEditingController();
 
   @override
@@ -54,6 +56,7 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
           ? DateFormat('dd/MM/yyyy').format(state.deliveryDatetime!)
           : today;
       noteController.text = state.note ?? '';
+      discountValueController.text = state.discountValue?.toString() ?? '';
     });
   }
 
@@ -61,6 +64,7 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
   void dispose() {
     deliveryDatetimeController.dispose();
     noteController.dispose();
+    discountValueController.dispose();
     super.dispose();
   }
 
@@ -167,6 +171,56 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                     icon: const Icon(Icons.add),
                     label: const Text('Thêm món'),
                   ),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //   children: [
+                  //     TextButton.icon(
+                  //       onPressed: () {
+                  //         notifier.addItem(
+                  //           allProduct.isNotEmpty ? allProduct.first : null,
+                  //         );
+                  //       },
+                  //       icon: const Icon(Icons.add),
+                  //       label: const Text('Thêm món'),
+                  //     ),
+                  //
+                  //     Container(
+                  //       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  //       decoration: BoxDecoration(
+                  //         color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  //         borderRadius: BorderRadius.circular(8),
+                  //       ),
+                  //       // child: Text(
+                  //       //   '${CurrencyFormatter.formatVND(formState.total ?? 0)}',
+                  //       //   style: const TextStyle(fontWeight: FontWeight.w600),
+                  //       // ),
+                  //     ),
+                  //   ],
+                  // ),
+                  _DiscountValueField(
+                    controller: discountValueController,
+                    onChanged: notifier.onChangedDiscountValue,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'Tổng: ${CurrencyFormatter.formatVND(formState.total ?? 0)}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        ),
+                      ),
+                    ),
+                  ),
                   _StatusDropdown(
                     selected: OrderStatusExtension.fromValue(formState.status ?? 0),
                     onChanged: notifier.onChangedStatus,
@@ -175,10 +229,6 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                     controller: deliveryDatetimeController,
                     onChanged: notifier.onChangedDeliveryDatetime,
                   ),
-                  // _PriceField(
-                  //   controller: priceController,
-                  //   onChanged: notifier.onChangedPrice,
-                  // ),
                   _NoteField(
                     controller: noteController,
                     onChanged: notifier.onChangedNote,
@@ -218,7 +268,7 @@ class _UserAutocomplete extends StatelessWidget {
         .firstOrNull;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.only(top: 4),
       child: Autocomplete<UserEntity>(
         displayStringForOption: (c) => c.name ?? '',
 
@@ -247,12 +297,23 @@ class _UserAutocomplete extends StatelessWidget {
             textController.text = selectedUser.name ?? '';
           }
 
-          return TextFormField(
-            controller: textController, // ✅ dùng controller của Autocomplete
-            focusNode: focusNode,
-            decoration: const InputDecoration(
-              labelText: 'Chọn khách hàng',
-              border: OutlineInputBorder(),
+          return SizedBox(
+            height: 40,
+            child: TextFormField(
+              controller: textController,
+              focusNode: focusNode,
+              style: const TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                labelText: 'Chọn hách hàng',
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
             ),
           );
         },
@@ -297,22 +358,34 @@ class _StatusDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.padding),
-      child: DropdownButtonFormField<OrderStatus>(
-        value: selected,
-        decoration: const InputDecoration(
-          labelText: 'Trạng thái',
-          border: OutlineInputBorder(),
+      child: SizedBox(
+        height: 40,
+        child: DropdownButtonFormField<OrderStatus>(
+          value: selected,
+          isExpanded: true,
+          decoration: InputDecoration(
+            labelText: 'Trạng thái',
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
+            ),
+            border: const OutlineInputBorder(),
+          ),
+          style: const TextStyle(fontSize: 13),
+
+          items: OrderStatus.values.map((status) {
+            return DropdownMenuItem<OrderStatus>(
+              value: status,
+              child: Text(
+                status.label,
+                style: const TextStyle(fontSize: 13),
+              ),
+            );
+          }).toList(),
+
+          onChanged: onChanged,
         ),
-        isExpanded: true,
-
-        items: OrderStatus.values.map((status) {
-          return DropdownMenuItem<OrderStatus>(
-            value: status,
-            child: Text(status.label),
-          );
-        }).toList(),
-
-        onChanged: onChanged,
       ),
     );
   }
@@ -358,38 +431,49 @@ class _DeliveryDatetimeField extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.padding),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        onTap: () => _pickDate(context),
-        child: InputDecorator(
-          decoration: InputDecoration(
-            labelText: 'Ngày giao hàng',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
+      child: SizedBox(
+        height: 40,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () => _pickDate(context),
+          child: InputDecorator(
+            isEmpty: controller.text.isEmpty,
+            decoration: InputDecoration(
+              labelText: 'Ngày giao hàng',
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              suffixIcon: const Icon(Icons.calendar_month_rounded, size: 18),
             ),
-            suffixIcon: const Icon(Icons.calendar_month_rounded),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.event_available_rounded,
-                size: 18,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  controller.text.isEmpty
-                      ? 'Chọn ngày giao hàng'
-                      : controller.text,
-                  style: controller.text.isEmpty
-                      ? theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.outline,
-                  )
-                      : theme.textTheme.bodyMedium,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.event_available_rounded,
+                  size: 16,
+                  color: theme.colorScheme.primary,
                 ),
-              ),
-            ],
+                const SizedBox(width: 6),
+
+                Expanded(
+                  child: Text(
+                    controller.text.isEmpty
+                        ? 'Chọn ngày'
+                        : controller.text,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: controller.text.isEmpty
+                          ? theme.colorScheme.outline
+                          : theme.textTheme.bodyMedium?.color,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -397,11 +481,11 @@ class _DeliveryDatetimeField extends StatelessWidget {
   }
 }
 
-class _PriceField extends StatelessWidget {
+class _DiscountValueField extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
 
-  const _PriceField({
+  const _DiscountValueField({
     required this.controller,
     required this.onChanged,
   });
@@ -409,13 +493,33 @@ class _PriceField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: AppSizes.padding),
-      child: AppTextField(
-        controller: controller,
-        labelText: 'Giá bán',
-        hintText: 'Nhập giá bán...',
-        type: AppTextFieldType.currency,
-        onChanged: onChanged,
+      padding: const EdgeInsets.only(top: AppSizes.padding / 2),
+      child: SizedBox(
+        height: 40, // 👈 nhỏ lại (40 → 36)
+        child: TextField(
+          controller: controller,
+          onChanged: onChanged,
+          keyboardType: TextInputType.number,
+          style: const TextStyle(fontSize: 12.5),
+
+          decoration: InputDecoration(
+            isDense: true,
+
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 8,
+            ),
+
+            labelText: 'Giảm giá',
+
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+
+            prefixIcon: const Icon(Icons.discount, size: 16),
+            suffixIcon: const Icon(Icons.attach_money, size: 16),
+          ),
+        ),
       ),
     );
   }
@@ -545,41 +649,46 @@ class _OrderItemRow extends StatelessWidget {
     final qty = item.quantity;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          // PRODUCT
           Expanded(
             flex: 3,
-            child: DropdownButtonFormField<ProductEntity>(
-              value: item.product ?? products.firstOrNull,
-              isExpanded: true,
-              decoration: const InputDecoration(
-                isDense: true,
-                contentPadding:
-                EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                border: OutlineInputBorder(),
-              ),
-              items: products.map((p) {
-                return DropdownMenuItem(
-                  value: p,
-                  child: Text(
-                    p.name,
-                    overflow: TextOverflow.ellipsis,
+            child: SizedBox(
+              height: 36,
+              child: DropdownButtonFormField<ProductEntity>(
+                value: item.product ?? products.firstOrNull,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
                   ),
-                );
-              }).toList(),
-              onChanged: (value) {
-                onProductChanged(value);
-              },
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                style: const TextStyle(fontSize: 13),
+                items: products.map((p) {
+                  return DropdownMenuItem(
+                    value: p,
+                    child: Text(
+                      p.name,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  );
+                }).toList(),
+                onChanged: onProductChanged,
+              ),
             ),
           ),
 
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
 
-          // QTY STEPPER
           Container(
-            height: 40,
+            height: 32,
             decoration: BoxDecoration(
               border: Border.all(
                 color: Theme.of(context).colorScheme.outlineVariant,
@@ -587,48 +696,64 @@ class _OrderItemRow extends StatelessWidget {
               borderRadius: BorderRadius.circular(6),
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // MINUS
-                IconButton(
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 30),
-                  icon: const Icon(Icons.remove, size: 18),
-                  onPressed: qty > 1
-                      ? () => onQuantityChanged(qty - 1)
-                      : null,
+                InkWell(
+                  onTap: qty > 1 ? () => onQuantityChanged(qty - 1) : null,
+                  child: const SizedBox(
+                    width: 28,
+                    child: Center(
+                      child: Icon(Icons.remove, size: 16),
+                    ),
+                  ),
                 ),
 
-                Text(
-                  qty.toString(),
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                SizedBox(
+                  width: 22,
+                  child: Center(
+                    child: Text(
+                      '$qty',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
 
-                // PLUS
-                IconButton(
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 30),
-                  icon: const Icon(Icons.add, size: 18),
-                  onPressed: () => onQuantityChanged(qty + 1),
+                InkWell(
+                  onTap: () => onQuantityChanged(qty + 1),
+                  child: const SizedBox(
+                    width: 28,
+                    child: Center(
+                      child: Icon(Icons.add, size: 16),
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
 
-          const SizedBox(width: 6),
+          const SizedBox(width: 4),
 
-          // DELETE
-          IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            icon: Icon(
-              Icons.close,
-              size: 20,
-              color: Theme.of(context).colorScheme.error,
+          SizedBox(
+            width: 28,
+            height: 28,
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              iconSize: 16,
+              splashRadius: 16,
+              icon: Icon(
+                Icons.close,
+                color: Theme.of(context).colorScheme.error,
+                size: 16,
+              ),
+              onPressed: onDelete,
             ),
-            onPressed: onDelete,
-          ),
+          )
         ],
       ),
     );
+
   }
 }

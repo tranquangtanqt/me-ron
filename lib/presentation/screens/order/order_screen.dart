@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pos/core/constants/constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,7 +16,6 @@ import '../../widgets/app_empty_state.dart';
 import '../../widgets/app_loading_more_indicator.dart';
 import '../../widgets/app_progress_indicator.dart';
 import '../../widgets/app_snack_bar.dart';
-import '../../widgets/app_text_field.dart';
 import 'components/order_card.dart';
 
 class OrderScreen extends ConsumerStatefulWidget {
@@ -230,18 +230,10 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
 
   final statuses = [
     (-1, 'Tất cả'),
-    (OrderStatus.shipping.value, 'Đang giao'),
-    (OrderStatus.completed.value, 'Đã thanh toán'),
-    (OrderStatus.cancelled.value, 'Hủy'),
-  ];
-
-  late final dates = const [
-    ('1', 'Hôm nay'),
-    ('2', 'Hôm qua'),
-    ('3', 'Tuần này'),
-    ('4', 'Tuần trước'),
-    ('5', 'Tháng này'),
-    ('6', 'Tháng trước'),
+    (OrderStatus.pending.value, OrderStatus.pending.label),
+    (OrderStatus.shipping.value, OrderStatus.shipping.label),
+    (OrderStatus.completed.value, OrderStatus.completed.label),
+    (OrderStatus.cancelled.value, OrderStatus.cancelled.label),
   ];
 
   @override
@@ -302,7 +294,7 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
                       value: '99',
                       child: Text('Tất cả thời gian'),
                     ),
-                    ...dates.map((c) {
+                    ...Constants.orderDateFilters.map((c) {
                       return DropdownMenuItem(
                         value: c.$1,
                         child: Text(c.$2),
@@ -411,74 +403,74 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
   }
 }
 
-class _FilterBar extends ConsumerStatefulWidget {
-  const _FilterBar();
-
-  @override
-  ConsumerState<_FilterBar> createState() => _FilterBarState();
-}
-
-class _FilterBarState extends ConsumerState<_FilterBar> {
-  String? selectedCategoryId;
-
-  @override
-  Widget build(BuildContext context) {
-    final categories = ref.watch(
-      categoryNotifierProvider.select((s) => s.allCategory),
-    );
-
-    return Row(
-      children: [
-        // ===== COMBOBOX =====
-        Expanded(
-          child: DropdownButtonFormField<String>(
-            value: selectedCategoryId,
-            isExpanded: true,
-            decoration: const InputDecoration(
-              labelText: 'Danh mục',
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12),
-            ),
-            items: [
-              const DropdownMenuItem(
-                value: null,
-                child: Text('Tất cả'),
-              ),
-              ...?categories?.map((c) {
-                return DropdownMenuItem(
-                  value: c.id.toString(),
-                  child: Text("c.name"),
-                  // child: Text(c.name),
-                );
-              }),
-            ],
-            onChanged: (value) {
-              setState(() {
-                selectedCategoryId = value;
-              });
-            },
-          ),
-        ),
-
-        const SizedBox(width: 8),
-
-        // ===== BUTTON SEARCH =====
-        SizedBox(
-          height: 48,
-          child: ElevatedButton(
-            onPressed: () {
-              // ref.read(orderNotifierProvider.notifier).getAllOrder(
-              //   true,
-              //   categoryId: selectedCategoryId,
-              // );
-            },
-            child: const Icon(Icons.search),
-          ),
-        ),
-      ],
-    );
-  }
-}
+// class _FilterBar extends ConsumerStatefulWidget {
+//   const _FilterBar();
+//
+//   @override
+//   ConsumerState<_FilterBar> createState() => _FilterBarState();
+// }
+//
+// class _FilterBarState extends ConsumerState<_FilterBar> {
+//   String? selectedCategoryId;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final categories = ref.watch(
+//       categoryNotifierProvider.select((s) => s.allCategory),
+//     );
+//
+//     return Row(
+//       children: [
+//         // ===== COMBOBOX =====
+//         Expanded(
+//           child: DropdownButtonFormField<String>(
+//             value: selectedCategoryId,
+//             isExpanded: true,
+//             decoration: const InputDecoration(
+//               labelText: 'Danh mục',
+//               border: OutlineInputBorder(),
+//               contentPadding: EdgeInsets.symmetric(horizontal: 12),
+//             ),
+//             items: [
+//               const DropdownMenuItem(
+//                 value: null,
+//                 child: Text('Tất cả'),
+//               ),
+//               ...?categories?.map((c) {
+//                 return DropdownMenuItem(
+//                   value: c.id.toString(),
+//                   child: Text("c.name"),
+//                   // child: Text(c.name),
+//                 );
+//               }),
+//             ],
+//             onChanged: (value) {
+//               setState(() {
+//                 selectedCategoryId = value;
+//               });
+//             },
+//           ),
+//         ),
+//
+//         const SizedBox(width: 8),
+//
+//         // ===== BUTTON SEARCH =====
+//         SizedBox(
+//           height: 48,
+//           child: ElevatedButton(
+//             onPressed: () {
+//               // ref.read(orderNotifierProvider.notifier).getAllOrder(
+//               //   true,
+//               //   categoryId: selectedCategoryId,
+//               // );
+//             },
+//             child: const Icon(Icons.search),
+//           ),
+//         ),
+//       ],
+//     );
+//   }
+// }
 
 class _OrderCard extends StatelessWidget {
   final OrderModel order;
