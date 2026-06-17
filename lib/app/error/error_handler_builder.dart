@@ -23,7 +23,7 @@ class ErrorHandlerBuilder extends ConsumerStatefulWidget {
 }
 
 class ErrorHandlerBuilderState extends ConsumerState<ErrorHandlerBuilder> {
-  ErrorLoggerService get _errorLoggerService => ref.read(errorLoggerServiceProvider);
+  // ErrorLoggerService get _errorLoggerService => ref.read(errorLoggerServiceProvider);	TODO comment
   AppRoutes get _appRoutes => ref.read(appRoutesProvider);
 
   @override
@@ -45,7 +45,7 @@ class ErrorHandlerBuilderState extends ConsumerState<ErrorHandlerBuilder> {
   void onFlutterError(FlutterErrorDetails flutterError) {
     ce(flutterError.exception);
 
-    _errorLoggerService.log(error: flutterError);
+    // _errorLoggerService.log(error: flutterError);	TODO comment
 
     if (!mounted) return;
 
@@ -65,7 +65,7 @@ class ErrorHandlerBuilderState extends ConsumerState<ErrorHandlerBuilder> {
   bool onPlatformError(Object error, StackTrace stackTrace) {
     ce(error);
 
-    _errorLoggerService.log(error: error, stackTrace: stackTrace);
+    // _errorLoggerService.log(error: error, stackTrace: stackTrace);	TODO comment
 
     if (!mounted) return false;
 
