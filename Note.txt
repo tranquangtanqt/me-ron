@@ -1,0 +1,30 @@
+Tạo bổ sung file: android\app\google-services.json
+{
+  "project_info": {
+    "project_number": "402369890551",
+    "project_id": "me-ron",
+    "storage_bucket": "me-ron.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:402369890551:android:85739142066dd958172bf2",
+        "android_client_info": {
+          "package_name": "me_ron.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxDkWF5JRnuuqYMR5bVHT2zlzlUEOUgAM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
