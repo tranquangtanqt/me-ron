@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -304,7 +303,7 @@ class _UserAutocomplete extends StatelessWidget {
               focusNode: focusNode,
               style: const TextStyle(fontSize: 14),
               decoration: InputDecoration(
-                labelText: 'Chọn hách hàng',
+                labelText: 'Chọn khách hàng',
                 isDense: true,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -446,7 +445,7 @@ class _DeliveryDatetimeField extends StatelessWidget {
                 vertical: 10,
               ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(4),
               ),
               suffixIcon: const Icon(Icons.calendar_month_rounded, size: 18),
             ),
