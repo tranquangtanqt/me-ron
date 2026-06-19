@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:me_ron/domain/usecases/params/base_params.dart';
+
 import '../../core/common/result.dart';
 import '../../core/constants/constants.dart';
 import '../../domain/entities/product_entity.dart';
@@ -20,21 +22,13 @@ class ProductRepositoryImpl extends ProductRepository {
 
 
   @override
-  Future<Result<List<ProductEntity>>> getAllProducts(
-      {
-        String orderBy = 'id',
-        String sortBy = 'ASC',
-        int limit = 10,
-        int? offset,
-        String? contains,
-      }) async {
+  Future<Result<List<ProductEntity>>> getAllProducts(BaseParams params) async {
     try {
       final local = await productLocalDatasource.getAllProducts(
-        orderBy: orderBy,
-        sortBy: sortBy,
-        limit: limit,
-        offset: offset,
-        contains: contains,
+        orderBy: params.orderBy,
+        sortBy: params.sortBy,
+        limit: params.limit,
+        offset: params.offset,
       );
 
       if (local.isFailure) return Result.failure(error: local.error!);

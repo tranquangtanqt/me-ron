@@ -1,15 +1,10 @@
+import 'package:me_ron/domain/usecases/params/base_params.dart';
+
 import '../../core/common/result.dart';
 import '../entities/product_entity.dart';
 
 abstract class ProductRepository {
-  Future<Result<List<ProductEntity>>> getAllProducts(
-    {
-      String orderBy,
-      String sortBy,
-      int limit,
-      int? offset,
-      String? contains,
-    });
+  Future<Result<List<ProductEntity>>> getAllProducts(BaseParams params);
 
   Future<Result<ProductEntity?>> getProduct(int productId);
 
@@ -18,13 +13,4 @@ abstract class ProductRepository {
   Future<Result<void>> updateProduct(ProductEntity product);
 
   Future<Result<void>> deleteProduct(int productId);
-
-  // Future<Result<List<ProductEntity>>> getUserProducts(
-  //   String userId, {
-  //   String orderBy,
-  //   String sortBy,
-  //   int limit,
-  //   int? offset,
-  //   String? contains,
-  // });
 }

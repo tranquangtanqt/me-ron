@@ -28,7 +28,6 @@ class OrderItemNotifier extends Notifier<OrderItemState> {
       orderBy: 'id',
       sortBy: 'ASC',
       offset: offset,
-      contains: contains,
     );
 
     final orderItemRepository = ref.read(orderItemRepositoryProvider);

@@ -5,6 +5,7 @@ import '../../core/constants/constants.dart';
 import '../../domain/entities/order_entity.dart';
 import '../../domain/repositories/order_repository.dart';
 import '../../domain/usecases/params/base_params.dart';
+import '../../domain/usecases/params/order_params.dart';
 import '../datasources/local/order_local_datasource_impl.dart';
 import '../datasources/local/queued_action_local_datasource_impl.dart';
 import '../models/order_model.dart';
@@ -21,7 +22,7 @@ class OrderRepositoryImpl extends OrderRepository {
 
 
   @override
-  Future<Result<List<OrderModel>>> getAllOrders(BaseParams params) async {
+  Future<Result<List<OrderModel>>> getAllOrders(OrderParams params) async {
     try {
       final local = await orderLocalDatasource.getAllOrders(params);
 

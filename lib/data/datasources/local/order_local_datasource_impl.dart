@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:me_ron/domain/usecases/params/order_params.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../core/common/result.dart';
@@ -14,7 +15,7 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
   OrderLocalDatasourceImpl(this._databaseService);
 
   @override
-  Future<Result<List<OrderModel>>> getAllOrders(BaseParams params) async {
+  Future<Result<List<OrderModel>>> getAllOrders(OrderParams params) async {
     try {
       String sql = '''
           SELECT 
@@ -28,11 +29,10 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
             D.quantity As quantity,
             D.lineTotal As lineTotal
           FROM ${DatabaseConfig.orderTableName} AS O
-            INNER JOIN ${DatabaseConfig.userTableName} AS U
+            LEFT JOIN ${DatabaseConfig.userTableName} AS U
               ON O.userId = U.id
             LEFT JOIN ${DatabaseConfig.orderItemTableName} AS D
               ON O.id = D.orderId
-          
         ''';
 
       List<dynamic> args = [];
@@ -57,13 +57,21 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
         args.add(params.status);
       }
 
+      if (params.userId != null) {
+        if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
+        sqlWhere += 'userId = ?';
+        args.add(params.userId);
+      }
+
       if (sqlWhere.isNotEmpty) {
         sql += ' WHERE $sqlWhere';
       }
 
       sql += ' ORDER BY deliveryDatetime DESC';
+      print(sql);
 
       var res = await _databaseService.database.rawQuery(sql, args);
+      print(args);
 
       return res.isEmpty
           ? Result.success(data: [])

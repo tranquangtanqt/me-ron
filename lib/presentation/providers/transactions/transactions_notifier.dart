@@ -36,7 +36,7 @@ class TransactionsNotifier extends Notifier<TransactionsState> {
     var params = BaseParams(
       param: userId,
       offset: offset,
-      contains: contains,
+      // contains: contains,
     );
 
     final transactionRepository = ref.read(transactionRepositoryProvider);

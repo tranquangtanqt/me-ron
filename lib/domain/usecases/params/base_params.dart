@@ -6,10 +6,10 @@ class BaseParams<T> extends Equatable {
   final String sortBy;
   final int limit;
   final int? offset;
-  final String? contains;
-  final DateTime? fromDate;
-  final DateTime? toDate;
-  final int? status;
+  // final String? contains;
+  // final DateTime? fromDate;
+  // final DateTime? toDate;
+  // final int? status;
 
   const BaseParams({
     this.param,
@@ -17,12 +17,18 @@ class BaseParams<T> extends Equatable {
     this.sortBy = 'DESC',
     this.limit = 10,
     this.offset,
-    this.contains,
-    this.fromDate,
-    this.toDate,
-    this.status,
+    // this.contains,
+    // this.fromDate,
+    // this.toDate,
+    // this.status,
   });
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [
+    param,
+    orderBy,
+    sortBy,
+    limit,
+    offset,
+  ];
 }

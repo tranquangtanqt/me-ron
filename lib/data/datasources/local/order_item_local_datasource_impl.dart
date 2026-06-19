@@ -3,6 +3,7 @@ import 'package:sqflite/sqflite.dart';
 import '../../../core/common/result.dart';
 import '../../../core/services/database/database_config.dart';
 import '../../../core/services/database/database_service.dart';
+import '../../../domain/usecases/params/base_params.dart';
 import '../../models/order_item_model.dart';
 import '../interfaces/order_item_datasource.dart';
 
@@ -12,14 +13,7 @@ class OrderItemLocalDatasourceImpl extends OrderItemDatasource {
   OrderItemLocalDatasourceImpl(this._databaseService);
 
   @override
-  Future<Result<List<OrderItemModel>>> getAllOrderItems(
-      {
-        String orderBy = 'id',
-        String sortBy = 'ASC',
-        int limit = 10,
-        int? offset,
-        String? contains,
-      }) async {
+  Future<Result<List<OrderItemModel>>> getAllOrderItems(BaseParams params) async {
     try {
       var res = await _databaseService.database.rawQuery(
         '''
@@ -27,13 +21,13 @@ class OrderItemLocalDatasourceImpl extends OrderItemDatasource {
           FROM ${DatabaseConfig.orderTableName} AS O
             INNER JOIN ${DatabaseConfig.userTableName} AS U
             ON O.userId = U.id
-          ORDER BY $orderBy $sortBy
+          ORDER BY $params.orderBy $params.sortBy
           LIMIT ?
           OFFSET ?
           ''',
             [
-              limit,
-              offset ?? 0,
+              params.limit,
+              params.offset ?? 0,
             ],
       );
       return res.isEmpty

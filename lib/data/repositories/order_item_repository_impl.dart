@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:me_ron/domain/usecases/params/base_params.dart';
+
 import '../../core/common/result.dart';
 import '../../domain/entities/order_item_entity.dart';
 import '../../domain/repositories/order_item_repository.dart';
@@ -19,22 +21,9 @@ class OrderItemRepositoryImpl extends OrderItemRepository {
 
 
   @override
-  Future<Result<List<OrderItemModel>>> getAllOrderItems(
-      {
-        String orderBy = 'id',
-        String sortBy = 'ASC',
-        int limit = 10,
-        int? offset,
-        String? contains,
-      }) async {
+  Future<Result<List<OrderItemModel>>> getAllOrderItems(BaseParams params) async {
     try {
-      final local = await orderItemLocalDatasource.getAllOrderItems(
-        orderBy: orderBy,
-        sortBy: sortBy,
-        limit: limit,
-        offset: offset,
-        contains: contains,
-      );
+      final local = await orderItemLocalDatasource.getAllOrderItems(params);
 
       if (local.isFailure) return Result.failure(error: local.error!);
 

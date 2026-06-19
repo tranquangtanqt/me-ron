@@ -7,9 +7,11 @@ import '../../../core/enums/order_status.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../../data/models/order_model.dart';
 import '../../../domain/entities/category_entity.dart';
+import '../../../domain/entities/user_entity.dart';
 import '../../providers/category/category_notifier.dart';
 import '../../providers/order/order_form_notifier.dart';
 import '../../providers/order/order_notifier.dart';
+import '../../providers/user/user_notifier.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_dialog.dart';
 import '../../widgets/app_empty_state.dart';
@@ -184,6 +186,7 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
   DateTime now = DateTime.now();
   late DateTime fromDate = DateTime(now.year, now.month, now.day);
   late DateTime toDate = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
+  int? userId;
 
   final fromController = TextEditingController();
   final toController = TextEditingController();
@@ -202,10 +205,13 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
 
     fromController.text = DateFormat('dd/MM/yyyy').format(fromDate);
     toController.text = DateFormat('dd/MM/yyyy').format(toDate);
+
   }
 
   @override
   Widget build(BuildContext context) {
+    final allUser = ref.watch(userNotifierProvider.select((s) => s.allUser)) ?? [];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -231,6 +237,18 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
               );
             },
           ),
+        ),
+
+        const SizedBox(height: 10),
+
+        _UserAutocomplete(
+          selected: userId,
+          users: allUser,
+          onChanged: (_userId) {
+            setState(() {
+              userId = _userId;
+            });
+          },
         ),
 
         const SizedBox(height: 10),
@@ -283,6 +301,7 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
                     fromDate: fromDate,
                     toDate: toDate,
                     status: selectedStatus,
+                    userId: userId,
                   );
                 },
                 child: const Icon(Icons.search, size: 18),
@@ -374,6 +393,101 @@ class _DateField extends StatelessWidget {
                 : controller.text,
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _UserAutocomplete extends StatelessWidget {
+  final int? selected;
+  final List<UserEntity> users;
+  final ValueChanged<int?> onChanged;
+
+  const _UserAutocomplete({
+    required this.selected,
+    required this.users,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedUser = users
+        .where((e) => e.id == selected)
+        .cast<UserEntity?>()
+        .firstOrNull;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Autocomplete<UserEntity>(
+        displayStringForOption: (c) => c.name ?? '',
+
+        optionsBuilder: (TextEditingValue value) {
+          final query = value.text.trim().toLowerCase();
+
+          if (query.isEmpty) {
+            return users;
+          }
+
+          return users.where((c) {
+            final deliveryDatetime = (c.name ?? '').toLowerCase();
+            return deliveryDatetime.contains(query);
+          });
+        },
+
+        onSelected: (UserEntity selection) {
+          onChanged(selection.id);
+        },
+
+        fieldViewBuilder: (context, textController, focusNode, onFieldSubmitted) {
+          // sync selected text khi edit
+          if (selectedUser != null &&
+              textController.text.isEmpty) {
+            textController.text = selectedUser.name ?? '';
+          }
+
+          return SizedBox(
+            height: 40,
+            child: TextFormField(
+              controller: textController,
+              focusNode: focusNode,
+              style: const TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                labelText: 'Chọn khách hàng',
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+            ),
+          );
+        },
+
+        optionsViewBuilder: (context, onSelected, options) {
+          return Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              elevation: 4,
+              child: SizedBox(
+                height: 220,
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  itemCount: options.length,
+                  itemBuilder: (context, index) {
+                    final option = options.elementAt(index);
+                    return ListTile(
+                      title: Text(option.name ?? ''),
+                      onTap: () => onSelected(option),
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

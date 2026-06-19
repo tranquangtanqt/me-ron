@@ -10,30 +10,8 @@ class GetAllProductsUsecase extends Usecase<Result, BaseParams> {
   final ProductRepository _productRepository;
 
   @override
-  Future<Result<List<ProductEntity>>> call(BaseParams params) async => _productRepository.getAllProducts(
-    orderBy: params.orderBy,
-    sortBy: params.sortBy,
-    limit: params.limit,
-    offset: params.offset,
-    contains: params.contains,
-  );
+  Future<Result<List<ProductEntity>>> call(BaseParams params) async => _productRepository.getAllProducts(params);
 }
-
-// class GetUserProductsUsecase extends Usecase<Result, BaseParams> {
-//   GetUserProductsUsecase(this._productRepository);
-//
-//   final ProductRepository _productRepository;
-//
-//   @override
-//   Future<Result<List<ProductEntity>>> call(BaseParams params) async => _productRepository.getUserProducts(
-//     params.param,
-//     orderBy: params.orderBy,
-//     sortBy: params.sortBy,
-//     limit: params.limit,
-//     offset: params.offset,
-//     contains: params.contains,
-//   );
-// }
 
 class GetProductUsecase extends Usecase<Result, int> {
   GetProductUsecase(this._productRepository);

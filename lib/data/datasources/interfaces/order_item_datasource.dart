@@ -1,3 +1,5 @@
+import 'package:me_ron/domain/usecases/params/base_params.dart';
+
 import '../../../core/common/result.dart';
 import '../../models/order_item_model.dart';
 
@@ -10,11 +12,5 @@ abstract class OrderItemDatasource {
 
   Future<Result<OrderItemModel?>> getOrderItem(int id);
 
-  Future<Result<List<OrderItemModel>>> getAllOrderItems({
-    String orderBy,
-    String sortBy,
-    int limit,
-    int? offset,
-    String? contains,
-  });
+  Future<Result<List<OrderItemModel>>> getAllOrderItems(BaseParams params);
 }

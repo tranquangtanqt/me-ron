@@ -4,6 +4,7 @@ import '../../../app/di/app_providers.dart';
 import '../../../core/enums/order_status.dart';
 import '../../../domain/usecases/params/base_params.dart';
 import '../../../domain/usecases/order_usecases.dart';
+import '../../../domain/usecases/params/order_params.dart';
 import 'order_state.dart';
 
 final orderNotifierProvider = NotifierProvider<OrderNotifier, OrderState>(
@@ -25,7 +26,7 @@ class OrderNotifier extends Notifier<OrderState> {
   }
 
   Future<void> getAllOrder(bool resetDataFlg, {int? offset, String? contains,
-  DateTime? fromDate, DateTime? toDate, int? status}) async {
+  DateTime? fromDate, DateTime? toDate, int? status, int? userId}) async {
     if (resetDataFlg == true) {
       state = const OrderState(
         allOrder: [],
@@ -47,14 +48,19 @@ class OrderNotifier extends Notifier<OrderState> {
       state = state.copyWith();
     }
 
-    final params = BaseParams(
+    final baseParams = BaseParams(
       orderBy: 'id',
       sortBy: 'ASC',
       offset: offset,
+    );
+
+    final params = OrderParams(
+      base: baseParams,
       contains: contains,
       fromDate: fromDate,
       toDate: toDate,
       status: status,
+      userId: userId,
     );
 
     final orderRepository = ref.read(orderRepositoryProvider);
