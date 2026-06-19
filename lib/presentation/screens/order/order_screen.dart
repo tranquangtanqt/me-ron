@@ -13,7 +13,6 @@ import '../../providers/order/order_notifier.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_dialog.dart';
 import '../../widgets/app_empty_state.dart';
-import '../../widgets/app_loading_more_indicator.dart';
 import '../../widgets/app_progress_indicator.dart';
 import '../../widgets/app_snack_bar.dart';
 import 'components/order_card.dart';
@@ -26,13 +25,11 @@ class OrderScreen extends ConsumerStatefulWidget {
 }
 
 class _OrderScreenState extends ConsumerState<OrderScreen> {
-  // final scrollController = ScrollController();
   final searchFieldController = TextEditingController();
   List<CategoryEntity> allCategory = [];
 
   @override
   void initState() {
-    // scrollController.addListener(scrollListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(orderNotifierProvider.notifier).getAllOrder(true);
       ref.read(categoryNotifierProvider.notifier).getAllCategory();
@@ -59,32 +56,9 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
 
   @override
   void dispose() {
-    // scrollController.removeListener(scrollListener);
-    // scrollController.dispose();
     searchFieldController.dispose();
     super.dispose();
   }
-
-  // void scrollListener() {
-  //   final notifier = ref.read(orderNotifierProvider.notifier);
-  //   final state = ref.read(orderNotifierProvider);
-  //
-  //   if (!scrollController.hasClients) return;
-  //   if (state.isLoadingMore) return;
-  //
-  //   final max = scrollController.position.maxScrollExtent;
-  //   final current = scrollController.position.pixels;
-  //
-  //   if (current < max - 150) return;
-  //
-  //   final lastId = state.allOrder?.last.id;
-  //   if (lastId == null) return;
-  //
-  //   notifier.getAllOrder(
-  //     false,
-  //     offset: lastId,
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -94,11 +68,10 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
     // });
 
     final allOrder = ref.watch(orderNotifierProvider.select((s) => s.allOrder));
-    // final isLoadingMore = ref.watch(orderNotifierProvider.select((s) => s.isLoadingMore));
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Order'),
+        title: const Text('Đặt món'),
         elevation: 0,
         shadowColor: Colors.transparent,
         actions: const [_AddButton()],
@@ -108,21 +81,8 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
         displacement: 60,
         child: Scrollbar(
           child: CustomScrollView(
-            // controller: scrollController,
-            // Disable scroll when data is null or empty
             physics: (allOrder?.isEmpty ?? true) ? const NeverScrollableScrollPhysics() : null,
             slivers: [
-              // SliverAppBar(
-              //   floating: true,
-              //   snap: true,
-              //   automaticallyImplyLeading: false,
-              //   collapsedHeight: 70,
-              //   titleSpacing: 0,
-              //   title: Padding(
-              //     padding: const EdgeInsets.symmetric(horizontal: AppSizes.padding),
-              //     child: _SearchField(controller: searchFieldController),
-              //   ),
-              // ),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -170,9 +130,6 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                   );
                 },
               ),
-              // SliverToBoxAdapter(
-              //   child: AppLoadingMoreIndicator(isLoading: isLoadingMore),
-              // ),
             ],
           ),
         ),

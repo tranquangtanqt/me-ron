@@ -420,7 +420,6 @@ class _DeliveryDatetimeField extends StatelessWidget {
 
       controller.text = formatted;
       onChanged(picked);
-      // onChanged(formatted);
     }
   }
 
@@ -541,7 +540,7 @@ class _NoteField extends StatelessWidget {
         controller: controller,
         labelText: 'Ghi chú',
         hintText: 'Nhập ghi chú...',
-        maxLines: 4,
+        maxLines: 2,
         onChanged: onChanged,
       ),
     );
