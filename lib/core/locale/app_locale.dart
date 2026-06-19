@@ -6,8 +6,8 @@ class AppLocale {
   AppLocale._();
 
   static Locale defaultLocale = const Locale('vi', 'VN');
-  static String defaultPhoneCode = '+62';
-  static String defaultCurrencyCode = 'Rp';
+  static String defaultPhoneCode = '+84';
+  static String defaultCurrencyCode = '₫';
 
   static const List<Locale> supportedLocales = [
     Locale('vi', 'VN'),

@@ -288,8 +288,7 @@ class _UserAutocomplete extends StatelessWidget {
           onChanged(selection.id);
         },
 
-        fieldViewBuilder:
-            (context, textController, focusNode, onFieldSubmitted) {
+        fieldViewBuilder: (context, textController, focusNode, onFieldSubmitted) {
           // sync selected text khi edit
           if (selectedUser != null &&
               textController.text.isEmpty) {
@@ -446,21 +445,22 @@ class _DeliveryDatetimeField extends StatelessWidget {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(4),
               ),
-              suffixIcon: const Icon(Icons.calendar_month_rounded, size: 18),
+              prefixIcon: const Icon(
+                Icons.event_available_rounded,
+                size: 16,
+              ),
+              suffixIcon: const Icon(
+                Icons.calendar_month_rounded,
+                size: 16,
+              ),
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.event_available_rounded,
-                  size: 16,
-                  color: theme.colorScheme.primary,
-                ),
-                const SizedBox(width: 6),
-
                 Expanded(
                   child: Text(
                     controller.text.isEmpty
-                        ? 'Chọn ngày'
+                        // ? 'Chọn ngày'
+                        ? ''
                         : controller.text,
                     style: TextStyle(
                       fontSize: 13,

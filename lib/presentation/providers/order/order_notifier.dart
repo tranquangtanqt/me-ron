@@ -25,7 +25,7 @@ class OrderNotifier extends Notifier<OrderState> {
   }
 
   Future<void> getAllOrder(bool resetDataFlg, {int? offset, String? contains,
-  DateTime? startDate, DateTime? endDate, int? status}) async {
+  DateTime? fromDate, DateTime? toDate, int? status}) async {
     if (resetDataFlg == true) {
       state = const OrderState(
         allOrder: [],
@@ -52,8 +52,8 @@ class OrderNotifier extends Notifier<OrderState> {
       sortBy: 'ASC',
       offset: offset,
       contains: contains,
-      startDate: startDate,
-      endDate: endDate,
+      fromDate: fromDate,
+      toDate: toDate,
       status: status,
     );
 

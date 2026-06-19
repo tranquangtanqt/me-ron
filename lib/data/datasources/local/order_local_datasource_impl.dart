@@ -40,15 +40,15 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
       final format = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
       String sqlWhere = '';
 
-      if (params.startDate != null) {
+      if (params.fromDate != null) {
         sqlWhere += 'deliveryDatetime >= ?';
-        args.add(format.format(params.startDate!));
+        args.add(format.format(params.fromDate!));
       }
 
-      if (params.endDate != null) {
+      if (params.toDate != null) {
         if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
         sqlWhere += 'deliveryDatetime <= ?';
-        args.add(format.format(params.endDate!));
+        args.add(format.format(params.toDate!));
       }
 
       if (params.status != null) {

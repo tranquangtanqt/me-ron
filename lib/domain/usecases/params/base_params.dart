@@ -7,8 +7,8 @@ class BaseParams<T> extends Equatable {
   final int limit;
   final int? offset;
   final String? contains;
-  final DateTime? startDate;
-  final DateTime? endDate;
+  final DateTime? fromDate;
+  final DateTime? toDate;
   final int? status;
 
   const BaseParams({
@@ -18,8 +18,8 @@ class BaseParams<T> extends Equatable {
     this.limit = 10,
     this.offset,
     this.contains,
-    this.startDate,
-    this.endDate,
+    this.fromDate,
+    this.toDate,
     this.status,
   });
 

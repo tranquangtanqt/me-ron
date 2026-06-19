@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
-import '../../../core/constants/constants.dart';
 import '../../../core/enums/order_status.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../../data/models/order_model.dart';
@@ -25,7 +25,6 @@ class OrderScreen extends ConsumerStatefulWidget {
 }
 
 class _OrderScreenState extends ConsumerState<OrderScreen> {
-  final searchFieldController = TextEditingController();
   List<CategoryEntity> allCategory = [];
 
   @override
@@ -56,7 +55,6 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
 
   @override
   void dispose() {
-    searchFieldController.dispose();
     super.dispose();
   }
 
@@ -182,8 +180,13 @@ class _OrderFilterBar extends ConsumerStatefulWidget {
 }
 
 class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
-  String? selectedDateId = '99';
   int selectedStatus = OrderStatus.shipping.value;
+  DateTime now = DateTime.now();
+  late DateTime fromDate = DateTime(now.year, now.month, now.day);
+  late DateTime toDate = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
+
+  final fromController = TextEditingController();
+  final toController = TextEditingController();
 
   final statuses = [
     (-1, 'Tất cả'),
@@ -192,6 +195,14 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
     (OrderStatus.completed.value, OrderStatus.completed.label),
     (OrderStatus.cancelled.value, OrderStatus.cancelled.label),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    fromController.text = DateFormat('dd/MM/yyyy').format(fromDate);
+    toController.text = DateFormat('dd/MM/yyyy').format(toDate);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -224,44 +235,31 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
 
         const SizedBox(height: 10),
 
-        // ===== DROPDOWN + SEARCH =====
+        // ===== DATE + SEARCH =====
         Row(
           children: [
-            // DROPDOWN
+            // DATE
             Expanded(
-              flex: 3,
-              child: SizedBox(
-                height: 38,
-                child: DropdownButtonFormField<String>(
-                  value: selectedDateId,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 8,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  style: const TextStyle(fontSize: 13),
-                  items: [
-                    const DropdownMenuItem(
-                      value: '99',
-                      child: Text('Tất cả thời gian'),
-                    ),
-                    ...Constants.orderDateFilters.map((c) {
-                      return DropdownMenuItem(
-                        value: c.$1,
-                        child: Text(c.$2),
-                      );
-                    }),
-                  ],
-                  onChanged: (value) {
-                    setState(() => selectedDateId = value);
-                  },
-                ),
+              child: _DateField(
+                label: 'Từ ngày',
+                controller: fromController,
+                onChanged: (date) {
+                  setState(() {
+                    fromDate = date;
+                  });
+                },
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _DateField(
+                label: 'Đến ngày',
+                controller: toController,
+                onChanged: (date) {
+                  setState(() {
+                    toDate = date;
+                  });
+                },
               ),
             ),
 
@@ -278,76 +276,13 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
                   ),
                 ),
                 onPressed: () {
-                  DateTime? startDate;
-                  DateTime? endDate;
-                  DateTime now = DateTime.now();
+                  toDate = DateTime(toDate.year, toDate.month, toDate.day, 23, 59, 59, 999);
 
-                  if (selectedDateId == '99') {
-                    // Tất cả
-                  } else if (selectedDateId == '1') {
-                    // Hôm nay
-                    startDate = DateTime(now.year, now.month, now.day);
-                  } else if (selectedDateId == '2') {
-                    // Hôm qua
-                    final yesterday = now.subtract(const Duration(days: 1));
-
-                    startDate = DateTime(yesterday.year, yesterday.month, yesterday.day);
-
-                    endDate = DateTime(
-                      yesterday.year,
-                      yesterday.month,
-                      yesterday.day,
-                      23,
-                      59,
-                      59,
-                      999,
-                    );
-                  } else if (selectedDateId == '3') {
-                    // Tuần này
-                    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-                    startDate = DateTime(
-                      startOfWeek.year,
-                      startOfWeek.month,
-                      startOfWeek.day,
-                    );
-                  } else if (selectedDateId == '4') {
-                    // Tuần trước
-                    final startOfThisWeek = now.subtract(Duration(days: now.weekday - 1));
-
-                    final startOfLastWeek = startOfThisWeek.subtract(const Duration(days: 7));
-
-                    startDate = DateTime(
-                      startOfLastWeek.year,
-                      startOfLastWeek.month,
-                      startOfLastWeek.day,
-                    );
-
-                    endDate = startOfThisWeek.subtract(const Duration(seconds: 1));
-                  } else if (selectedDateId == '5') {
-                    // Tháng này
-                    startDate = DateTime(now.year, now.month, 1);
-                  } else if (selectedDateId == '6') {
-                    // Tháng trước
-                    final now = DateTime.now();
-
-                    final firstDayThisMonth = DateTime(now.year, now.month, 1);
-                    final lastDayLastMonth = firstDayThisMonth.subtract(const Duration(days: 1));
-
-                    startDate = DateTime(lastDayLastMonth.year, lastDayLastMonth.month, 1);
-                    endDate = DateTime(
-                      lastDayLastMonth.year,
-                      lastDayLastMonth.month,
-                      lastDayLastMonth.day,
-                      23,
-                      59,
-                      59,
-                    );
-                  }
                   ref.read(orderNotifierProvider.notifier).getAllOrder(
                     true,
-                  startDate: startDate,
-                  endDate: endDate,
-                  status: selectedStatus,
+                    fromDate: fromDate,
+                    toDate: toDate,
+                    status: selectedStatus,
                   );
                 },
                 child: const Icon(Icons.search, size: 18),
@@ -359,75 +294,6 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
     );
   }
 }
-
-// class _FilterBar extends ConsumerStatefulWidget {
-//   const _FilterBar();
-//
-//   @override
-//   ConsumerState<_FilterBar> createState() => _FilterBarState();
-// }
-//
-// class _FilterBarState extends ConsumerState<_FilterBar> {
-//   String? selectedCategoryId;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final categories = ref.watch(
-//       categoryNotifierProvider.select((s) => s.allCategory),
-//     );
-//
-//     return Row(
-//       children: [
-//         // ===== COMBOBOX =====
-//         Expanded(
-//           child: DropdownButtonFormField<String>(
-//             value: selectedCategoryId,
-//             isExpanded: true,
-//             decoration: const InputDecoration(
-//               labelText: 'Danh mục',
-//               border: OutlineInputBorder(),
-//               contentPadding: EdgeInsets.symmetric(horizontal: 12),
-//             ),
-//             items: [
-//               const DropdownMenuItem(
-//                 value: null,
-//                 child: Text('Tất cả'),
-//               ),
-//               ...?categories?.map((c) {
-//                 return DropdownMenuItem(
-//                   value: c.id.toString(),
-//                   child: Text("c.name"),
-//                   // child: Text(c.name),
-//                 );
-//               }),
-//             ],
-//             onChanged: (value) {
-//               setState(() {
-//                 selectedCategoryId = value;
-//               });
-//             },
-//           ),
-//         ),
-//
-//         const SizedBox(width: 8),
-//
-//         // ===== BUTTON SEARCH =====
-//         SizedBox(
-//           height: 48,
-//           child: ElevatedButton(
-//             onPressed: () {
-//               // ref.read(orderNotifierProvider.notifier).getAllOrder(
-//               //   true,
-//               //   categoryId: selectedCategoryId,
-//               // );
-//             },
-//             child: const Icon(Icons.search),
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-// }
 
 class _OrderCard extends StatelessWidget {
   final OrderModel order;
@@ -443,26 +309,72 @@ class _OrderCard extends StatelessWidget {
   }
 }
 
-// class _SearchField extends ConsumerWidget {
-//   final TextEditingController controller;
-//
-//   const _SearchField({required this.controller});
-//
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     return AppTextField(
-//       controller: controller,
-//       hintText: 'Tìm kiếm sản phẩm...',
-//       type: AppTextFieldType.search,
-//       textInputAction: TextInputAction.search,
-//       onEditingComplete: () {
-//         FocusScope.of(context).unfocus();
-//         ref.read(orderNotifierProvider.notifier).resetOrder();
-//         ref.read(orderNotifierProvider.notifier).getAllOrder(contains: controller.text);
-//       },
-//       onTapClearButton: () {
-//         ref.read(orderNotifierProvider.notifier).getAllOrder(contains: controller.text);
-//       },
-//     );
-//   }
-// }
+class _DateField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final ValueChanged<DateTime> onChanged;
+
+  const _DateField({
+    required this.label,
+    required this.controller,
+    required this.onChanged,
+  });
+
+  Future<void> _pickDate(BuildContext context) async {
+    DateTime initialDate = DateTime.now();
+
+    if (controller.text.isNotEmpty) {
+      try {
+        initialDate = DateFormat('dd/MM/yyyy').parse(controller.text);
+      } catch (_) {}
+    }
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null) {
+      controller.text = DateFormat(
+        'dd/MM/yyyy',
+      ).format(picked);
+
+      onChanged(picked);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 40,
+      child: InkWell(
+        onTap: () => _pickDate(context),
+        child: InputDecorator(
+          isEmpty: controller.text.isEmpty,
+          decoration: InputDecoration(
+            labelText: label,
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+            suffixIcon: const Icon(
+              Icons.calendar_month_rounded,
+              size: 18,
+            ),
+          ),
+          child: Text(
+            controller.text.isEmpty
+                ? ''
+                : controller.text,
+          ),
+        ),
+      ),
+    );
+  }
+}
