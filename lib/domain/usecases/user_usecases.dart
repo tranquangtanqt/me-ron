@@ -1,5 +1,4 @@
-import 'package:flutter_pos/domain/usecases/params/base_params.dart';
-
+import '../../domain/usecases/params/base_params.dart';
 import '../../core/common/result.dart';
 import '../../core/usecase/usecase.dart';
 import '../entities/user_entity.dart';

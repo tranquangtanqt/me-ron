@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'app/app.dart';
 import 'app/di/app_providers.dart';
 import 'core/services/database/database_service.dart';
-import 'firebase_options.dart';
+// import 'firebase_options.dart';
 
 void main() async {
   // Initialize binding
