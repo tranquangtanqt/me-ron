@@ -182,6 +182,7 @@ INSERT INTO '$orderItemTableName' ('orderId', 'productId', 'snapshotName', 'snap
 VALUES  
   ('1', '1', 'snapshotName 1', 1000, 1, 1000),
   ('1', '2', 'snapshotName 2', 2000, 2, 4000),
-  ('2', '1', 'snapshotName 3', 2000, 2, 4000);
+  ('2', '1', 'snapshotName 3', 2000, 2, 4000),
+  ('3', '1', 'snapshotName 3', 2000, 2, 4000);
 ''';
 }

@@ -44,6 +44,7 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
         subTotal: 0,
         total: 0,
         isLoaded: true,
+        status: OrderStatus.pending.value
       );
       return;
     }
@@ -83,7 +84,6 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
       }
 
      // state = state.copyWithGroup(order: res.data ?? [], isLoadingMore: false);
-      print(state);
     } else {
       throw res.error ?? 'Failed to load data';
     }

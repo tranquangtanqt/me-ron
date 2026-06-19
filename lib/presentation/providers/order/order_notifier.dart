@@ -5,6 +5,7 @@ import '../../../core/enums/order_status.dart';
 import '../../../domain/usecases/params/base_params.dart';
 import '../../../domain/usecases/order_usecases.dart';
 import '../../../domain/usecases/params/order_params.dart';
+import 'order_filter_notifier.dart';
 import 'order_state.dart';
 
 final orderNotifierProvider = NotifierProvider<OrderNotifier, OrderState>(
@@ -90,5 +91,27 @@ class OrderNotifier extends Notifier<OrderState> {
       state = state.copyWith();
       throw Exception(res.error?.toString() ?? 'Failed to load data');
     }
+  }
+
+  Future<void> reload(WidgetRef ref) async {
+    final filter = ref.read(orderFilterProvider);
+
+    final toDate = DateTime(
+      filter.toDate!.year,
+      filter.toDate!.month,
+      filter.toDate!.day,
+      23,
+      59,
+      59,
+      999,
+    );
+
+    await getAllOrder(
+      true,
+      fromDate: filter.fromDate,
+      toDate: toDate,
+      status: filter.status,
+      userId: filter.userId,
+    );
   }
 }

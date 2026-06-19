@@ -9,14 +9,13 @@ import '../../../data/models/order_model.dart';
 import '../../../domain/entities/category_entity.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../providers/category/category_notifier.dart';
-import '../../providers/order/order_form_notifier.dart';
+import '../../providers/order/order_filter_notifier.dart';
 import '../../providers/order/order_notifier.dart';
 import '../../providers/user/user_notifier.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_dialog.dart';
 import '../../widgets/app_empty_state.dart';
 import '../../widgets/app_progress_indicator.dart';
-import '../../widgets/app_snack_bar.dart';
 import 'components/order_card.dart';
 
 class OrderScreen extends ConsumerStatefulWidget {
@@ -34,24 +33,22 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(orderNotifierProvider.notifier).getAllOrder(true);
       ref.read(categoryNotifierProvider.notifier).getAllCategory();
+      ref.read(userNotifierProvider.notifier).getAllUser();
     });
     super.initState();
   }
 
-  void updateOrder(int id) {
-    context.push('/order/order-edit/$id');
+  void createOrder() async {
+    final result = await context.push('/order/order-create');
+    if (result == true) {
+      ref.read(orderNotifierProvider.notifier).reload(ref);
+    }
   }
 
-  void deleteOrder(int id) async {
-    var res = await AppDialog.showProgress(() {
-      return ref.read(orderFormNotifierProvider.notifier).deleteOrder(id);
-    });
-
-    if (res.isSuccess) {
-      if (!mounted) return;
-      AppSnackBar.show('Xóa dữ liệu thành công!');
-    } else {
-      AppDialog.showError(error: res.error?.toString());
+  void updateOrder(int id) async {
+    final result = await context.push('/order/order-edit/$id');
+    if (result == true) {
+      ref.read(orderNotifierProvider.notifier).reload(ref);
     }
   }
 
@@ -71,10 +68,10 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Đặt món'),
+        title: const Text('Đặt hàng'),
         elevation: 0,
         shadowColor: Colors.transparent,
-        actions: const [_AddButton()],
+        actions: [_AddButton(onCreate: createOrder)],
       ),
       body: RefreshIndicator(
         onRefresh: () => ref.read(orderNotifierProvider.notifier).getAllOrder(false),
@@ -89,7 +86,9 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                     horizontal: AppSizes.padding,
                     vertical: 8,
                   ),
-                  child: _OrderFilterBar(),
+                  child: _OrderFilterBar(onSearch: () {
+                    ref.read(orderNotifierProvider.notifier).reload(ref);
+                  })
                 ),
               ),
               SliverLayoutBuilder(
@@ -109,7 +108,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                       child: AppEmptyState(
                         subtitle: 'Hiện tại không có order nào, hãy thêm order để tiếp tục.',
                         buttonText: 'Thêm',
-                        onTapButton: () => context.push('/order/order-create'),
+                        onTapButton: () => createOrder(),
                       ),
                     );
                   }
@@ -123,7 +122,10 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                           padding: const EdgeInsets.only(
                             bottom: AppSizes.padding / 2,
                           ),
-                          child: _OrderCard(order: allOrder[i]),
+                          child: _OrderCard(
+                              order: allOrder[i],
+                              onTap: updateOrder
+                          ),
                         );
                       },
                     ),
@@ -139,55 +141,92 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
 }
 
 class _AddButton extends StatelessWidget {
-  const _AddButton();
+  final VoidCallback onCreate;
+  const _AddButton({
+    required this.onCreate
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(right: AppSizes.padding),
-      child: AppButton(
-        height: 26,
-        borderRadius: BorderRadius.circular(4),
-        padding: const EdgeInsets.symmetric(horizontal: AppSizes.padding / 2),
-        buttonColor: Theme.of(context).colorScheme.surfaceContainer,
-        child: Row(
-          children: [
-            Icon(
-              Icons.add,
-              size: 12,
-              color: Theme.of(context).colorScheme.primary,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ===== VIEW DETAIL BUTTON =====
+          AppButton(
+            height: 26,
+            borderRadius: BorderRadius.circular(4),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.padding / 2,
             ),
-            const SizedBox(width: AppSizes.padding / 4),
-            Text(
-              'Thêm',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+            buttonColor: Theme.of(context).colorScheme.surfaceContainer,
+            onTap: () => context.go('/order'), // hoặc route xem chi tiết
+            child: Row(
+              children: [
+                Icon(
+                  Icons.visibility,
+                  size: 12,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: AppSizes.padding / 4),
+                Text(
+                  'Chi tiết',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        onTap: () => context.go('/order/order-create'),
+          ),
+
+          const SizedBox(width: 8),
+
+          // ===== ADD BUTTON =====
+          AppButton(
+            height: 26,
+            borderRadius: BorderRadius.circular(4),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.padding / 2,
+            ),
+            buttonColor: Theme.of(context).colorScheme.surfaceContainer,
+            onTap: () => onCreate(),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.add,
+                  size: 12,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: AppSizes.padding / 4),
+                Text(
+                  'Thêm',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
 class _OrderFilterBar extends ConsumerStatefulWidget {
-  const _OrderFilterBar();
+  final VoidCallback onSearch;
+  const _OrderFilterBar({required this.onSearch});
 
   @override
   ConsumerState<_OrderFilterBar> createState() => _OrderFilterBarState();
 }
 
-class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
-  int selectedStatus = OrderStatus.shipping.value;
-  DateTime now = DateTime.now();
-  late DateTime fromDate = DateTime(now.year, now.month, now.day);
-  late DateTime toDate = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
-  int? userId;
-
+class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> with RouteAware {
   final fromController = TextEditingController();
   final toController = TextEditingController();
 
@@ -203,14 +242,31 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
   void initState() {
     super.initState();
 
+    DateTime now = DateTime.now();
+    DateTime fromDate = DateTime(now.year, now.month, now.day);
+    DateTime toDate = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
+
+    final filter = ref.read(orderFilterProvider);
+    if (filter.fromDate != null) {
+      fromDate = filter.fromDate!;
+    }
+    if (filter.fromDate != null) {
+      toDate = DateTime(filter.toDate!.year, filter.toDate!.month, filter.toDate!.day, 23, 59, 59, 999);
+    }
+
     fromController.text = DateFormat('dd/MM/yyyy').format(fromDate);
     toController.text = DateFormat('dd/MM/yyyy').format(toDate);
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onSearch(); // auto trigger search
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final allUser = ref.watch(userNotifierProvider.select((s) => s.allUser)) ?? [];
+
+    final filter = ref.watch(orderFilterProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,14 +280,16 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
             separatorBuilder: (_, __) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
               final item = statuses[index];
-              final isSelected = selectedStatus == item.$1;
+              // final isSelected = selectedStatus == item.$1;
+              final isSelected = filter.status == item.$1;
 
               return ChoiceChip(
                 label: Text(item.$2),
                 selected: isSelected,
                 onSelected: (_) {
                   setState(() {
-                    selectedStatus = item.$1;
+                    // selectedStatus = item.$1;
+                    ref.read(orderFilterProvider.notifier).setStatus(item.$1);
                   });
                 },
               );
@@ -242,11 +300,12 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
         const SizedBox(height: 10),
 
         _UserAutocomplete(
-          selected: userId,
+          selected: filter.userId,
           users: allUser,
           onChanged: (_userId) {
             setState(() {
-              userId = _userId;
+              // userId = _userId;
+              ref.read(orderFilterProvider.notifier).setUser(_userId);
             });
           },
         ),
@@ -263,7 +322,8 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
                 controller: fromController,
                 onChanged: (date) {
                   setState(() {
-                    fromDate = date;
+                    // fromDate = date;
+                    ref.read(orderFilterProvider.notifier).setFromDate(date);
                   });
                 },
               ),
@@ -275,7 +335,8 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
                 controller: toController,
                 onChanged: (date) {
                   setState(() {
-                    toDate = date;
+                    // toDate = date;
+                    ref.read(orderFilterProvider.notifier).setToDate(date);
                   });
                 },
               ),
@@ -294,15 +355,7 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
                   ),
                 ),
                 onPressed: () {
-                  toDate = DateTime(toDate.year, toDate.month, toDate.day, 23, 59, 59, 999);
-
-                  ref.read(orderNotifierProvider.notifier).getAllOrder(
-                    true,
-                    fromDate: fromDate,
-                    toDate: toDate,
-                    status: selectedStatus,
-                    userId: userId,
-                  );
+                  widget.onSearch();
                 },
                 child: const Icon(Icons.search, size: 18),
               ),
@@ -316,14 +369,18 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> {
 
 class _OrderCard extends StatelessWidget {
   final OrderModel order;
+  final ValueChanged<int> onTap;
 
-  const _OrderCard({required this.order});
+  const _OrderCard({
+    required this.order,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return OrderCard(
       order: order,
-      onTap: () => context.go('/order/order-edit/${order.id}'),
+      onTap: () => onTap(order.id!),
     );
   }
 }

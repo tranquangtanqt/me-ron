@@ -74,7 +74,7 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
 
     if (res.isSuccess) {
       if (!mounted) return;
-      context.pop();
+      context.pop(true);
       AppSnackBar.show('Thêm mới dữ liệu thành công');
     } else {
       AppDialog.showError(error: res.error?.toString());
@@ -88,7 +88,7 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
 
     if (res.isSuccess) {
       if (!mounted) return;
-      context.pop();
+      context.pop(true);
       AppSnackBar.show('Cập nhật dữ liệu thành công');
     } else {
       AppDialog.showError(error: res.error?.toString());
@@ -102,7 +102,7 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
 
     if (res.isSuccess) {
       if (!mounted) return;
-      context.pop();
+      context.pop(true);
       AppSnackBar.show('Xóa dữ liệu thành công');
     } else {
       AppDialog.showError(error: res.error?.toString());
