@@ -50,3 +50,12 @@ class DeleteOrderUsecase extends Usecase<Result<void>, int> {
   @override
   Future<Result<void>> call(int params) async => _orderRepository.deleteOrder(params);
 }
+
+class UpdateStatusOrderUsecase extends Usecase<Result<void>, OrderEntity> {
+  UpdateStatusOrderUsecase(this._orderRepository);
+
+  final OrderRepository _orderRepository;
+
+  @override
+  Future<Result<void>> call(OrderEntity params) async => _orderRepository.updateStatusOrder(params);
+}

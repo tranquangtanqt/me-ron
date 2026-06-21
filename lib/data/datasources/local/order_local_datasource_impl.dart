@@ -172,4 +172,23 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
       return Result.failure(error: e);
     }
   }
+
+  @override
+  Future<Result<void>> updateStatusOrder(int id, int status) async {
+    try {
+      await _databaseService.database.update(
+        DatabaseConfig.orderTableName,
+        {
+          'status': status,
+        },
+        where: 'id = ?',
+        whereArgs: [id],
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      return Result.success(data: null);
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
 }

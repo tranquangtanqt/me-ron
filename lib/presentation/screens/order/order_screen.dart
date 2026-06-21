@@ -299,6 +299,9 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> with RouteAwar
                     // selectedStatus = item.$1;
                     ref.read(orderFilterProvider.notifier).setStatus(item.$1);
                   });
+
+                  // Auto-trigger search after changing the status
+                  widget.onSearch();
                 },
               );
             },
@@ -391,9 +394,37 @@ class _OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Color? bg;
+    final status = order.status;
+    if (status != null) {
+      try {
+        final st = OrderStatus.values[status];
+        switch (st) {
+          case OrderStatus.shipping:
+            // bg = Colors.amber.shade900;
+            bg = const Color(0xFF3A2E00);
+            break;
+          case OrderStatus.completed:
+            // bg = Colors.green.shade900;
+            bg = const Color(0xFF0D3B2A);
+            break;
+          case OrderStatus.cancelled:
+            // bg = Colors.red.shade900;
+            bg = const Color(0xFF3D1A1A);
+            break;
+          case OrderStatus.pending:
+          // default:
+            // bg = const Color(0xFF202225);
+        }
+      } catch (_) {
+        bg = null;
+      }
+    }
+
     return OrderCard(
       order: order,
       onTap: () => onTap(order.id!),
+      backgroundColor: bg,
     );
   }
 }

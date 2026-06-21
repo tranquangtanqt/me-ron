@@ -11,12 +11,14 @@ class OrderCard extends StatelessWidget {
   final OrderModel order;
   final VoidCallback? onTap;
   final bool enabled;
+  final Color? backgroundColor;
 
   const OrderCard({
     super.key,
     required this.order,
     this.onTap,
     this.enabled = true,
+    this.backgroundColor,
   });
 
   @override
@@ -31,7 +33,7 @@ class OrderCard extends StatelessWidget {
         child: Ink(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
+            color: backgroundColor ?? Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(6),
             border: Border.all(
               width: 0.5,

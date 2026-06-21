@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/enums/order_status.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../../core/utilities/currency_formatter.dart';
-import '../../../core/utilities/date_time_formatter.dart';
 import '../../../data/models/order_model.dart';
+import '../../providers/order/order_form_notifier.dart';
 import '../../providers/order/order_notifier.dart';
 import '../../widgets/app_button.dart';
+import '../../widgets/app_dialog.dart';
+import '../../widgets/app_snack_bar.dart';
 import 'components/order_detail_card.dart';
 
 class OrderDetailScreen extends ConsumerStatefulWidget {
@@ -28,13 +31,83 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
       ref.read(orderNotifierProvider.notifier).reload();
     });
   }
-
-
   void updateOrder(int id) async {
     final result = await context.push('/order/order-edit/$id');
     if (result == true) {
       ref.read(orderNotifierProvider.notifier).reload();
     }
+  }
+
+  // thanh toán
+  void onPayment() {
+    final allOrder = ref.read(orderNotifierProvider).allOrder;
+
+    bool check = true;
+    for (int i = 0; i < allOrder!.length; i++) {
+      if (allOrder[i].status != OrderStatus.shipping.value || allOrder[i].status != OrderStatus.pending.value) {
+        check = false;
+      }
+    }
+
+    if (check == false) {
+      AppSnackBar.showError('Chỉ cho phép thanh toán với đơn có trạng thái  mới hoặc đã giao hàng');
+      return;
+    }
+
+    // check thanh toán TODO
+    final screenContext = context;
+
+    AppDialog.show(
+      title: 'Xác nhận',
+      text: 'Bạn có chắc chắn muốn Thanh toán toàn bộ?',
+      leftButtonText: 'Hủy',
+      rightButtonText: 'Thanh toán',
+      rightButtonColor: Color(0xFF0D3B2A),
+      rightButtonTextColor: Theme.of(context).colorScheme.error,
+      onTapRightButton: (context) async {
+        //final allOrder = ref.read(orderNotifierProvider).allOrder;
+
+        // updateOrderStatus
+        bool successFlg = true;
+        for (int i = 0; i < allOrder!.length; i++) {
+
+          var res = await AppDialog.showProgress(() {
+            return ref.read(orderFormNotifierProvider.notifier).updatedStatusOrder(allOrder[i].id!, OrderStatus.completed.value);
+          });
+
+          if (!screenContext.mounted) return;
+          if (!res.isSuccess) {
+            successFlg = false;
+            AppDialog.showError(error: res.error?.toString());
+            break;
+          }
+        }
+
+        if (!screenContext.mounted) return;
+
+        if (successFlg) {
+          try {
+            Navigator.of(context, rootNavigator: true).pop();
+          } catch (_) {
+            // fallback
+            Navigator.of(context).pop();
+          }
+
+          await Future.delayed(const Duration(milliseconds: 50));
+
+          if (!screenContext.mounted) return;
+          GoRouter.of(screenContext).pop(true);
+
+          AppSnackBar.show('Cập nhật dữ liệu thành công');
+        }
+      },
+    );
+  }
+
+  // Thanh toán 1 phần (có thể dư hoặc thiếu)
+  void onPartialPayment() {
+    AppSnackBar.showError('Đang phát triển'); //TODO
+    return;
   }
 
   @override
@@ -53,6 +126,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chi tiết'),
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        actions: [_PaymentButton(onPayment: onPayment, onPartialPayment: onPartialPayment,)],
       ),
       body: CustomScrollView(
         slivers: [
@@ -79,7 +155,6 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     );
   }
 }
-
 
 class _UserOrderCardGroup extends StatelessWidget {
   final int userId;
@@ -172,6 +247,115 @@ class _OrderDetailCard extends StatelessWidget {
     return OrderDetailCard(
       order: order,
       onTap: () => onTap(order.id!),
+      backgroundColor: () {
+        Color? bg;
+        final status = order.status;
+        if (status != null) {
+          try {
+        final st = OrderStatus.values[status];
+        switch (st) {
+          case OrderStatus.shipping:
+            // bg = Colors.amber.shade900;
+            bg = const Color(0xFF3A2E00);
+            break;
+          case OrderStatus.completed:
+            // bg = Colors.green.shade900;
+            bg = const Color(0xFF0D3B2A);
+            break;
+          case OrderStatus.cancelled:
+            // bg = Colors.red.shade900;
+            bg = const Color(0xFF3D1A1A);
+            break;
+          case OrderStatus.pending:
+          // default:
+            // bg = const Color(0xFF202225);
+        }
+      } catch (_) {
+        bg = null;
+      }
+        }
+        return bg;
+      }(),
+    );
+  }
+}
+
+class _PaymentButton extends StatelessWidget {
+  final VoidCallback onPayment;
+  final VoidCallback onPartialPayment;
+  const _PaymentButton({
+    required this.onPayment,
+    required this.onPartialPayment
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: AppSizes.padding),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ===== VIEW DETAIL BUTTON =====
+          AppButton(
+            height: 26,
+            borderRadius: BorderRadius.circular(4),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.padding / 2,
+            ),
+            buttonColor: Theme.of(context).colorScheme.surfaceContainer,
+            onTap: () => onPartialPayment(),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.account_balance_wallet,
+                  size: 12,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: AppSizes.padding / 4),
+                Text(
+                  'Thanh toán 1 phần',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          // ===== ADD BUTTON =====
+          AppButton(
+            height: 26,
+            borderRadius: BorderRadius.circular(4),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.padding / 2,
+            ),
+            buttonColor: Theme.of(context).colorScheme.surfaceContainer,
+            onTap: () => onPayment(),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.payment,
+                  size: 12,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: AppSizes.padding / 4),
+                Text(
+                  'Thanh toán',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

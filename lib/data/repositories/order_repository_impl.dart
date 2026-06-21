@@ -125,4 +125,29 @@ class OrderRepositoryImpl extends OrderRepository {
       return Result.failure(error: e);
     }
   }
+
+  @override
+  Future<Result<void>> updateStatusOrder(OrderEntity order) async {
+    try {
+      final local = await orderLocalDatasource.updateStatusOrder(order.id!, order.status);
+      // if (local.isFailure) return Result.failure(error: local.error!);
+
+      // final res = await queuedActionLocalDatasource.createQueuedAction(
+      //   QueuedActionModel(
+      //     id: DateTime.now().millisecond,
+      //     repository: 'OrderRepositoryImpl',
+      //     method: 'updateOrder',
+      //     param: jsonEncode(OrderModel.fromEntity(order).toJson()),
+      //     isCritical: true,
+      //     createdAt: DateTime.now().toIso8601String(),
+      //   ),
+      // );
+
+      // if (res.isFailure) return Result.failure(error: res.error!);
+
+      return Result.success(data: null);
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
 }

@@ -199,6 +199,29 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
     );
   }
 
+  Future<Result<void>> updatedStatusOrder(int id, int status) async {
+    return performUpdate(
+      execute: () async {
+        final orderRepository = ref.read(orderRepositoryProvider);
+
+        final order = OrderEntity(
+          id: id,
+          status: status,
+          deliveryDatetime: DateTime.now(),
+          discountValue: 0,
+          subTotal: 0,
+          total: 0,
+          note: '',
+        );
+
+        final res = await UpdateStatusOrderUsecase(orderRepository).call(order);
+
+        return res;
+      },
+      onSuccess: () => ref.read(orderNotifierProvider.notifier).getAllOrder(true),
+    );
+  }
+
   Future<Result<void>> deleteOrder(int id) async {
     return performDelete(
       execute: () async {
