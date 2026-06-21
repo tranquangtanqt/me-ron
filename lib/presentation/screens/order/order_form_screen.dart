@@ -111,10 +111,10 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(orderNotifierProvider, (previous, next) {
-      print("error: ${next.error}");
-      print("data: ${next.allOrder}");
-    });
+    // ref.listen(orderNotifierProvider, (previous, next) {
+    //   print("error: ${next.error}");
+    //   print("data: ${next.allOrder}");
+    // });
 
     final allUser = ref.watch(userNotifierProvider.select((s) => s.allUser)) ?? [];
 
@@ -128,7 +128,13 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.id == null ? 'Thêm đặt hàng' : 'Chỉnh sửa đặt hàng'),
-        titleSpacing: 0,
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        actions: [_CreateOrUpdateButton(
+          id: widget.id,
+          onCreateOrder: createOrder,
+          onUpdatedOrder: updatedOrder,
+        ),],
       ),
       body: !isLoaded
           ? const AppProgressIndicator()
@@ -170,32 +176,6 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                     icon: const Icon(Icons.add),
                     label: const Text('Thêm món'),
                   ),
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //   children: [
-                  //     TextButton.icon(
-                  //       onPressed: () {
-                  //         notifier.addItem(
-                  //           allProduct.isNotEmpty ? allProduct.first : null,
-                  //         );
-                  //       },
-                  //       icon: const Icon(Icons.add),
-                  //       label: const Text('Thêm món'),
-                  //     ),
-                  //
-                  //     Container(
-                  //       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  //       decoration: BoxDecoration(
-                  //         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  //         borderRadius: BorderRadius.circular(8),
-                  //       ),
-                  //       // child: Text(
-                  //       //   '${CurrencyFormatter.formatVND(formState.total ?? 0)}',
-                  //       //   style: const TextStyle(fontWeight: FontWeight.w600),
-                  //       // ),
-                  //     ),
-                  //   ],
-                  // ),
                   _DiscountValueField(
                     controller: discountValueController,
                     onChanged: notifier.onChangedDiscountValue,
@@ -232,11 +212,6 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                     controller: noteController,
                     onChanged: notifier.onChangedNote,
                   ),
-                  _CreateOrUpdateButton(
-                    id: widget.id,
-                    onCreateOrder: createOrder,
-                    onUpdatedOrder: updatedOrder,
-                  ),
                   _DeleteButton(
                     id: widget.id,
                     onDeleteOrder: deleteOrder,
@@ -244,6 +219,72 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                 ],
               ),
             ),
+    );
+  }
+}
+
+class _CreateOrUpdateButton extends ConsumerWidget {
+  final int? id;
+  final VoidCallback onCreateOrder;
+  final VoidCallback onUpdatedOrder;
+
+  const _CreateOrUpdateButton({
+    required this.id,
+    required this.onCreateOrder,
+    required this.onUpdatedOrder,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isFormValid = ref.watch(
+      orderFormNotifierProvider.select((s) {
+        debugPrint("userId=${s.userId}, items=${s.items?.length}");
+        return s.userId != null && (s.items?.isNotEmpty ?? false);
+      }),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(right: AppSizes.padding),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ===== SAVE BUTTON =====
+          AppButton(
+            height: 26,
+            borderRadius: BorderRadius.circular(4),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.padding / 2,
+            ),
+            buttonColor: Theme.of(context).colorScheme.surfaceContainer,
+            onTap: () {
+              if (id != null) {
+                onUpdatedOrder();
+              } else {
+                onCreateOrder();
+              }
+            },
+            enabled: isFormValid,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.save,
+                  size: 12,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: AppSizes.padding / 4),
+                Text(
+                  'Lưu',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -542,43 +583,6 @@ class _NoteField extends StatelessWidget {
         hintText: 'Nhập ghi chú...',
         maxLines: 2,
         onChanged: onChanged,
-      ),
-    );
-  }
-}
-
-class _CreateOrUpdateButton extends ConsumerWidget {
-  final int? id;
-  final VoidCallback onCreateOrder;
-  final VoidCallback onUpdatedOrder;
-
-  const _CreateOrUpdateButton({
-    required this.id,
-    required this.onCreateOrder,
-    required this.onUpdatedOrder,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isFormValid = ref.watch(
-      orderFormNotifierProvider.select((s) {
-        debugPrint("userId=${s.userId}, items=${s.items?.length}");
-        return s.userId != null && (s.items?.isNotEmpty ?? false);
-      }),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSizes.padding * 1.5),
-      child: AppButton(
-        text: id == null ? 'Thêm mới' : 'Chỉnh sửa',
-        enabled: isFormValid,
-        onTap: () {
-          if (id != null) {
-            onUpdatedOrder();
-          } else {
-            onCreateOrder();
-          }
-        },
       ),
     );
   }

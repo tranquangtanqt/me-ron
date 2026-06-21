@@ -13,7 +13,6 @@ import '../../providers/order/order_filter_notifier.dart';
 import '../../providers/order/order_notifier.dart';
 import '../../providers/user/user_notifier.dart';
 import '../../widgets/app_button.dart';
-import '../../widgets/app_dialog.dart';
 import '../../widgets/app_empty_state.dart';
 import '../../widgets/app_progress_indicator.dart';
 import 'components/order_card.dart';
@@ -41,14 +40,21 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
   void createOrder() async {
     final result = await context.push('/order/order-create');
     if (result == true) {
-      ref.read(orderNotifierProvider.notifier).reload(ref);
+      ref.read(orderNotifierProvider.notifier).reload();
     }
   }
 
   void updateOrder(int id) async {
     final result = await context.push('/order/order-edit/$id');
     if (result == true) {
-      ref.read(orderNotifierProvider.notifier).reload(ref);
+      ref.read(orderNotifierProvider.notifier).reload();
+    }
+  }
+
+  void toDetailOrder() async {
+    final result = await context.push('/order/order-detail');
+    if (result == true) {
+      ref.read(orderNotifierProvider.notifier).reload();
     }
   }
 
@@ -71,10 +77,10 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
         title: const Text('Đặt hàng'),
         elevation: 0,
         shadowColor: Colors.transparent,
-        actions: [_AddButton(onCreate: createOrder)],
+        actions: [_AddButton(onCreate: createOrder, onDetail: toDetailOrder,)],
       ),
       body: RefreshIndicator(
-        onRefresh: () => ref.read(orderNotifierProvider.notifier).getAllOrder(false),
+        onRefresh: () => ref.read(orderNotifierProvider.notifier).reload(),
         displacement: 60,
         child: Scrollbar(
           child: CustomScrollView(
@@ -87,7 +93,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                     vertical: 8,
                   ),
                   child: _OrderFilterBar(onSearch: () {
-                    ref.read(orderNotifierProvider.notifier).reload(ref);
+                    ref.read(orderNotifierProvider.notifier).reload();
                   })
                 ),
               ),
@@ -142,8 +148,10 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
 
 class _AddButton extends StatelessWidget {
   final VoidCallback onCreate;
+  final VoidCallback onDetail;
   const _AddButton({
-    required this.onCreate
+    required this.onCreate,
+    required this.onDetail
   });
 
   @override
@@ -161,7 +169,7 @@ class _AddButton extends StatelessWidget {
               horizontal: AppSizes.padding / 2,
             ),
             buttonColor: Theme.of(context).colorScheme.surfaceContainer,
-            onTap: () => context.go('/order'), // hoặc route xem chi tiết
+            onTap: () => onDetail(),
             child: Row(
               children: [
                 Icon(
@@ -302,10 +310,14 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> with RouteAwar
         _UserAutocomplete(
           selected: filter.userId,
           users: allUser,
-          onChanged: (_userId) {
+          onChanged: (userId) {
             setState(() {
-              // userId = _userId;
-              ref.read(orderFilterProvider.notifier).setUser(_userId);
+              ref.read(orderFilterProvider.notifier).setUser(userId);
+            });
+          },
+          onClear: () {
+            setState(() {
+              ref.read(orderFilterProvider.notifier).setUser(null);
             });
           },
         ),
@@ -354,7 +366,8 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> with RouteAwar
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
+                  await Future.microtask(() {});
                   widget.onSearch();
                 },
                 child: const Icon(Icons.search, size: 18),
@@ -439,10 +452,10 @@ class _DateField extends StatelessWidget {
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(4),
             ),
-            suffixIcon: const Icon(
-              Icons.calendar_month_rounded,
-              size: 18,
-            ),
+            // suffixIcon: const Icon(
+            //   Icons.calendar_month_rounded,
+            //   size: 18,
+            // ),
           ),
           child: Text(
             controller.text.isEmpty
@@ -459,47 +472,51 @@ class _UserAutocomplete extends StatelessWidget {
   final int? selected;
   final List<UserEntity> users;
   final ValueChanged<int?> onChanged;
+  final VoidCallback onClear;
 
   const _UserAutocomplete({
+    super.key,
     required this.selected,
     required this.users,
     required this.onChanged,
+    required this.onClear,
   });
 
   @override
   Widget build(BuildContext context) {
-    final selectedUser = users
-        .where((e) => e.id == selected)
-        .cast<UserEntity?>()
-        .firstOrNull;
-
     return Padding(
       padding: const EdgeInsets.only(top: 4),
       child: Autocomplete<UserEntity>(
-        displayStringForOption: (c) => c.name ?? '',
+        displayStringForOption: (u) => u.name ?? '',
 
         optionsBuilder: (TextEditingValue value) {
           final query = value.text.trim().toLowerCase();
 
-          if (query.isEmpty) {
-            return users;
-          }
+          if (query.isEmpty) return users;
 
-          return users.where((c) {
-            final deliveryDatetime = (c.name ?? '').toLowerCase();
-            return deliveryDatetime.contains(query);
-          });
+          return users.where(
+                (u) => (u.name ?? '').toLowerCase().contains(query),
+          );
         },
 
-        onSelected: (UserEntity selection) {
-          onChanged(selection.id);
+        onSelected: (UserEntity user) {
+          FocusScope.of(context).unfocus();
+          onChanged(user.id);
         },
 
-        fieldViewBuilder: (context, textController, focusNode, onFieldSubmitted) {
-          // sync selected text khi edit
-          if (selectedUser != null &&
-              textController.text.isEmpty) {
-            textController.text = selectedUser.name ?? '';
+        fieldViewBuilder:(context, textController, focusNode, onFieldSubmitted) {
+          final selectedUser = selected == null
+              ? null
+              : users.where((u) => u.id == selected).firstOrNull;
+
+          // 🔥 sync từ state -> text
+          if (selectedUser != null
+              &&
+              textController.text != selectedUser.name
+          ) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              textController.text = selectedUser.name ?? '';
+            });
           }
 
           return SizedBox(
@@ -508,6 +525,15 @@ class _UserAutocomplete extends StatelessWidget {
               controller: textController,
               focusNode: focusNode,
               style: const TextStyle(fontSize: 14),
+
+              onChanged: (value) {
+                // 🔥 quan trọng: nếu user xoá text → reset filter
+                if (value.trim().isEmpty) {
+                  onClear();
+                  onChanged(null);
+                }
+              },
+
               decoration: InputDecoration(
                 labelText: 'Chọn khách hàng',
                 isDense: true,
@@ -518,6 +544,18 @@ class _UserAutocomplete extends StatelessWidget {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),
+
+                suffixIcon:
+                (textController.text.isNotEmpty || selected != null)
+                    ? IconButton(
+                  icon: const Icon(Icons.close, size: 18),
+                  onPressed: () {
+                    onClear();
+                    textController.clear();
+                    onChanged(null);
+                  },
+                )
+                    : null,
               ),
             ),
           );

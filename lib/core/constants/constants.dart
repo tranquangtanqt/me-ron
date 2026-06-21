@@ -22,4 +22,6 @@ class Constants {
   static const nonCriticalErrorLibraries = {
     'image resource service',
   };
+
+  static const String dateFormatDDMMYYYY = 'dd/MM/yyyy';
 }

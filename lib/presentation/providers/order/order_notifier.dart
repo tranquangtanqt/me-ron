@@ -93,7 +93,7 @@ class OrderNotifier extends Notifier<OrderState> {
     }
   }
 
-  Future<void> reload(WidgetRef ref) async {
+  Future<void> reload() async {
     final filter = ref.read(orderFilterProvider);
 
     final toDate = DateTime(

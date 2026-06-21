@@ -14,6 +14,7 @@ import '../../presentation/screens/account/profile_form_screen.dart';
 import '../../presentation/screens/error/error_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/main/main_screen.dart';
+import '../../presentation/screens/order/order_detail_screen.dart';
 import '../../presentation/screens/order/order_form_screen.dart';
 import '../../presentation/screens/order/order_screen.dart';
 import '../../presentation/screens/products/product_form_screen.dart';
@@ -220,6 +221,7 @@ class AppRoutes {
       routes: [
         _orderCreate(),
         _orderEdit(),
+        _orderDetail(),
       ],
     );
   }
@@ -290,20 +292,15 @@ class AppRoutes {
     );
   }
 
-  // GoRoute _productDetail() {
-  //   return GoRoute(
-  //     path: 'product-detail/:id',
-  //     builder: (context, state) {
-  //       int? id = int.tryParse(state.pathParameters["id"] ?? '');
-  //
-  //       if (id == null) {
-  //         throw 'Required productId is not provided!';
-  //       }
-  //
-  //       return ProductDetailScreen(id: id);
-  //     },
-  //   );
-  // }
+  GoRoute _orderDetail() {
+    return GoRoute(
+      path: 'order-detail',
+      parentNavigatorKey: navNavigatorKey,
+      builder: (context, state) {
+        return const OrderDetailScreen();
+      },
+    );
+  }
 
   GoRoute _transactionDetail() {
     return GoRoute(
