@@ -132,6 +132,7 @@ final categoryRepositoryProvider = Provider<CategoryRepository>(
 final orderRepositoryProvider = Provider<OrderRepository>(
       (ref) => OrderRepositoryImpl(
     orderLocalDatasource: ref.watch(orderLocalDatasourceProvider),
+    orderItemLocalDatasource: ref.watch(orderItemLocalDatasourceProvider),
     queuedActionLocalDatasource: ref.watch(queuedActionLocalDatasourceProvider),
   ),
 );

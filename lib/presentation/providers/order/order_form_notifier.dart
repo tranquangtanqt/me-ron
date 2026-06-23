@@ -105,31 +105,24 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
           note: state.note ?? '',
         );
 
-        final res = await CreateOrderUsecase(orderRepository).call(order);
-
-        final orderItemRepository = ref.read(orderItemRepositoryProvider);
-
-        // var total = 0;
+        // create order + items atomically (local + queued action)
+        final items = <OrderItemEntity>[];
         for (final OrderItemForm item in state.items ?? []) {
           final oderItem = OrderItemEntity(
-            orderId: res.data,
+            orderId: null,
             productId: item.product?.id,
             snapshotName: item.product?.name,
             snapshotPrice: item.product?.price ?? 0,
             quantity: item.quantity,
             lineTotal: (item.product?.price ?? 0) * item.quantity,
           );
-
-          await CreateOrderItemUsecase(orderItemRepository).call(oderItem);
-          // total += oderItem.lineTotal;
+          items.add(oderItem);
         }
 
-        // final updatedOrder = order.copyWith(
-        //   id: res.data,
-        //   total: total,
-        // );
-        //
-        // await UpdateOrderUsecase(orderRepository).call(updatedOrder);
+        final res = await CreateOrderWithItemsUsecase(orderRepository).call({
+          'order': order,
+          'items': items,
+        });
 
         return res;
       },
@@ -269,6 +262,10 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
 
   void onChangedDeliveryDatetime(DateTime value) {
     state = state.copyWith(deliveryDatetime: value);
+  }
+
+  void onChangedPaymentDatetime(DateTime value) {
+    state = state.copyWith(paymentDatetime: value);
   }
 
   void removeItem(int index) {

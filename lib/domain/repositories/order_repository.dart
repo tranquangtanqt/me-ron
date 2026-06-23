@@ -10,6 +10,8 @@ abstract class OrderRepository {
 
   Future<Result<int>> createOrder(OrderEntity order);
 
+  Future<Result<int>> createOrderWithItems(OrderEntity order, List<dynamic> items);
+
   Future<Result<void>> updateOrder(OrderEntity order);
 
   Future<Result<void>> deleteOrder(int orderId);

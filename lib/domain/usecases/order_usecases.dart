@@ -32,6 +32,19 @@ class CreateOrderUsecase extends Usecase<Result, OrderEntity> {
   Future<Result<int>> call(OrderEntity params) async => _orderRepository.createOrder(params);
 }
 
+class CreateOrderWithItemsUsecase extends Usecase<Result, Map<String, dynamic>> {
+  CreateOrderWithItemsUsecase(this._orderRepository);
+
+  final OrderRepository _orderRepository;
+
+  @override
+  Future<Result<int>> call(Map<String, dynamic> params) async {
+    final order = params['order'] as OrderEntity;
+    final items = params['items'] as List;
+    return _orderRepository.createOrderWithItems(order, items);
+  }
+}
+
 class UpdateOrderUsecase extends Usecase<Result<void>, OrderEntity> {
   UpdateOrderUsecase(this._orderRepository);
 
