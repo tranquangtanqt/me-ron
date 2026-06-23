@@ -1,0 +1,106 @@
+vậy trường hợp tôi muốn lọc với đơn mới, đã giao hàng, đã hủy, đã thanh toán, thanh toán 1 phần, chưa thanh toán thì sao
+
+Câu này là đúng “bài toán thực tế” luôn: bạn muốn lọc theo trạng thái hiển thị, nhưng dữ liệu lại nằm ở 2 hệ khác nhau (Order + Payment).
+
+👉 Cách đúng không phải là lưu tất cả status vào Orders, mà là:
+
+Orders chỉ lưu trạng thái giao hàng
+Trạng thái thanh toán = tính toán từ PaymentOrders
+
+1. Tách rõ 2 nhóm trạng thái
+A. Trạng thái giao hàng (lưu trong Orders)
+enum DeliveryStatus {
+  newOrder,     // mới tạo
+  delivered,    // đã giao
+  cancelled,    // đã hủy
+}
+
+DB:
+
+Orders.status
+B. Trạng thái thanh toán (KHÔNG lưu, chỉ tính)
+enum PaymentStatus {
+  unpaid,       // chưa thanh toán
+  partial,      // thanh toán 1 phần
+  paid          // đã thanh toán
+}
+
+Tính từ:
+
+SUM(PaymentOrders.paidAmount)
+2. Hàm tính PaymentStatus
+PaymentStatus getPaymentStatus(double total, double paid) {
+  if (paid == 0) return PaymentStatus.unpaid;
+  if (paid < total) return PaymentStatus.partial;
+  return PaymentStatus.paid;
+}
+3. Khi cần filter (quan trọng nhất)
+
+Bạn KHÔNG filter trực tiếp bằng SQL đơn giản nữa, mà có 2 cách:
+
+CÁCH 1 (khuyến nghị): Query + tính trong app
+Bước 1: lấy orders + tổng tiền đã trả
+SELECT o.*,
+       COALESCE(SUM(po.paidAmount), 0) as paidAmount
+FROM Orders o
+LEFT JOIN PaymentOrders po ON po.orderId = o.id
+GROUP BY o.id;
+Bước 2: map sang model
+final paymentStatus = getPaymentStatus(order.total, order.paidAmount);
+Bước 3: filter
+if (filter == 'paid') {
+  list.where((o) => o.paymentStatus == PaymentStatus.paid);
+}
+4. Mapping UI filter bạn muốn
+Filter UI	Cách hiểu
+Mới	deliveryStatus = newOrder
+Đã giao	deliveryStatus = delivered
+Đã hủy	deliveryStatus = cancelled
+Chưa thanh toán	paid = 0
+Thanh toán 1 phần	0 < paid < total
+Đã thanh toán	paid >= total
+5. Quan trọng: đừng nhét tất cả vào Orders.status
+
+Nếu bạn làm:
+
+status = new / delivered / cancelled / paid / partial / unpaid
+
+👉 sẽ gặp 3 vấn đề:
+
+dữ liệu bị trùng nghĩa
+dễ sai khi update
+không xử lý được case “1 payment cho nhiều order”
+6. Thiết kế chuẩn cho hệ của bạn
+Orders
+id
+userId
+status (delivery only)
+total
+...
+Payment
+id
+amount
+date
+PaymentOrders
+paymentId
+orderId
+paidAmount
+7. Kết luận thẳng
+
+👉 Bạn vẫn filter được đầy đủ:
+
+Mới
+Đã giao
+Đã hủy
+Chưa thanh toán
+Thanh toán 1 phần
+Đã thanh toán
+
+NHƯNG:
+
+Payment status phải là “computed field”, không phải database field
+
+Nếu bạn muốn, mình có thể giúp bạn viết luôn:
+
+1 hàm getOrdersWithStatus()
+hoặc design lại Repository layer cho Flutter SQLite của bạn để filter cực nhanh mà không bị JOIN nặng 👍
