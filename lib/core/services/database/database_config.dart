@@ -108,14 +108,14 @@ CREATE TABLE IF NOT EXISTS '$orderItemTableName' (
 CREATE TABLE IF NOT EXISTS '$paymentTableName' (
     'id' INTEGER PRIMARY KEY AUTOINCREMENT,
     'paymentMethod' INTEGER,
-    'receivedAmount' INTEGER,
-    'returnAmount' INTEGER,
+    'amount' INTEGER,
     'paymentDate' DATETIME DEFAULT CURRENT_TIMESTAMP,
     'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
     'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ''';
-
+// amount: số tiền khách trả.
+// ví dụ lần 1: 50.000, lần 2: 40.000
   static const String createPaymentOrderTable =
   '''
 CREATE TABLE IF NOT EXISTS '$paymentOrderTableName' (
@@ -129,6 +129,7 @@ CREATE TABLE IF NOT EXISTS '$paymentOrderTableName' (
     FOREIGN KEY (orderId) REFERENCES Orders(id)
 );
 ''';
+//paidAmount: số tiền chia cô từng đơn dựa vào payment.amount
 
   static const String createTransactionTable =
       '''

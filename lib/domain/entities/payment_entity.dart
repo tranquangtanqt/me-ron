@@ -3,8 +3,7 @@ import 'package:equatable/equatable.dart';
 class PaymentEntity extends Equatable {
   final int? id;
   final int? paymentMethod;
-  final int receivedAmount;
-  final int returnAmount;
+  final int amount;
   final DateTime? paymentDate;
   final String? createdAt;
   final String? updatedAt;
@@ -12,8 +11,7 @@ class PaymentEntity extends Equatable {
   const PaymentEntity({
     this.id,
     this.paymentMethod,
-    required this.receivedAmount,
-    required this.returnAmount,
+    required this.amount,
     this.paymentDate,
     this.createdAt,
     this.updatedAt,
@@ -22,7 +20,7 @@ class PaymentEntity extends Equatable {
   PaymentEntity copyWith({
     final int? id,
     final int? paymentMethod,
-    final int? receivedAmount,
+    final int? amount,
     final int? returnAmount,
     final DateTime? paymentDate,
     final String? createdAt,
@@ -31,8 +29,7 @@ class PaymentEntity extends Equatable {
     return PaymentEntity(
       id: id ?? this.id,
       paymentMethod: paymentMethod ?? this.paymentMethod,
-      receivedAmount: receivedAmount ?? this.receivedAmount,
-      returnAmount: returnAmount ?? this.returnAmount,
+      amount: amount ?? this.amount,
       paymentDate: paymentDate ?? this.paymentDate,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -43,8 +40,7 @@ class PaymentEntity extends Equatable {
   List<Object?> get props => [
     id,
     paymentMethod,
-    receivedAmount,
-    returnAmount,
+    amount,
     paymentDate,
     createdAt,
     updatedAt,
