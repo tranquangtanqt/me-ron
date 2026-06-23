@@ -44,7 +44,8 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
         subTotal: 0,
         total: 0,
         isLoaded: true,
-        status: OrderStatus.pending.value
+        status: OrderStatus.pending.value,
+        originalStatus: OrderStatus.pending.value
       );
       return;
     }
@@ -60,6 +61,7 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
       state = state.copyWith(
         userId: orders?[0].userId,
         status: orders?[0].status,
+        originalStatus: orders?[0].status,
         deliveryDatetime: orders?[0].deliveryDatetime,
         discountValue: orders?[0].discountValue,
         subTotal: orders?[0].subTotal,
@@ -105,31 +107,24 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
           note: state.note ?? '',
         );
 
-        final res = await CreateOrderUsecase(orderRepository).call(order);
-
-        final orderItemRepository = ref.read(orderItemRepositoryProvider);
-
-        // var total = 0;
+        // create order + items atomically (local + queued action)
+        final items = <OrderItemEntity>[];
         for (final OrderItemForm item in state.items ?? []) {
           final oderItem = OrderItemEntity(
-            orderId: res.data,
+            orderId: null,
             productId: item.product?.id,
             snapshotName: item.product?.name,
             snapshotPrice: item.product?.price ?? 0,
             quantity: item.quantity,
             lineTotal: (item.product?.price ?? 0) * item.quantity,
           );
-
-          await CreateOrderItemUsecase(orderItemRepository).call(oderItem);
-          // total += oderItem.lineTotal;
+          items.add(oderItem);
         }
 
-        // final updatedOrder = order.copyWith(
-        //   id: res.data,
-        //   total: total,
-        // );
-        //
-        // await UpdateOrderUsecase(orderRepository).call(updatedOrder);
+        final res = await CreateOrderWithItemsUsecase(orderRepository).call({
+          'order': order,
+          'items': items,
+        });
 
         return res;
       },
@@ -142,6 +137,7 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
       execute: () async {
         final orderRepository = ref.read(orderRepositoryProvider);
 
+        print(state.isStatusChanged);
         final order = OrderEntity(
           id: id,
           userId: state.userId,
@@ -269,6 +265,10 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
 
   void onChangedDeliveryDatetime(DateTime value) {
     state = state.copyWith(deliveryDatetime: value);
+  }
+
+  void onChangedPaymentDatetime(DateTime value) {
+    state = state.copyWith(paymentDatetime: value);
   }
 
   void removeItem(int index) {

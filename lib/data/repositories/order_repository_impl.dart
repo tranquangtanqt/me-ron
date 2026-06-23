@@ -3,20 +3,25 @@ import 'dart:convert';
 import '../../core/common/result.dart';
 import '../../core/constants/constants.dart';
 import '../../domain/entities/order_entity.dart';
+import '../../domain/entities/order_item_entity.dart';
 import '../../domain/repositories/order_repository.dart';
 import '../../domain/usecases/params/base_params.dart';
 import '../../domain/usecases/params/order_params.dart';
 import '../datasources/local/order_local_datasource_impl.dart';
+import '../datasources/local/order_item_local_datasource_impl.dart';
 import '../datasources/local/queued_action_local_datasource_impl.dart';
+import '../models/order_item_model.dart';
 import '../models/order_model.dart';
 import '../models/queued_action_model.dart';
 
 class OrderRepositoryImpl extends OrderRepository {
   final OrderLocalDatasourceImpl orderLocalDatasource;
+  final OrderItemLocalDatasourceImpl orderItemLocalDatasource;
   final QueuedActionLocalDatasourceImpl queuedActionLocalDatasource;
 
   OrderRepositoryImpl({
     required this.orderLocalDatasource,
+    required this.orderItemLocalDatasource,
     required this.queuedActionLocalDatasource,
   });
 
@@ -31,6 +36,40 @@ class OrderRepositoryImpl extends OrderRepository {
       final list = local.data ?? [];
       // return Result.success(data: list.map((e) => e.toEntity()).toList());
       return Result.success(data: list.toList());
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<int>> createOrderWithItems(OrderEntity order, List<dynamic> items) async {
+    try {
+      final data = OrderModel.fromEntity(order);
+
+      final itemsModels = items.map((dynamic it) => OrderItemModel.fromEntity(it as OrderItemEntity)).toList();
+
+      final local = await orderLocalDatasource.createOrderWithItems(data, itemsModels);
+      if (local.isFailure) return Result.failure(error: local.error!);
+
+      final createdOrderId = local.data!;
+
+      final res = await queuedActionLocalDatasource.createQueuedAction(
+        QueuedActionModel(
+          id: DateTime.now().millisecond,
+          repository: 'OrderRepositoryImpl',
+          method: 'createOrderWithItems',
+          param: jsonEncode({
+            'order': data.toJson(),
+            'items': itemsModels.map((e) => e.toJson()).toList(),
+          }),
+          isCritical: true,
+          createdAt: DateTime.now().toIso8601String(),
+        ),
+      );
+
+      if (res.isFailure) return Result.failure(error: res.error!);
+
+      return Result.success(data: createdOrderId);
     } catch (e) {
       return Result.failure(error: e);
     }
