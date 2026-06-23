@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:me_ron/domain/usecases/params/base_params.dart';
-
 import '../../core/common/result.dart';
 import '../../domain/entities/order_item_entity.dart';
 import '../../domain/repositories/order_item_repository.dart';
@@ -9,6 +7,7 @@ import '../datasources/local/order_item_local_datasource_impl.dart';
 import '../datasources/local/queued_action_local_datasource_impl.dart';
 import '../models/order_item_model.dart';
 import '../models/queued_action_model.dart';
+import '../../domain/usecases/params/base_params.dart';
 
 class OrderItemRepositoryImpl extends OrderItemRepository {
   final OrderItemLocalDatasourceImpl orderItemLocalDatasource;

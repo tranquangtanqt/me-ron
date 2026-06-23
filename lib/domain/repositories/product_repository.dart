@@ -1,7 +1,6 @@
-import 'package:me_ron/domain/usecases/params/base_params.dart';
-
 import '../../core/common/result.dart';
 import '../entities/product_entity.dart';
+import '../../../../domain/usecases/params/base_params.dart';
 
 abstract class ProductRepository {
   Future<Result<List<ProductEntity>>> getAllProducts(BaseParams params);

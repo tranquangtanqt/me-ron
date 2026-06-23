@@ -1,8 +1,7 @@
-import 'package:me_ron/domain/usecases/params/order_params.dart';
-
 import '../../core/common/result.dart';
 import '../../data/models/order_model.dart';
 import '../entities/order_entity.dart';
+import '../../domain/usecases/params/order_params.dart';
 
 abstract class OrderRepository {
   Future<Result<List<OrderModel>>> getAllOrders(OrderParams params);

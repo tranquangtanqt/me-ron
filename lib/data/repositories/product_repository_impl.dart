@@ -1,15 +1,13 @@
 import 'dart:convert';
 
-import 'package:me_ron/domain/usecases/params/base_params.dart';
-
 import '../../core/common/result.dart';
-import '../../core/constants/constants.dart';
 import '../../domain/entities/product_entity.dart';
 import '../../domain/repositories/product_repository.dart';
 import '../datasources/local/product_local_datasource_impl.dart';
 import '../datasources/local/queued_action_local_datasource_impl.dart';
 import '../models/product_model.dart';
 import '../models/queued_action_model.dart';
+import '../../../domain/usecases/params/base_params.dart';
 
 class ProductRepositoryImpl extends ProductRepository {
   final ProductLocalDatasourceImpl productLocalDatasource;

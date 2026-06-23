@@ -1,7 +1,6 @@
-import 'package:me_ron/domain/usecases/params/base_params.dart';
-
 import '../../../core/common/result.dart';
 import '../../models/order_item_model.dart';
+import '../../../domain/usecases/params/base_params.dart';
 
 abstract class OrderItemDatasource {
   Future<Result<int>> createOrderItem(OrderItemModel order);
