@@ -46,20 +46,12 @@ class OrderRepositoryImpl extends OrderRepository {
     try {
       final data = OrderModel.fromEntity(order);
 
-      final local = await orderLocalDatasource.createOrder(data);
+      final itemsModels = items.map((dynamic it) => OrderItemModel.fromEntity(it as OrderItemEntity)).toList();
+
+      final local = await orderLocalDatasource.createOrderWithItems(data, itemsModels);
       if (local.isFailure) return Result.failure(error: local.error!);
 
       final createdOrderId = local.data!;
-
-      // create order items locally
-      final List<Map<String, dynamic>> itemsJson = [];
-      for (final dynamic it in items) {
-        final orderItemEntity = it as OrderItemEntity;
-        final itemModel = OrderItemModel.fromEntity(orderItemEntity.copyWith(orderId: createdOrderId));
-        final itemRes = await orderItemLocalDatasource.createOrderItem(itemModel);
-        if (itemRes.isFailure) return Result.failure(error: itemRes.error!);
-        itemsJson.add(itemModel.toJson());
-      }
 
       final res = await queuedActionLocalDatasource.createQueuedAction(
         QueuedActionModel(
@@ -68,7 +60,7 @@ class OrderRepositoryImpl extends OrderRepository {
           method: 'createOrderWithItems',
           param: jsonEncode({
             'order': data.toJson(),
-            'items': itemsJson,
+            'items': itemsModels.map((e) => e.toJson()).toList(),
           }),
           isCritical: true,
           createdAt: DateTime.now().toIso8601String(),

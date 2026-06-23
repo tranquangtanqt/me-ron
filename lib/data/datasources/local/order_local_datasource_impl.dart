@@ -5,6 +5,7 @@ import '../../../core/common/result.dart';
 import '../../../core/services/database/database_config.dart';
 import '../../../core/services/database/database_service.dart';
 import '../../models/order_model.dart';
+import '../../models/order_item_model.dart';
 import '../interfaces/order_datasource.dart';
 import '../../../domain/usecases/params/order_params.dart';
 
@@ -93,6 +94,39 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
 
       // The id has been generated in models
       return Result.success(data: id);
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<int>> createOrderWithItems(OrderModel order, List<OrderItemModel> items) async {
+    try {
+      final createdId = await _databaseService.database.transaction((trx) async {
+        final id = await trx.insert(
+          DatabaseConfig.orderTableName,
+          order.toJson(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+
+        if (items.isNotEmpty) {
+          final batch = trx.batch();
+          for (var item in items) {
+            item.orderId = id;
+            batch.insert(
+              DatabaseConfig.orderItemTableName,
+              item.toJson(),
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
+          }
+
+          await batch.commit(noResult: true);
+        }
+
+        return id;
+      });
+
+      return Result.success(data: createdId);
     } catch (e) {
       return Result.failure(error: e);
     }
