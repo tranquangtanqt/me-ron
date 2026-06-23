@@ -9,9 +9,11 @@ class DatabaseConfig {
   static const String userTableName = 'Users';
   static const String categoriesTableName = 'Categories';
   static const String productTableName = 'Products';
-  static const String transactionTableName = 'Transactions';
   static const String orderTableName = 'Orders';
+  static const String paymentTableName = 'Payments';
+  static const String paymentOrderTableName = 'PaymentOrders';
   static const String orderItemTableName = 'OrderItems';
+  static const String transactionTableName = 'Transactions';
   static const String queuedActionTableName = 'QueuedActions';
 
   static const String createAddressTable =
@@ -101,6 +103,32 @@ CREATE TABLE IF NOT EXISTS '$orderItemTableName' (
 ''';
 // lineTotal = snapshotPrice * quantity
 // tong cua dong hien tai = gia * so luong
+  static const String createPaymentTable =
+  '''
+CREATE TABLE IF NOT EXISTS '$paymentTableName' (
+    'id' INTEGER PRIMARY KEY AUTOINCREMENT,
+    'paymentMethod' INTEGER,
+    'receivedAmount' INTEGER,
+    'returnAmount' INTEGER,
+    'paymentDate' DATETIME DEFAULT CURRENT_TIMESTAMP,
+    'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
+    'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+''';
+
+  static const String createPaymentOrderTable =
+  '''
+CREATE TABLE IF NOT EXISTS '$paymentOrderTableName' (
+    'id' INTEGER PRIMARY KEY AUTOINCREMENT,
+    'paymentId' INTEGER NOT NULL,
+    'orderId' INTEGER NOT NULL,
+    'paidAmount' INTEGER NOT NULL,
+    'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
+    'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (paymentId) REFERENCES Payments(id),
+    FOREIGN KEY (orderId) REFERENCES Orders(id)
+);
+''';
 
   static const String createTransactionTable =
       '''
@@ -165,24 +193,24 @@ INSERT INTO '$userTableName' ('name', 'address', 'phone')
 VALUES  
   ('W2 907 Chị Huyền', 'Tòa nhà W2', '0123456789'),
   ('W2 911 Chị Dung', 'Tòa nhà W2', '0123456789'),
-  ('W3 Tên người dùng', 'Tòa nhà W2', '0123456789');
+  ('W3 AAA', 'Tòa nhà W3', '0123456789');
 ''';
 
   static const String insertOrderTable =
   '''
 INSERT INTO '$orderTableName' ('userId', 'status', 'discountValue', 'subTotal', 'total', 'deliveryDatetime')
-VALUES  ('1', '1', 1000, 5000, 4000, '2026-06-02T00:00:00.000'),
-       ('1', '1', 2000, 5000, 3000, '2026-06-02T00:00:00.000'),
-       ('2', '1', 3000, 5000, 2000, '2026-06-02T00:00:00.000');
+VALUES  ('1', '1', 1000, 25000, 24000, '2026-06-02T00:00:00.000'),
+       ('1', '1', 2000, 10000, 8000, '2026-06-02T00:00:00.000'),
+       ('2', '1', 3000, 30000, 28000, '2026-06-02T00:00:00.000');
 ''';
 
   static const String insertOrderItemTable =
   '''
 INSERT INTO '$orderItemTableName' ('orderId', 'productId', 'snapshotName', 'snapshotPrice', 'quantity', 'lineTotal')
 VALUES  
-  ('1', '1', 'snapshotName 1', 1000, 1, 1000),
-  ('1', '2', 'snapshotName 2', 2000, 2, 4000),
-  ('2', '1', 'snapshotName 3', 2000, 2, 4000),
-  ('3', '1', 'snapshotName 3', 2000, 2, 4000);
+  ('1', '1', 'Bánh bao không nhân', 5000, 1, 5000),
+  ('1', '2', 'Bánh bao thịt trứng', 10000, 2, 20000),
+  ('2', '1', 'Bánh bao không nhân', 5000, 2, 10000),
+  ('3', '2', 'Bánh bao thịt trứng', 10000, 3, 30000);
 ''';
 }

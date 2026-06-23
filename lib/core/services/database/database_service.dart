@@ -53,6 +53,8 @@ class DatabaseService {
       db.execute(DatabaseConfig.createProductTable),
       db.execute(DatabaseConfig.createOrderTable),
       db.execute(DatabaseConfig.createOrderItemTable),
+      db.execute(DatabaseConfig.createPaymentTable),
+      db.execute(DatabaseConfig.createPaymentOrderTable),
       db.execute(DatabaseConfig.createTransactionTable),
       db.execute(DatabaseConfig.createQueuedActionTable),
     ]);
