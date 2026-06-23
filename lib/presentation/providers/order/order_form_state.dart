@@ -6,7 +6,9 @@ import '../../screens/order/components/order_item_form.dart';
 class OrderFormState {
   final int? userId;
   final int? status;
+  final int? originalStatus;
   final DateTime? deliveryDatetime;
+  final DateTime? paymentDatetime;
   final int? discountValue;
   final int? subTotal;
   final int? total;
@@ -17,7 +19,9 @@ class OrderFormState {
   const OrderFormState({
     this.userId,
     this.status,
+    this.originalStatus,
     this.deliveryDatetime,
+    this.paymentDatetime,
     this.discountValue,
     this.subTotal,
     this.total,
@@ -29,7 +33,9 @@ class OrderFormState {
   OrderFormState copyWith({
     int? userId,
     int? status,
+    int? originalStatus,
     DateTime? deliveryDatetime,
+    DateTime? paymentDatetime,
     int? discountValue,
     int? subTotal,
     int? total,
@@ -40,7 +46,9 @@ class OrderFormState {
     return OrderFormState(
       userId: userId ?? this.userId,
       status: status ?? this.status,
+      originalStatus: originalStatus ?? this.originalStatus,
       deliveryDatetime: deliveryDatetime ?? this.deliveryDatetime,
+      paymentDatetime: paymentDatetime ?? this.paymentDatetime,
       discountValue: discountValue ?? this.discountValue,
       subTotal: subTotal ?? this.subTotal,
       total: total ?? this.total,
@@ -75,6 +83,7 @@ class OrderFormState {
       userId: userId ?? this.userId,
       status: status ?? this.status,
       deliveryDatetime: deliveryDatetime ?? this.deliveryDatetime,
+      paymentDatetime: paymentDatetime ?? this.paymentDatetime,
       discountValue: discountValue ?? this.discountValue,
       subTotal: subTotal ?? this.subTotal,
       total: total ?? this.total,
@@ -83,4 +92,6 @@ class OrderFormState {
       items: items ?? this.items,
     );
   }
+
+  bool get isStatusChanged => status != originalStatus;
 }

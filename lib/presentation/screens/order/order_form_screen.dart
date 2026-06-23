@@ -33,6 +33,7 @@ class OrderFormScreen extends ConsumerStatefulWidget {
 
 class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
   final deliveryDatetimeController = TextEditingController();
+  final paymentDatetimeController = TextEditingController();
   final discountValueController = TextEditingController();
   final noteController = TextEditingController();
 
@@ -54,6 +55,10 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
       state.deliveryDatetime != null
           ? DateFormat('dd/MM/yyyy').format(state.deliveryDatetime!)
           : today;
+      paymentDatetimeController.text =
+      state.paymentDatetime != null
+          ? DateFormat('dd/MM/yyyy').format(state.paymentDatetime!)
+          : today;
       noteController.text = state.note ?? '';
       discountValueController.text = state.discountValue?.toString() ?? '';
     });
@@ -62,6 +67,7 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
   @override
   void dispose() {
     deliveryDatetimeController.dispose();
+    paymentDatetimeController.dispose();
     noteController.dispose();
     discountValueController.dispose();
     super.dispose();
@@ -124,6 +130,8 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
 
     final formState = ref.watch(orderFormNotifierProvider);
     final isLoaded = formState.isLoaded;
+
+    final status = OrderStatusExtension.fromValue(formState.status ?? 0);
 
     return Scaffold(
       appBar: AppBar(
@@ -208,6 +216,11 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                     controller: deliveryDatetimeController,
                     onChanged: notifier.onChangedDeliveryDatetime,
                   ),
+                  if (status == OrderStatus.completed)
+                    _PaymentDatetimeField(
+                      controller: paymentDatetimeController,
+                      onChanged: notifier.onChangedPaymentDatetime,
+                    ),
                   _NoteField(
                     controller: noteController,
                     onChanged: notifier.onChangedNote,
@@ -501,6 +514,96 @@ class _DeliveryDatetimeField extends StatelessWidget {
                   child: Text(
                     controller.text.isEmpty
                         // ? 'Chọn ngày'
+                        ? ''
+                        : controller.text,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: controller.text.isEmpty
+                          ? theme.colorScheme.outline
+                          : theme.textTheme.bodyMedium?.color,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PaymentDatetimeField extends StatelessWidget {
+  final TextEditingController controller;
+  final ValueChanged<DateTime> onChanged;
+
+  const _PaymentDatetimeField({
+    required this.controller,
+    required this.onChanged,
+  });
+
+  Future<void> _pickDate(BuildContext context) async {
+    DateTime initialDate = DateTime.now();
+
+    if (controller.text.isNotEmpty) {
+      try {
+        initialDate = DateFormat('dd/MM/yyyy').parse(controller.text);
+      } catch (_) {}
+    }
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null) {
+      final formatted = DateFormat('dd/MM/yyyy').format(picked);
+
+      controller.text = formatted;
+      onChanged(picked);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSizes.padding),
+      child: SizedBox(
+        height: 40,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () => _pickDate(context),
+          child: InputDecorator(
+            isEmpty: controller.text.isEmpty,
+            decoration: InputDecoration(
+              labelText: 'Ngày thanh toán',
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+              prefixIcon: const Icon(
+                Icons.event_available_rounded,
+                size: 16,
+              ),
+              suffixIcon: const Icon(
+                Icons.calendar_month_rounded,
+                size: 16,
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    controller.text.isEmpty
+                    // ? 'Chọn ngày'
                         ? ''
                         : controller.text,
                     style: TextStyle(

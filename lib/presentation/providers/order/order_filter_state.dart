@@ -1,6 +1,3 @@
-import '../../../data/models/order_item_model.dart';
-import '../../../data/models/order_model.dart';
-
 class OrderFilterState {
   final int? status;
   final DateTime? fromDate;

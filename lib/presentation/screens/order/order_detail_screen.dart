@@ -44,7 +44,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
 
     bool check = true;
     for (int i = 0; i < allOrder!.length; i++) {
-      if (allOrder[i].status != OrderStatus.shipping.value || allOrder[i].status != OrderStatus.pending.value) {
+      if (allOrder[i].status != OrderStatus.shipping.value && allOrder[i].status != OrderStatus.pending.value) {
         check = false;
       }
     }

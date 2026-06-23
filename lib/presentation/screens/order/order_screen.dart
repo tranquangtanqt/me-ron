@@ -251,14 +251,14 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> with RouteAwar
     super.initState();
 
     DateTime now = DateTime.now();
-    DateTime fromDate = DateTime(now.year, now.month, now.day);
+    DateTime fromDate = DateTime(now.year, now.month, now.day, 00, 00, 00, 000);
     DateTime toDate = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
 
     final filter = ref.read(orderFilterProvider);
     if (filter.fromDate != null) {
-      fromDate = filter.fromDate!;
+      fromDate = DateTime(filter.fromDate!.year, filter.fromDate!.month, filter.fromDate!.day, 00, 00, 00, 000);
     }
-    if (filter.fromDate != null) {
+    if (filter.toDate != null) {
       toDate = DateTime(filter.toDate!.year, filter.toDate!.month, filter.toDate!.day, 23, 59, 59, 999);
     }
 

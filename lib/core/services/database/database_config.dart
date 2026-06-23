@@ -197,12 +197,12 @@ VALUES
   ('W3 AAA', 'Tòa nhà W3', '0123456789');
 ''';
 
-  static const String insertOrderTable =
+  static String get insertOrderTable =>
   '''
 INSERT INTO '$orderTableName' ('userId', 'status', 'discountValue', 'subTotal', 'total', 'deliveryDatetime')
-VALUES  ('1', '1', 1000, 25000, 24000, '2026-06-02T00:00:00.000'),
-       ('1', '1', 2000, 10000, 8000, '2026-06-02T00:00:00.000'),
-       ('2', '1', 3000, 30000, 28000, '2026-06-02T00:00:00.000');
+VALUES  ('1', '1', 1000, 25000, 24000, '${DateTime.now().toIso8601String()}'),
+       ('1', '1', 2000, 10000, 8000, '${DateTime.now().toIso8601String()}'),
+       ('2', '1', 3000, 30000, 28000, '${DateTime.now().toIso8601String()}');
 ''';
 
   static const String insertOrderItemTable =

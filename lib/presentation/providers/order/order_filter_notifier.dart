@@ -8,11 +8,12 @@ final orderFilterProvider = StateNotifierProvider<OrderFilterNotifier, OrderFilt
 );
 
 class OrderFilterNotifier extends StateNotifier<OrderFilterState> {
+
   OrderFilterNotifier()
       : super(OrderFilterState(
         status: OrderStatus.shipping.value,
-        fromDate: DateTime.now(),
-        toDate: DateTime.now(),
+        fromDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 00, 00, 00, 000),
+        toDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 23, 59, 59, 999),
     ),
   );
 
@@ -35,8 +36,8 @@ class OrderFilterNotifier extends StateNotifier<OrderFilterState> {
   void reset() {
     state = OrderFilterState(
       status: OrderStatus.shipping.value,
-      fromDate: DateTime.now(),
-      toDate: DateTime.now(),
+      fromDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 00, 00, 00, 000),
+      toDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 23, 59, 59, 999),
     );
   }
 }

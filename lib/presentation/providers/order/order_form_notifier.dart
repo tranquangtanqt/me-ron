@@ -44,7 +44,8 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
         subTotal: 0,
         total: 0,
         isLoaded: true,
-        status: OrderStatus.pending.value
+        status: OrderStatus.pending.value,
+        originalStatus: OrderStatus.pending.value
       );
       return;
     }
@@ -60,6 +61,7 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
       state = state.copyWith(
         userId: orders?[0].userId,
         status: orders?[0].status,
+        originalStatus: orders?[0].status,
         deliveryDatetime: orders?[0].deliveryDatetime,
         discountValue: orders?[0].discountValue,
         subTotal: orders?[0].subTotal,
@@ -135,6 +137,7 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
       execute: () async {
         final orderRepository = ref.read(orderRepositoryProvider);
 
+        print(state.isStatusChanged);
         final order = OrderEntity(
           id: id,
           userId: state.userId,
