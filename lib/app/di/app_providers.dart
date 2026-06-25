@@ -13,30 +13,22 @@ import '../../core/services/logger/error_logger_service.dart';
 import '../../core/services/printer/printer_service.dart';
 import '../../data/datasources/local/order_item_local_datasource_impl.dart';
 import '../../data/datasources/local/order_local_datasource_impl.dart';
-import '../../data/datasources/local/payment_local_datasource_impl.dart';
-import '../../data/datasources/local/payment_order_local_datasource_impl.dart';
 import '../../data/datasources/local/product_local_datasource_impl.dart';
 import '../../data/datasources/local/queued_action_local_datasource_impl.dart';
 import '../../data/datasources/local/transaction_local_datasource_impl.dart';
 import '../../data/datasources/local/user_local_datasource_impl.dart';
 import '../../data/datasources/local/address_local_datasource_impl.dart';
 import '../../data/datasources/local/category_local_datasource_impl.dart';
-import '../../data/repositories/auth_repository_impl.dart';
 import '../../data/repositories/order_item_repository_impl.dart';
 import '../../data/repositories/order_repository_impl.dart';
-import '../../data/repositories/payment_order_repository_impl.dart';
-import '../../data/repositories/payment_repository_impl.dart';
 import '../../data/repositories/product_repository_impl.dart';
 import '../../data/repositories/queued_action_repository_impl.dart';
 import '../../data/repositories/transaction_repository_impl.dart';
 import '../../data/repositories/user_repository_impl.dart';
 import '../../data/repositories/address_repository_impl.dart';
 import '../../data/repositories/category_repository_impl.dart';
-import '../../domain/repositories/auth_repository.dart';
 import '../../domain/repositories/order_item_repository.dart';
 import '../../domain/repositories/order_repository.dart';
-import '../../domain/repositories/payment_order_repository.dart';
-import '../../domain/repositories/payment_repository.dart';
 import '../../domain/repositories/product_repository.dart';
 import '../../domain/repositories/queued_action_repository.dart';
 import '../../domain/repositories/transaction_repository.dart';
@@ -88,12 +80,6 @@ final orderLocalDatasourceProvider = Provider<OrderLocalDatasourceImpl>(
 final orderItemLocalDatasourceProvider = Provider<OrderItemLocalDatasourceImpl>(
       (ref) => OrderItemLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
 );
-final paymentLocalDatasourceProvider = Provider<PaymentLocalDatasourceImpl>(
-      (ref) => PaymentLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
-);
-final paymentOrderLocalDatasourceProvider = Provider<PaymentOrderLocalDatasourceImpl>(
-      (ref) => PaymentOrderLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
-);
 final queuedActionLocalDatasourceProvider = Provider<QueuedActionLocalDatasourceImpl>(
   (ref) => QueuedActionLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
 );
@@ -139,18 +125,6 @@ final orderRepositoryProvider = Provider<OrderRepository>(
 final orderItemRepositoryProvider = Provider<OrderItemRepository>(
       (ref) => OrderItemRepositoryImpl(
     orderItemLocalDatasource: ref.watch(orderItemLocalDatasourceProvider),
-    queuedActionLocalDatasource: ref.watch(queuedActionLocalDatasourceProvider),
-  ),
-);
-final paymentRepositoryProvider = Provider<PaymentRepository>(
-      (ref) => PaymentRepositoryImpl(
-    paymentLocalDatasource: ref.watch(paymentLocalDatasourceProvider),
-    queuedActionLocalDatasource: ref.watch(queuedActionLocalDatasourceProvider),
-  ),
-);
-final paymentOrderRepositoryProvider = Provider<PaymentOrderRepository>(
-      (ref) => PaymentOrderRepositoryImpl(
-    paymentOrderLocalDatasource: ref.watch(paymentOrderLocalDatasourceProvider),
     queuedActionLocalDatasource: ref.watch(queuedActionLocalDatasourceProvider),
   ),
 );
