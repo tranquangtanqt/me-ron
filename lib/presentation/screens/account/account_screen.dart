@@ -17,17 +17,17 @@ class AccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Account')),
+      appBar: AppBar(title: const Text('Cài đặt')),
       body: const SingleChildScrollView(
         padding: EdgeInsets.all(AppSizes.padding),
         child: Column(
           children: [
             _UserInfo(),
-            _ProfileButton(),
+            // _ProfileButton(),
             _ThemeButton(),
-            _PrinterSettingsButton(),
-            _AboutButton(),
-            _SignOutButton(),
+            // _PrinterSettingsButton(),
+            // _AboutButton(),
+            // _SignOutButton(),
           ],
         ),
       ),
@@ -55,7 +55,7 @@ class _UserInfo extends ConsumerWidget {
           // ),
           // const SizedBox(height: AppSizes.padding),
           Text(
-            user?.name ?? '(No Name)',
+            user?.name ?? '(Mẹ Rôn)',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -134,7 +134,7 @@ class _ThemeButton extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSizes.padding / 1.5),
                 Text(
-                  'Theme',
+                  'Thay đổi chủ đề',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -149,8 +149,8 @@ class _ThemeButton extends StatelessWidget {
         ),
         onTap: () {
           AppDialog.show(
-            title: 'Theme',
-            leftButtonText: 'Close',
+            title: 'Chủ đề',
+            leftButtonText: 'Đóng',
             child: const _ThemeDialogBody(),
           );
         },
@@ -260,7 +260,8 @@ class _ThemeDialogBody extends ConsumerWidget {
         ),
         const SizedBox(width: AppSizes.padding),
         Text(
-          'Dark Mode',
+          'Chế độ tối',
+          // 'Dark Mode',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
