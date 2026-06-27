@@ -67,63 +67,69 @@ class _AddressScreenState extends ConsumerState<AddressScreen> {
         actions: const [_AddButton()],
       ),
       body: Align(
-        alignment: Alignment.topLeft,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSizes.padding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columns: const [
-                    DataColumn(label: Text('Mã')),
-                    DataColumn(label: Text('Tên')),
-                    DataColumn(label: Text('Tùy chọn')),
-                  ],
-                  rows: (allAddress ?? []).map((item) {
-                    return DataRow(
-                      cells: [
-                        DataCell(Text(item.code.toString())),
-                        DataCell(Text(item.name ?? '')),
-                        DataCell(
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit, color: Colors.orange),
-                                onPressed: () {
-                                  updateAddress(item.code);
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () {
-                                  AppDialog.show(
-                                    title: 'Xác nhận',
-                                    text: 'Bạn có chắc chắn muốn xóa địa chỉ?',
-                                    leftButtonText: 'Hủy bỏ',
-                                    rightButtonText: 'Xóa',
-                                    rightButtonColor: Theme.of(context).colorScheme.errorContainer,
-                                    rightButtonTextColor: Theme.of(context).colorScheme.error,
-                                    onTapRightButton: (context) async {
-                                      context.pop();
-                                      deleteAddress(item.code);
-                                    },
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ),
+      alignment: Alignment.topLeft,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSizes.padding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                showCheckboxColumn: false, //ẩn checkbox
+                columns: const [
+                  DataColumn(label: Text('Mã',style: TextStyle(fontWeight: FontWeight.bold,))),
+                  DataColumn(label: Text('Tên',style: TextStyle(fontWeight: FontWeight.bold,))),
+                  // DataColumn(label: Text('Tùy chọn')),
+                ],
+                rows: (allAddress ?? []).map((item) {
+                  return DataRow(
+                    onSelectChanged: (selected) {
+                      if (selected == true) {
+                        updateAddress(item.code);
+                      }
+                    },
+                    cells: [
+                      DataCell(Text(item.code.toString())),
+                      DataCell(Text(item.name ?? '')),
+                      // DataCell(
+                      //   Row(
+                      //     children: [
+                      //       IconButton(
+                      //         icon: const Icon(Icons.edit, color: Colors.orange),
+                      //         onPressed: () {
+                      //           updateAddress(item.code);
+                      //         },
+                      //       ),
+                      //       IconButton(
+                      //         icon: const Icon(Icons.delete, color: Colors.red),
+                      //         onPressed: () {
+                      //           AppDialog.show(
+                      //             title: 'Xác nhận',
+                      //             text: 'Bạn có chắc chắn muốn xóa địa chỉ?',
+                      //             leftButtonText: 'Hủy bỏ',
+                      //             rightButtonText: 'Xóa',
+                      //             rightButtonColor: Theme.of(context).colorScheme.errorContainer,
+                      //             rightButtonTextColor: Theme.of(context).colorScheme.error,
+                      //             onTapRightButton: (context) async {
+                      //               context.pop();
+                      //               deleteAddress(item.code);
+                      //             },
+                      //           );
+                      //         },
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
+                    ],
+                  );
+                }).toList(),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
+    ),
     );
   }
 }

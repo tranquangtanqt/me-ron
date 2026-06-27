@@ -38,7 +38,6 @@ class _UserScreenState extends ConsumerState<UserScreen> {
 
     if (res.isSuccess) {
       if (!mounted) return;
-      // context.go('/user');
       ref.read(userNotifierProvider.notifier).getAllUser();
       AppSnackBar.show('Xóa dữ liệu thành công!');
     } else {
@@ -77,6 +76,7 @@ class _UserScreenState extends ConsumerState<UserScreen> {
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: DataTable(
+                  showCheckboxColumn: false, //ẩn checkbox
                   columnSpacing: 25, // giảm khoảng cách giữa các cột
                   horizontalMargin: 8,
                   dataRowMinHeight: 40,
@@ -89,15 +89,20 @@ class _UserScreenState extends ConsumerState<UserScreen> {
                   columns: const [
                     DataColumn(label: Padding(
                       padding: EdgeInsets.only(left: 8),
-                      child: Text('STT'),
+                      child: Text('STT', style: TextStyle(fontWeight: FontWeight.bold,)),
                     ),),
-                    DataColumn(label: Text('Tên')),
-                    DataColumn(label: Text('Số ĐT')),
-                    DataColumn(label: Text('Địa chỉ')),
-                    DataColumn(label: Text('Tùy chọn')),
+                    DataColumn(label: Text('Tên',style: TextStyle(fontWeight: FontWeight.bold,))),
+                    DataColumn(label: Text('Số ĐT',style: TextStyle(fontWeight: FontWeight.bold,))),
+                    DataColumn(label: Text('Địa chỉ',style: TextStyle(fontWeight: FontWeight.bold,))),
+                    // DataColumn(label: Text('Tùy chọn')),
                   ],
                   rows: (allUser ?? []).map((item) {
                     return DataRow(
+                      onSelectChanged: (selected) {
+                        if (selected == true) {
+                          updateUser(item.id!);
+                        }
+                      },
                       cells: [
                         DataCell(Padding(
                           padding: const EdgeInsets.only(left: 8),
@@ -106,35 +111,35 @@ class _UserScreenState extends ConsumerState<UserScreen> {
                         DataCell(Text(item.name ?? '')),
                         DataCell(Text(item.phone ?? '')),
                         DataCell(Text(item.address ?? '')),
-                        DataCell(
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit, color: Colors.orange),
-                                onPressed: () {
-                                  updateUser(item.id!);
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () {
-                                  AppDialog.show(
-                                    title: 'Xác nhận',
-                                    text: 'Bạn có chắc chắn muốn xóa dữ liệu?',
-                                    leftButtonText: 'Hủy bỏ',
-                                    rightButtonText: 'Xóa',
-                                    rightButtonColor: Theme.of(context).colorScheme.errorContainer,
-                                    rightButtonTextColor: Theme.of(context).colorScheme.error,
-                                    onTapRightButton: (context) async {
-                                      context.pop();
-                                      deleteUser(item.id!);
-                                    },
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
+                        // DataCell(
+                        //   Row(
+                        //     children: [
+                        //       IconButton(
+                        //         icon: const Icon(Icons.edit, color: Colors.orange),
+                        //         onPressed: () {
+                        //           updateUser(item.id!);
+                        //         },
+                        //       ),
+                        //       IconButton(
+                        //         icon: const Icon(Icons.delete, color: Colors.red),
+                        //         onPressed: () {
+                        //           AppDialog.show(
+                        //             title: 'Xác nhận',
+                        //             text: 'Bạn có chắc chắn muốn xóa dữ liệu?',
+                        //             leftButtonText: 'Hủy bỏ',
+                        //             rightButtonText: 'Xóa',
+                        //             rightButtonColor: Theme.of(context).colorScheme.errorContainer,
+                        //             rightButtonTextColor: Theme.of(context).colorScheme.error,
+                        //             onTapRightButton: (context) async {
+                        //               context.pop();
+                        //               deleteUser(item.id!);
+                        //             },
+                        //           );
+                        //         },
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
                       ],
                     );
                   }).toList(),

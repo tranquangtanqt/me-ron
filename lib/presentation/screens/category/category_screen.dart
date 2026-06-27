@@ -57,7 +57,7 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Danh mục sản phẩm'),
+        title: const Text('Danh mục món ăn'),
         titleSpacing: 0,
         leading: BackButton(
           onPressed: () => context.pop(),
@@ -89,11 +89,11 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
                   columns: const [
                     DataColumn(label: Padding(
                       padding: EdgeInsets.only(left: 8),
-                      child: Text('id'),
+                      child: Text('STT', style: TextStyle(fontWeight: FontWeight.bold,)),
                     ),),
-                    DataColumn(label: Text('Tên')),
-                    DataColumn(label: Text('Mô tả')),
-                    DataColumn(label: Text('Tùy chọn')),
+                    DataColumn(label: Text('Tên', style: TextStyle(fontWeight: FontWeight.bold,))),
+                    DataColumn(label: Text('Mô tả', style: TextStyle(fontWeight: FontWeight.bold,))),
+                    DataColumn(label: Text('Tùy chọn', style: TextStyle(fontWeight: FontWeight.bold,))),
                   ],
                   rows: (allCategory ?? []).map((item) {
                     return DataRow(

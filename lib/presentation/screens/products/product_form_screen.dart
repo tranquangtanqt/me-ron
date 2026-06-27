@@ -139,7 +139,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.id == null ? 'Thêm sản phẩm' : 'Chỉnh sửa sản phẩm'),
+        title: Text(widget.id == null ? 'Thêm món ăn' : 'Chỉnh sửa món ăn'),
         titleSpacing: 0,
       ),
       body: !isLoaded
@@ -343,8 +343,8 @@ class _NameField extends StatelessWidget {
       padding: const EdgeInsets.only(top: AppSizes.padding),
       child: AppTextField(
         controller: controller,
-        labelText: 'Tên sản phẩm',
-        hintText: 'Nhập tên sản phẩm...',
+        labelText: 'Tên món ăn',
+        hintText: 'Nhập tên món ăn...',
         onChanged: onChanged,
       ),
     );
@@ -391,7 +391,7 @@ class _DescriptionField extends StatelessWidget {
       child: AppTextField(
         controller: controller,
         labelText: 'Mô tả',
-        hintText: 'Nhập mô tả sản phẩm...',
+        hintText: 'Nhập mô tả món ăn...',
         maxLines: 4,
         onChanged: onChanged,
       ),
@@ -421,7 +421,8 @@ class _CreateOrUpdateButton extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.padding * 1.5),
       child: AppButton(
-        text: id == null ? 'Thêm mới sản phẩm' : 'Chỉnh sửa sản phẩm',
+        // text: id == null ? 'Thêm mới sản phẩm' : 'Chỉnh sửa sản phẩm',
+        text: 'Lưu',
         enabled: isFormValid,
         onTap: () {
           if (id != null) {

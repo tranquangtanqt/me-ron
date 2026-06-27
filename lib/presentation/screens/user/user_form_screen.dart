@@ -267,7 +267,7 @@ class _CreateOrUpdateButton extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.padding * 1.5),
       child: AppButton(
-        text: id == null ? 'Thêm khách hàng' : 'Chỉnh sửa khách hàng',
+        text: 'Lưu',
         enabled: isFormValid,
         onTap: () {
           if (id != null) {
