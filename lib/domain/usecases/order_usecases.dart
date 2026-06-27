@@ -76,11 +76,20 @@ class DeleteOrderUsecase extends Usecase<Result<void>, int> {
   Future<Result<void>> call(int params) async => _orderRepository.deleteOrder(params);
 }
 
-class UpdateStatusOrderUsecase extends Usecase<Result<void>, OrderEntity> {
+class UpdateStatusOrderUsecase extends Usecase<Result<void>, Map<String, int>> {
   UpdateStatusOrderUsecase(this._orderRepository);
 
   final OrderRepository _orderRepository;
 
   @override
-  Future<Result<void>> call(OrderEntity params) async => _orderRepository.updateStatusOrder(params);
+  Future<Result<void>> call(Map<String, int> params) async {
+    final orderId = params['orderId'];
+    final status = params['status'];
+
+    if (orderId == null || status == null) {
+      return Result.failure(error: 'orderId and status are required');
+    }
+
+    return _orderRepository.updateStatusOrder(orderId, status);
+  }
 }

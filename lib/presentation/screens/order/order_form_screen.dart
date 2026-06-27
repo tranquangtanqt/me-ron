@@ -114,6 +114,20 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
     }
   }
 
+  void cancelOrder() async {
+    var res = await AppDialog.showProgress(() {
+      return ref.read(orderFormNotifierProvider.notifier).updatedStatusOrder(widget.id!, OrderStatus.cancelled.value);
+    });
+
+    if (res.isSuccess) {
+      if (!mounted) return;
+      context.pop(true);
+      AppSnackBar.show('Hủy đơn thành công');
+    } else {
+      AppDialog.showError(error: res.error?.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // ref.listen(orderNotifierProvider, (previous, next) {
@@ -228,6 +242,11 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                     controller: noteController,
                     onChanged: notifier.onChangedNote,
                   ),
+                  if (widget.id != null && formState.status != OrderStatus.cancelled.value)
+                  _CancelButton(
+                    id: widget.id,
+                    onCancelOrder: cancelOrder,
+                  ),
                   _DeleteButton(
                     id: widget.id,
                     onDeleteOrder: deleteOrder,
@@ -254,7 +273,6 @@ class _CreateOrUpdateButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isFormValid = ref.watch(
       orderFormNotifierProvider.select((s) {
-        debugPrint("userId=${s.userId}, items=${s.items?.length}");
         return s.userId != null && (s.items?.isNotEmpty ?? false);
       }),
     );
@@ -742,6 +760,47 @@ class _NoteField extends StatelessWidget {
         hintText: 'Nhập ghi chú...',
         maxLines: 2,
         onChanged: onChanged,
+      ),
+    );
+  }
+}
+
+class _CancelButton extends ConsumerWidget {
+  final int? id;
+  final VoidCallback onCancelOrder;
+
+  const _CancelButton({
+    required this.id,
+    required this.onCancelOrder,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isFormValid = ref.watch(
+      orderFormNotifierProvider.select((s) {
+        return s.userId != null && (s.items?.isNotEmpty ?? false);
+      }),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSizes.padding * 1.5),
+      child: AppButton(
+        text: 'Hủy đơn',
+        enabled: isFormValid,
+        onTap: () {
+          AppDialog.show(
+            title: 'Xác nhận',
+            text: 'Bạn có chắc chắn muốn hủy đơn?',
+            leftButtonText: 'Không',
+            rightButtonText: 'Có',
+            rightButtonColor: Theme.of(context).colorScheme.errorContainer,
+            rightButtonTextColor: Theme.of(context).colorScheme.error,
+            onTapRightButton: (context) async {
+              context.pop();
+              onCancelOrder();
+            },
+          );
+        },
       ),
     );
   }

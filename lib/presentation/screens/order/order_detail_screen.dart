@@ -105,16 +105,19 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   }
 
   // Thanh toán 1 phần (có thể dư hoặc thiếu)
-  void onPartialPayment() {
-    AppSnackBar.showError('Đang phát triển'); //TODO
-    return;
-  }
+  // void onPartialPayment() {
+  //   AppSnackBar.showError('Đang phát triển'); //TODO
+  //   return;
+  // }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(orderNotifierProvider);
 
     List<OrderModel> orders = state.allOrder ?? [];
+    final hasDeliveredOrder = orders.any(
+      (order) => order.status == OrderStatus.shipping.value,
+    );
 
     final Map<int, List<OrderModel>> groupedOrders = {};
 
@@ -128,7 +131,8 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
         title: const Text('Chi tiết'),
         elevation: 0,
         shadowColor: Colors.transparent,
-        actions: [_PaymentButton(onPayment: onPayment, onPartialPayment: onPartialPayment,)],
+        // actions: [_PaymentButton(onPayment: onPayment, onPartialPayment: onPartialPayment,)],
+        actions: hasDeliveredOrder ? [_PaymentButton(onPayment: onPayment)] : const [],
       ),
       body: CustomScrollView(
         slivers: [
@@ -266,10 +270,10 @@ class _OrderDetailCard extends StatelessWidget {
 
 class _PaymentButton extends StatelessWidget {
   final VoidCallback onPayment;
-  final VoidCallback onPartialPayment;
+  // final VoidCallback onPartialPayment;
   const _PaymentButton({
     required this.onPayment,
-    required this.onPartialPayment
+    // required this.onPartialPayment
   });
 
   @override
@@ -280,35 +284,35 @@ class _PaymentButton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           // ===== VIEW DETAIL BUTTON =====
-          AppButton(
-            height: 26,
-            borderRadius: BorderRadius.circular(4),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.padding / 2,
-            ),
-            buttonColor: Theme.of(context).colorScheme.surfaceContainer,
-            onTap: () => onPartialPayment(),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.account_balance_wallet,
-                  size: 12,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: AppSizes.padding / 4),
-                Text(
-                  'Thanh toán 1 phần',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(width: 8),
+          // AppButton(
+          //   height: 26,
+          //   borderRadius: BorderRadius.circular(4),
+          //   padding: const EdgeInsets.symmetric(
+          //     horizontal: AppSizes.padding / 2,
+          //   ),
+          //   buttonColor: Theme.of(context).colorScheme.surfaceContainer,
+          //   onTap: () => onPartialPayment(),
+          //   child: Row(
+          //     children: [
+          //       Icon(
+          //         Icons.account_balance_wallet,
+          //         size: 12,
+          //         color: Theme.of(context).colorScheme.primary,
+          //       ),
+          //       const SizedBox(width: AppSizes.padding / 4),
+          //       Text(
+          //         'Thanh toán 1 phần',
+          //         style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          //           fontSize: 10,
+          //           fontWeight: FontWeight.bold,
+          //           color: Theme.of(context).colorScheme.primary,
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // ),
+          //
+          // const SizedBox(width: 8),
 
           // ===== ADD BUTTON =====
           AppButton(

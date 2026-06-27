@@ -176,17 +176,10 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
       execute: () async {
         final orderRepository = ref.read(orderRepositoryProvider);
 
-        final order = OrderEntity(
-          id: id,
-          status: status,
-          deliveryDatetime: DateTime.now(),
-          discountValue: 0,
-          subTotal: 0,
-          total: 0,
-          note: '',
-        );
-
-        final res = await UpdateStatusOrderUsecase(orderRepository).call(order);
+        final res = await UpdateStatusOrderUsecase(orderRepository).call({
+          'orderId': id,
+          'status': status,
+        });
 
         return res;
       },
