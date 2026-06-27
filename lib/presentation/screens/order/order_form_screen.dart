@@ -9,7 +9,6 @@ import '../../../core/themes/app_sizes.dart';
 import '../../../core/utilities/currency_formatter.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../providers/order/order_form_notifier.dart';
-import '../../providers/order/order_notifier.dart';
 import '../../providers/products/products_notifier.dart';
 import '../../providers/user/user_notifier.dart';
 import '../../widgets/app_button.dart';
@@ -131,7 +130,7 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
     final formState = ref.watch(orderFormNotifierProvider);
     final isLoaded = formState.isLoaded;
 
-    final status = OrderStatusExtension.fromValue(formState.status ?? 0);
+    // final status = OrderStatusExtension.fromValue(formState.status ?? 0);
 
     return Scaffold(
       appBar: AppBar(
@@ -208,19 +207,23 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                       ),
                     ),
                   ),
-                  _StatusDropdown(
-                    selected: OrderStatusExtension.fromValue(formState.status ?? 0),
-                    onChanged: notifier.onChangedStatus,
-                  ),
+                  // _StatusDropdown(
+                  //   selected: OrderStatusExtension.fromValue(formState.status ?? 0),
+                  //   onChanged: notifier.onChangedStatus,
+                  // ),
                   _DeliveryDatetimeField(
                     controller: deliveryDatetimeController,
                     onChanged: notifier.onChangedDeliveryDatetime,
                   ),
-                  if (status == OrderStatus.completed)
+                  _PrepaidCheckbox(
+                    value: formState.isPrepaid,
+                    onChanged: notifier.onChangedPrepaid,
+                  ),
+                  if (formState.isPrepaid)
                     _PaymentDatetimeField(
-                      controller: paymentDatetimeController,
-                      onChanged: notifier.onChangedPaymentDatetime,
-                    ),
+                    controller: paymentDatetimeController,
+                    onChanged: notifier.onChangedPaymentDatetime,
+                  ),
                   _NoteField(
                     controller: noteController,
                     onChanged: notifier.onChangedNote,
@@ -533,6 +536,59 @@ class _DeliveryDatetimeField extends StatelessWidget {
   }
 }
 
+class _PrepaidCheckbox extends StatelessWidget {
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const _PrepaidCheckbox({
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.primary;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: CheckboxListTile(
+        value: value,
+        dense: true,
+        contentPadding: const EdgeInsets.only(left: 4),
+        controlAffinity: ListTileControlAffinity.leading,
+
+        // 🔵 màu text
+        title: Text(
+          'Thanh toán',
+          style: TextStyle(
+            fontSize: 14,
+            color: color,
+          ),
+        ),
+
+        // 🔵 màu checkbox
+        activeColor: color, // fallback cho older Flutter
+        checkColor: Colors.white,
+
+        // 🔵 Flutter mới (quan trọng)
+        fillColor: MaterialStateProperty.resolveWith((states) {
+          if (states.contains(MaterialState.selected)) {
+            return color;
+          }
+          return Colors.transparent;
+        }),
+
+        side: BorderSide(
+          color: color,
+          width: 1.5,
+        ),
+
+        onChanged: (v) => onChanged(v ?? false),
+      ),
+    );
+  }
+}
+
 class _PaymentDatetimeField extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<DateTime> onChanged;
@@ -571,7 +627,7 @@ class _PaymentDatetimeField extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.only(top: AppSizes.padding),
+      padding: const EdgeInsets.only(top: 2),
       child: SizedBox(
         height: 40,
         child: InkWell(

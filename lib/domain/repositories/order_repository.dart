@@ -14,6 +14,8 @@ abstract class OrderRepository {
 
   Future<Result<void>> updateOrder(OrderEntity order);
 
+  Future<Result<void>> updateOrderWithItems(OrderEntity order, List<dynamic> items);
+
   Future<Result<void>> deleteOrder(int orderId);
 
   Future<Result<void>> updateStatusOrder(OrderEntity order);

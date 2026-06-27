@@ -44,6 +44,7 @@ class OrderState {
           userName: row.userName,
           status: row.status,
           deliveryDatetime: row.deliveryDatetime,
+          paymentDatetime: row.paymentDatetime,
           discountValue: row.discountValue,
           subTotal: row.subTotal,
           total: row.total,

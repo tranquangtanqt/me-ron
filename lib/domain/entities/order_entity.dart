@@ -5,6 +5,7 @@ class OrderEntity extends Equatable {
   final int? userId;
   final int status;
   final DateTime? deliveryDatetime;
+  final DateTime? paymentDatetime;
   final int discountValue;
   final int subTotal;
   final int total;
@@ -17,6 +18,7 @@ class OrderEntity extends Equatable {
     this.userId,
     required this.status,
     this.deliveryDatetime,
+    this.paymentDatetime,
     required this.discountValue,
     required this.subTotal,
     required this.total,
@@ -30,6 +32,7 @@ class OrderEntity extends Equatable {
     final int? userId,
     final int? status,
     final DateTime? deliveryDatetime,
+    final DateTime? paymentDatetime,
     final int? discountValue,
     final int? subTotal,
     final int? total,
@@ -42,6 +45,7 @@ class OrderEntity extends Equatable {
       userId: userId ?? this.userId,
       status: status ?? this.status,
       deliveryDatetime: deliveryDatetime ?? this.deliveryDatetime,
+      paymentDatetime: paymentDatetime ?? this.paymentDatetime,
       discountValue: discountValue ?? this.discountValue,
       subTotal: subTotal ?? this.subTotal,
       total: total ?? this.total,
@@ -57,6 +61,7 @@ class OrderEntity extends Equatable {
     userId,
     status,
     deliveryDatetime,
+    paymentDatetime,
     discountValue,
     subTotal,
     total,

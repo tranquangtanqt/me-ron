@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS '$orderTableName' (
     'userId' INTEGER,
     'status' INTEGER,
     'deliveryDatetime' DATETIME DEFAULT CURRENT_TIMESTAMP,
+    'paymentDatetime' DATETIME DEFAULT CURRENT_TIMESTAMP,
     'discountValue' INTEGER,
     'subTotal' INTEGER,
     'total' INTEGER,

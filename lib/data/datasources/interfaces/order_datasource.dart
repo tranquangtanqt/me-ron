@@ -8,6 +8,8 @@ abstract class OrderDatasource {
 
   Future<Result<int>> createOrderWithItems(OrderModel order, List<OrderItemModel> items);
 
+  Future<Result<void>> updateOrderWithItems(OrderModel order, List<OrderItemModel> items);
+
   Future<Result<void>> updateOrder(OrderModel order);
 
   Future<Result<void>> deleteOrder(int id);

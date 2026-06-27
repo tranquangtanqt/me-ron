@@ -44,13 +44,13 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
 
     bool check = true;
     for (int i = 0; i < allOrder!.length; i++) {
-      if (allOrder[i].status != OrderStatus.shipping.value && allOrder[i].status != OrderStatus.pending.value) {
+      if (allOrder[i].status == OrderStatus.completed) {
         check = false;
       }
     }
 
     if (check == false) {
-      AppSnackBar.showError('Chỉ cho phép thanh toán với đơn có trạng thái  mới hoặc đã giao hàng');
+      AppSnackBar.showError('Không cho phép thanh toán với đơn có trạng thái đã thanh toán');
       return;
     }
 
@@ -252,27 +252,11 @@ class _OrderDetailCard extends StatelessWidget {
         final status = order.status;
         if (status != null) {
           try {
-        final st = OrderStatus.values[status];
-        switch (st) {
-          case OrderStatus.shipping:
-            // bg = Colors.amber.shade900;
-            bg = const Color(0xFF3A2E00);
-            break;
-          case OrderStatus.completed:
-            // bg = Colors.green.shade900;
-            bg = const Color(0xFF0D3B2A);
-            break;
-          case OrderStatus.cancelled:
-            // bg = Colors.red.shade900;
-            bg = const Color(0xFF3D1A1A);
-            break;
-          case OrderStatus.pending:
-          // default:
-            // bg = const Color(0xFF202225);
-        }
-      } catch (_) {
-        bg = null;
-      }
+            final st = OrderStatusExtension.fromValue(status);
+            bg = st.color;
+          } catch (_) {
+            bg = null;
+          }
         }
         return bg;
       }(),

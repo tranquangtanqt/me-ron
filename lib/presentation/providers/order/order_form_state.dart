@@ -8,6 +8,7 @@ class OrderFormState {
   final int? status;
   final int? originalStatus;
   final DateTime? deliveryDatetime;
+  final bool isPrepaid; //Thanh toán luôn
   final DateTime? paymentDatetime;
   final int? discountValue;
   final int? subTotal;
@@ -21,6 +22,7 @@ class OrderFormState {
     this.status,
     this.originalStatus,
     this.deliveryDatetime,
+    this.isPrepaid = false,
     this.paymentDatetime,
     this.discountValue,
     this.subTotal,
@@ -36,6 +38,7 @@ class OrderFormState {
     int? originalStatus,
     DateTime? deliveryDatetime,
     DateTime? paymentDatetime,
+    bool? isPrepaid,
     int? discountValue,
     int? subTotal,
     int? total,
@@ -49,6 +52,7 @@ class OrderFormState {
       originalStatus: originalStatus ?? this.originalStatus,
       deliveryDatetime: deliveryDatetime ?? this.deliveryDatetime,
       paymentDatetime: paymentDatetime ?? this.paymentDatetime,
+      isPrepaid: isPrepaid ?? this.isPrepaid,
       discountValue: discountValue ?? this.discountValue,
       subTotal: subTotal ?? this.subTotal,
       total: total ?? this.total,
@@ -84,6 +88,7 @@ class OrderFormState {
       status: status ?? this.status,
       deliveryDatetime: deliveryDatetime ?? this.deliveryDatetime,
       paymentDatetime: paymentDatetime ?? this.paymentDatetime,
+      isPrepaid: isPrepaid ?? this.isPrepaid,
       discountValue: discountValue ?? this.discountValue,
       subTotal: subTotal ?? this.subTotal,
       total: total ?? this.total,

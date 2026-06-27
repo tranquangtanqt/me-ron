@@ -133,6 +133,49 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
   }
 
   @override
+  Future<Result<void>> updateOrderWithItems(OrderModel order, List<OrderItemModel> items) async {
+    try {
+      if (order.id == null) {
+        return Result.failure(error: 'Order id is null');
+      }
+
+      await _databaseService.database.transaction((trx) async {
+        await trx.update(
+          DatabaseConfig.orderTableName,
+          order.toJson(),
+          where: 'id = ?',
+          whereArgs: [order.id],
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+
+        await trx.delete(
+          DatabaseConfig.orderItemTableName,
+          where: 'orderId = ?',
+          whereArgs: [order.id],
+        );
+
+        if (items.isNotEmpty) {
+          final batch = trx.batch();
+          for (var item in items) {
+            item.orderId = order.id;
+            batch.insert(
+              DatabaseConfig.orderItemTableName,
+              item.toJson(),
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
+          }
+
+          await batch.commit(noResult: true);
+        }
+      });
+
+      return Result.success(data: null);
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
   Future<Result<void>> updateOrder(OrderModel order) async {
     try {
       await _databaseService.database.update(
@@ -167,12 +210,6 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
   @override
   Future<Result<List<OrderModel>>> getOrder(int id) async {
     try {
-      // var res = await _databaseService.database.query(
-      //   DatabaseConfig.orderTableName,
-      //   where: 'id = ?',
-      //   whereArgs: [id],
-      // );
-
       var res = await _databaseService.database.rawQuery(
         '''
           SELECT 

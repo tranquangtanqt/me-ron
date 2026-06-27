@@ -166,6 +166,39 @@ class OrderRepositoryImpl extends OrderRepository {
   }
 
   @override
+  Future<Result<void>> updateOrderWithItems(OrderEntity order, List<dynamic> items) async {
+    try {
+      final data = OrderModel.fromEntity(order);
+      final itemsModels = items
+          .map((dynamic it) => OrderItemModel.fromEntity(it as OrderItemEntity))
+          .toList();
+
+      final local = await orderLocalDatasource.updateOrderWithItems(data, itemsModels);
+      if (local.isFailure) return Result.failure(error: local.error!);
+
+      final res = await queuedActionLocalDatasource.createQueuedAction(
+        QueuedActionModel(
+          id: DateTime.now().millisecond,
+          repository: 'OrderRepositoryImpl',
+          method: 'updateOrderWithItems',
+          param: jsonEncode({
+            'order': data.toJson(),
+            'items': itemsModels.map((e) => e.toJson()).toList(),
+          }),
+          isCritical: true,
+          createdAt: DateTime.now().toIso8601String(),
+        ),
+      );
+
+      if (res.isFailure) return Result.failure(error: res.error!);
+
+      return Result.success(data: null);
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
   Future<Result<void>> updateStatusOrder(OrderEntity order) async {
     try {
       final local = await orderLocalDatasource.updateStatusOrder(order.id!, order.status);

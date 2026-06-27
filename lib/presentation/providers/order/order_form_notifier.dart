@@ -1,14 +1,10 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../../app/di/app_providers.dart';
 import '../../../core/common/result.dart';
 import '../../../core/enums/order_status.dart';
-import '../../../core/utilities/console_logger.dart';
-import '../../../data/models/order_item_model.dart';
 import '../../../data/models/order_model.dart';
 import '../../../domain/entities/order_entity.dart';
 import '../../../domain/entities/order_item_entity.dart';
@@ -33,9 +29,6 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
 
   Future<void> initOrderForm(int? orderId) async {
     final now = DateTime.now();
-    final today = "${now.day.toString().padLeft(2, '0')}/"
-        "${now.month.toString().padLeft(2, '0')}/"
-        "${now.year}";
 
     if (orderId == null) {
       state = state.copyWith(
@@ -44,8 +37,8 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
         subTotal: 0,
         total: 0,
         isLoaded: true,
-        status: OrderStatus.pending.value,
-        originalStatus: OrderStatus.pending.value
+        status: OrderStatus.shipping.value,
+        originalStatus: OrderStatus.shipping.value
       );
       return;
     }
@@ -56,13 +49,15 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
     final allProduct = ref.read(productsNotifierProvider).allProducts ?? [];
 
     if (res.isSuccess) {
-      final orders = res.data;
+      List<OrderModel>? orders = res.data;
 
       state = state.copyWith(
         userId: orders?[0].userId,
         status: orders?[0].status,
         originalStatus: orders?[0].status,
         deliveryDatetime: orders?[0].deliveryDatetime,
+        isPrepaid: OrderStatusExtension.fromValue(orders?[0].status ?? 0) == OrderStatus.completed,
+        paymentDatetime: orders?[0].paymentDatetime,
         discountValue: orders?[0].discountValue,
         subTotal: orders?[0].subTotal,
         total: orders?[0].total,
@@ -99,8 +94,9 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
         final order = OrderEntity(
           id: null,
           userId: state.userId,
-          status: state.status ?? OrderStatus.shipping.value,
+          status: state.isPrepaid ? OrderStatus.completed.value : OrderStatus.shipping.value,
           deliveryDatetime: state.deliveryDatetime,
+          paymentDatetime: state.paymentDatetime,
           discountValue: state.discountValue ?? 0,
           subTotal: state.subTotal ?? 0,
           total: state.total ?? 0,
@@ -137,27 +133,22 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
       execute: () async {
         final orderRepository = ref.read(orderRepositoryProvider);
 
-        print(state.isStatusChanged);
         final order = OrderEntity(
           id: id,
           userId: state.userId,
-          status: state.status ?? OrderStatus.shipping.value,
+          status: state.isPrepaid ? OrderStatus.completed.value : OrderStatus.shipping.value,
           deliveryDatetime: state.deliveryDatetime,
+          paymentDatetime: state.paymentDatetime,
           discountValue: state.discountValue ?? 0,
           subTotal: state.subTotal ?? 0,
           total: state.total ?? 0,
           note: state.note ?? '',
         );
 
-        final res = await UpdateOrderUsecase(orderRepository).call(order);
-
-        final orderItemRepository = ref.read(orderItemRepositoryProvider);
-
-        // var total = 0;
+        final items = <OrderItemEntity>[];
         for (final OrderItemForm item in state.items ?? []) {
-          OrderItemEntity oderItem;
-          if (item.id != null) {
-            oderItem = OrderItemEntity(
+          items.add(
+            OrderItemEntity(
               id: item.id,
               orderId: id,
               productId: item.product?.id,
@@ -165,29 +156,14 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
               snapshotPrice: item.product?.price ?? 0,
               quantity: item.quantity,
               lineTotal: (item.product?.price ?? 0) * item.quantity,
-            );
-            await UpdateOrderItemUsecase(orderItemRepository).call(oderItem);
-          } else {
-            oderItem = OrderItemEntity(
-              orderId: id,
-              productId: item.product?.id,
-              snapshotName: item.product?.name,
-              snapshotPrice: item.product?.price ?? 0,
-              quantity: item.quantity,
-              lineTotal: (item.product?.price ?? 0) * item.quantity,
-            );
-            await CreateOrderItemUsecase(orderItemRepository).call(oderItem);
-          }
-
-          // total += oderItem.lineTotal;
+            ),
+          );
         }
 
-        // final updatedOrder = order.copyWith(
-        //   id: id,
-        //   total: total,
-        // );
-        //
-        // await UpdateOrderUsecase(orderRepository).call(updatedOrder);
+        final res = await UpdateOrderWithItemsUsecase(orderRepository).call({
+          'order': order,
+          'items': items,
+        });
 
         return res;
       },
@@ -245,14 +221,13 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
     state = state.copyWith(userId: value);
   }
 
-  void onChangedStatus(OrderStatus? value) {
-    if (value == null) return;
-
-    state = state.copyWith(status: value.value);
-  }
+  // void onChangedStatus(OrderStatus? value) {
+  //   if (value == null) return;
+  //
+  //   state = state.copyWith(status: value.value);
+  // }
 
   void onChangedDiscountValue(String value) {
-    // state = state.copyWith(discountValue: int.tryParse(value));
     final discount = int.tryParse(value) ?? 0;
 
     final subTotal = state.subTotal ?? 0;
@@ -269,6 +244,13 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
 
   void onChangedPaymentDatetime(DateTime value) {
     state = state.copyWith(paymentDatetime: value);
+  }
+
+  void onChangedPrepaid(bool value) {
+    state = state.copyWith(
+      isPrepaid: value,
+      paymentDatetime: value ? state.paymentDatetime : null,
+    );
   }
 
   void removeItem(int index) {

@@ -9,6 +9,7 @@ class OrderModel {
   String? userName;
   int? status;
   DateTime? deliveryDatetime;
+  DateTime? paymentDatetime;
   int discountValue;
   int subTotal;
   int total;
@@ -30,6 +31,7 @@ class OrderModel {
     this.userName,
     this.status,
     required this.deliveryDatetime,
+    required this.paymentDatetime,
     required this.discountValue,
     required this.subTotal,
     required this.total,
@@ -55,6 +57,9 @@ class OrderModel {
       deliveryDatetime: json['deliveryDatetime'] != null
           ? DateTime.parse(json['deliveryDatetime'])
           : null,
+      paymentDatetime: json['paymentDatetime'] != null
+          ? DateTime.parse(json['paymentDatetime'])
+          : null,
       discountValue: json['discountValue'] ?? '',
       subTotal: json['subTotal'] ?? '',
       total: json['total'] ?? 0,
@@ -77,6 +82,7 @@ class OrderModel {
       'userId': userId,
       'status': status,
       'deliveryDatetime': deliveryDatetime?.toIso8601String(),
+      'paymentDatetime': paymentDatetime?.toIso8601String(),
       'discountValue': discountValue,
       'subTotal': subTotal,
       'total': total,
@@ -92,6 +98,7 @@ class OrderModel {
       userId: entity.userId,
       status: entity.status,
       deliveryDatetime: entity.deliveryDatetime,
+      paymentDatetime: entity.paymentDatetime,
       discountValue: entity.discountValue,
       subTotal: entity.subTotal,
       total: entity.total,
@@ -107,6 +114,7 @@ class OrderModel {
       userId: userId,
       status: status ?? 0,
       deliveryDatetime: deliveryDatetime,
+      paymentDatetime: paymentDatetime,
       discountValue: discountValue ?? 0,
       subTotal: subTotal ?? 0,
       total: total ?? 0,
@@ -124,6 +132,7 @@ class OrderModel {
         'userName: $userName, '
         'status: $status, '
         'deliveryDatetime: $deliveryDatetime, '
+        'paymentDatetime: $paymentDatetime, '
         'discountValue: $discountValue, '
         'subTotal: $subTotal, '
         'total: $total, '

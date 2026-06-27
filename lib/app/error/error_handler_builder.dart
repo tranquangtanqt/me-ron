@@ -43,6 +43,10 @@ class ErrorHandlerBuilderState extends ConsumerState<ErrorHandlerBuilder> {
 
   // Flutter error handling logic
   void onFlutterError(FlutterErrorDetails flutterError) {
+    debugPrint('========== Flutter Error ==========');
+    debugPrint(flutterError.exceptionAsString());
+    debugPrint(flutterError.stack?.toString());
+
     ce(flutterError.exception);
 
     // _errorLoggerService.log(error: flutterError);	TODO comment
@@ -63,6 +67,10 @@ class ErrorHandlerBuilderState extends ConsumerState<ErrorHandlerBuilder> {
 
   // Platform error handling logic
   bool onPlatformError(Object error, StackTrace stackTrace) {
+    debugPrint('========== Platform Error ==========');
+    debugPrint(error.toString());
+    debugPrint(stackTrace.toString());
+
     ce(error);
 
     // _errorLoggerService.log(error: error, stackTrace: stackTrace);	TODO comment
