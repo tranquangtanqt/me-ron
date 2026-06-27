@@ -26,10 +26,11 @@ extension OrderStatusExtension on OrderStatus {
   }
 
   /// Returns color for UI status badge
-  Color get color {
+  Color? get color {
     return switch (this) {
       // OrderStatus.pending => Colors.blue,
-      OrderStatus.shipping => Color(0xFF3A2E00),  //Colors.amber.shade900
+      OrderStatus.shipping => null,  //Colors.amber.shade900
+      // OrderStatus.shipping => Color(0xFF3A2E00),  //Colors.amber.shade900
       OrderStatus.completed => Color(0xFF0D3B2A), //Colors.green.shade900
       OrderStatus.cancelled => Color(0xFF3D1A1A), //Colors.red.shade900
     };

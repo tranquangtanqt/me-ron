@@ -89,7 +89,7 @@ class _UserScreenState extends ConsumerState<UserScreen> {
                   columns: const [
                     DataColumn(label: Padding(
                       padding: EdgeInsets.only(left: 8),
-                      child: Text('id'),
+                      child: Text('STT'),
                     ),),
                     DataColumn(label: Text('Tên')),
                     DataColumn(label: Text('Số ĐT')),
