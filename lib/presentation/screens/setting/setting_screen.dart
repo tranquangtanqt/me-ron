@@ -25,6 +25,7 @@ class SetttingScreen extends StatelessWidget {
             _UserInfo(),
             // _ProfileButton(),
             _ThemeButton(),
+            // _BackupButton(),
             // _PrinterSettingsButton(),
             // _AboutButton(),
             // _SignOutButton(),
@@ -153,6 +154,48 @@ class _ThemeButton extends StatelessWidget {
             leftButtonText: 'Đóng',
             child: const _ThemeDialogBody(),
           );
+        },
+      ),
+    );
+  }
+}
+
+class _BackupButton extends StatelessWidget {
+  const _BackupButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSizes.padding),
+      child: AppButton(
+        buttonColor: Theme.of(context).colorScheme.surface,
+        borderColor: Theme.of(context).colorScheme.surfaceContainer,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.info_outline_rounded,
+                  size: 18,
+                ),
+                const SizedBox(width: AppSizes.padding / 1.5),
+                Text(
+                  'Sao lưu',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 18,
+            ),
+          ],
+        ),
+        onTap: () {
+          context.go('/setting/about');
         },
       ),
     );

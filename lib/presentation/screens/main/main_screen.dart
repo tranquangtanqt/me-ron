@@ -87,7 +87,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       return 2;
     }
 
-    if (location.startsWith('/account')) {
+    if (location.startsWith('/setting')) {
       return 3;
     }
 
@@ -105,7 +105,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       case 2:
         router.go('/report');
       case 3:
-        router.go('/account');
+        router.go('/setting');
     }
   }
 }

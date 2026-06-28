@@ -119,7 +119,7 @@ class AppRoutes {
         _home(),
         _product(),
         _transactions(),
-        _account(),
+        _setting(),
         _address(),
         _category(),
         _user(),
@@ -245,9 +245,9 @@ class AppRoutes {
     );
   }
 
-  GoRoute _account() {
+  GoRoute _setting() {
     return GoRoute(
-      path: '/account',
+      path: '/setting',
       pageBuilder: (context, state) {
         return const NoTransitionPage<void>(
           child: SetttingScreen(),
