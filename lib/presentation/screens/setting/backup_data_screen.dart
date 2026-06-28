@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -21,6 +24,26 @@ class BackupDataScreen extends ConsumerStatefulWidget {
 
 class _BackupDataScreenState extends ConsumerState<BackupDataScreen> {
   final panelController = PanelController();
+  static const _mediaStoreChannel = MethodChannel('me_ron/media_store');
+
+  Future<String> _saveFileToDownloads({
+    required String fileName,
+    required String relativePath,
+    required String contents,
+  }) async {
+    final result = await _mediaStoreChannel.invokeMethod<String>('saveFileToDownloads', {
+      'fileName': fileName,
+      'relativePath': relativePath,
+      'mimeType': 'text/tab-separated-values',
+      'bytes': Uint8List.fromList(utf8.encode(contents)),
+    });
+
+    if (result == null || result.isEmpty) {
+      throw Exception('Không thể lưu file vào thư mục Download');
+    }
+
+    return result;
+  }
 
   @override
   void initState() {
@@ -34,17 +57,8 @@ class _BackupDataScreenState extends ConsumerState<BackupDataScreen> {
 
   Future<void> _exportDatabaseToTsv(BuildContext context) async {
     try {
-      final selectedDirectory = await FilePicker.getDirectoryPath();
-      if (selectedDirectory == null || selectedDirectory.isEmpty) {
-        return;
-      }
-
       final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-      final exportDirectory = Directory('$selectedDirectory/$timestamp');
-      if (!await exportDirectory.exists()) {
-        await exportDirectory.create(recursive: true);
-      }
-
+      final downloadRelativePath = 'Download/MeRon/$timestamp';
       final db = DatabaseService.instance.database;
       final tables = <String>[
         DatabaseConfig.addressTableName,
@@ -61,38 +75,41 @@ class _BackupDataScreenState extends ConsumerState<BackupDataScreen> {
 
       for (final tableName in tables) {
         final rows = await db.query(tableName);
-        if (rows.isEmpty) {
-          final file = File('${exportDirectory.path}/${tableName.toLowerCase()}_$timestamp.tsv');
-          await file.writeAsString('');
-          exportedFiles.add(file.path);
-          continue;
-        }
+        final fileName = '${tableName.toLowerCase()}_$timestamp.tsv';
+        final contents = rows.isEmpty
+            ? ''
+            : () {
+                final columns = rows.first.keys.toList();
+                final lines = <String>[
+                  columns.join('\t'),
+                ];
 
-        final columns = rows.first.keys.toList();
-        final lines = <String>[
-          columns.join('\t'),
-        ];
+                for (final row in rows) {
+                  final sanitized = columns.map((column) {
+                    final value = row[column];
+                    if (value == null) {
+                      return '';
+                    }
+                    return value.toString().replaceAll('\t', ' ').replaceAll('\n', ' ');
+                  }).toList();
+                  lines.add(sanitized.join('\t'));
+                }
 
-        for (final row in rows) {
-          final sanitized = columns.map((column) {
-            final value = row[column];
-            if (value == null) {
-              return '';
-            }
-            return value.toString().replaceAll('\t', ' ').replaceAll('\n', ' ');
-          }).toList();
-          lines.add(sanitized.join('\t'));
-        }
+                return lines.join('\n');
+              }();
 
-        final file = File('${exportDirectory.path}/${tableName.toLowerCase()}_$timestamp.tsv');
-        await file.writeAsString(lines.join('\n'));
-        exportedFiles.add(file.path);
+        final savedPath = await _saveFileToDownloads(
+          fileName: fileName,
+          relativePath: downloadRelativePath,
+          contents: contents,
+        );
+        exportedFiles.add(savedPath);
       }
 
       if (!mounted) return;
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Đã xuất ${exportedFiles.length} file vào ${exportDirectory.path}')),
+        SnackBar(content: Text('Đã xuất ${exportedFiles.length} file vào thư mục Download/MeRon/$timestamp')),
       );
     } catch (e) {
       if (!mounted) return;

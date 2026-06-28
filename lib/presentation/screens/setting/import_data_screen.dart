@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../../core/services/database/database_config.dart';
 import '../../../core/services/database/database_service.dart';
@@ -18,23 +19,60 @@ class ImportDataScreen extends ConsumerStatefulWidget {
 }
 
 class _ImportDataScreenState extends ConsumerState<ImportDataScreen> {
+  Future<File?> _resolveImportFile({required String tableName}) async {
+    final result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['tsv'],
+      withData: false,
+    );
+
+    if (result != null && result.files.isNotEmpty && result.files.single.path != null) {
+      final file = File(result.files.single.path!);
+      if (await file.exists()) {
+        return file;
+      }
+    }
+
+    final appDocumentsDirectory = await getApplicationDocumentsDirectory();
+    final backupsDirectory = Directory('${appDocumentsDirectory.path}/backups');
+    if (!await backupsDirectory.exists()) {
+      return null;
+    }
+
+    final backupDirectories = <Directory>[];
+    await for (final entity in backupsDirectory.list()) {
+      if (entity is Directory) {
+        backupDirectories.add(entity);
+      }
+    }
+
+    backupDirectories.sort((a, b) => b.path.compareTo(a.path));
+
+    for (final backupDirectory in backupDirectories) {
+      await for (final entity in backupDirectory.list()) {
+        if (entity is File) {
+          final fileName = entity.uri.pathSegments.last;
+          if (fileName.startsWith('${tableName.toLowerCase()}_') && fileName.endsWith('.tsv')) {
+            return entity;
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
   Future<void> _importTsvToDatabase({
     required BuildContext context,
     required String tableName,
     String? identityColumn,
   }) async {
     try {
-      final result = await FilePicker.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['tsv'],
-        withData: false,
-      );
-
-      if (result == null || result.files.single.path == null) {
-        return;
+      final file = await _resolveImportFile(tableName: tableName);
+      if (file == null) {
+        throw Exception('Không tìm thấy file TSV phù hợp');
       }
 
-      final file = File(result.files.single.path!);
       if (!await file.exists()) {
         throw Exception('File không tồn tại');
       }
