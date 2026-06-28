@@ -331,20 +331,53 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
                   }
 
                   return SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(AppSizes.padding, 2, AppSizes.padding, AppSizes.padding),
-                    sliver: SliverList.builder(
-                      itemCount: allOrder.length,
-                      itemBuilder: (context, i) {
-                        return Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: AppSizes.padding / 2,
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSizes.padding,
+                      2,
+                      AppSizes.padding,
+                      AppSizes.padding,
+                    ),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate(
+                        [
+                          const SizedBox(height: 6),
+
+                          // ===== SECTION HEADER =====
+                          Row(
+                            children: const [
+                              Icon(Icons.list_alt, size: 18),
+                              SizedBox(width: 6),
+                              Text(
+                                'Chi tiết đơn hàng',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
-                          child: _ReportOrderCard(
-                              order: allOrder[i],
-                              onTap: updateOrder
+
+                          const SizedBox(height: 6),
+                          const Divider(thickness: 1),
+
+                          const SizedBox(height: 4),
+
+                          // ===== LIST =====
+                          ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: allOrder.length,
+                            separatorBuilder: (_, __) =>
+                            const SizedBox(height: AppSizes.padding / 2),
+                            itemBuilder: (context, i) {
+                              return _ReportOrderCard(
+                                order: allOrder[i],
+                                onTap: updateOrder,
+                              );
+                            },
                           ),
-                        );
-                      },
+                        ],
+                      ),
                     ),
                   );
                 },
