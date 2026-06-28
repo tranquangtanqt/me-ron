@@ -1,5 +1,6 @@
 import '../../../core/common/result.dart';
 import '../../../domain/usecases/params/order_params.dart';
+import '../../../domain/usecases/params/report_order_params.dart';
 import '../../../domain/usecases/params/report_product_params.dart';
 import '../../models/order_model.dart';
 import '../../models/order_item_model.dart';
@@ -20,6 +21,8 @@ abstract class OrderDatasource {
   Future<Result<List<OrderModel>>> getAllOrders(OrderParams params);
 
   Future<Result<List<OrderModel>>> getAllOrderReportProduct(ReportProductParams params);
+
+  Future<Result<List<OrderModel>>> getAllOrderReportOrder(ReportOrderParams params);
 
   Future<Result<void>> updateStatusOrder(int id, int status);
 }

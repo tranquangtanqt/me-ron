@@ -68,7 +68,7 @@ class _ReportOrderButton extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSizes.padding / 1.5),
                 Text(
-                  'Theo đặt hàng',
+                  'Theo đơn hàng',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -82,13 +82,12 @@ class _ReportOrderButton extends StatelessWidget {
           ],
         ),
         onTap: () {
-          context.push('/order');
+          context.push('/report/report-order');
         },
       ),
     );
   }
 }
-
 
 class _ReportProductButton extends StatelessWidget {
   const _ReportProductButton();

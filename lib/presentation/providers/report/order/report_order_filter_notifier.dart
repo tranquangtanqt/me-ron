@@ -1,16 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../presentation/providers/report/product/report_product_filter_state.dart';
+import '../../../../presentation/providers/report/order/report_order_filter_state.dart';
 import '../../../../core/enums/order_status.dart';
 
 
-final reportProductFilterProvider = StateNotifierProvider<ReportProductNotifier, ReportProductFilterState>(
-      (ref) => ReportProductNotifier(),
+final reportOrderFilterProvider = StateNotifierProvider<ReportOrderNotifier, ReportOrderFilterState>(
+      (ref) => ReportOrderNotifier(),
 );
 
-class ReportProductNotifier extends StateNotifier<ReportProductFilterState> {
+class ReportOrderNotifier extends StateNotifier<ReportOrderFilterState> {
 
-  ReportProductNotifier()
-      : super(ReportProductFilterState(
+  ReportOrderNotifier()
+      : super(ReportOrderFilterState(
         status: OrderStatus.shipping.value,
         fromDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 00, 00, 00, 000),
         toDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 23, 59, 59, 999),
@@ -29,12 +29,12 @@ class ReportProductNotifier extends StateNotifier<ReportProductFilterState> {
     state = state.copyWith(toDate: to);
   }
 
-  void setProduct(int? productId) {
-    state = state.copyWith(productId: productId);
+  void setUser(int? userId) {
+    state = state.copyWith(userId: userId);
   }
 
   void reset() {
-    state = ReportProductFilterState(
+    state = ReportOrderFilterState(
       status: OrderStatus.shipping.value,
       fromDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 00, 00, 00, 000),
       toDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 23, 59, 59, 999),

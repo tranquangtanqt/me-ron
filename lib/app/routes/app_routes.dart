@@ -21,6 +21,7 @@ import '../../presentation/screens/order/order_form_screen.dart';
 import '../../presentation/screens/order/order_screen.dart';
 import '../../presentation/screens/products/product_form_screen.dart';
 import '../../presentation/screens/products/products_screen.dart';
+import '../../presentation/screens/report/report_order_screen.dart';
 import '../../presentation/screens/transactions/transaction_detail_screen.dart';
 import '../../presentation/screens/transactions/transactions_screen.dart';
 import '../../presentation/screens/user/user_form_screen.dart';
@@ -238,9 +239,8 @@ class AppRoutes {
         );
       },
       routes: [
+        _reportOrder(),
         _reportProduct(),
-        // _orderEdit(),
-        // _orderDetail(),
       ],
     );
   }
@@ -292,6 +292,15 @@ class AppRoutes {
       parentNavigatorKey: navNavigatorKey,
       builder: (context, state) {
         return const OrderFormScreen();
+      },
+    );
+  }
+
+  GoRoute _reportOrder() {
+    return GoRoute(
+      path: 'report-order',
+      builder: (context, state) {
+        return ReportOrderScreen();
       },
     );
   }
