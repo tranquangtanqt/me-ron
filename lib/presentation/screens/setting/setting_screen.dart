@@ -11,8 +11,8 @@ import '../../widgets/app_button.dart';
 import '../../widgets/app_dialog.dart';
 import '../../widgets/app_snack_bar.dart';
 
-class AccountScreen extends StatelessWidget {
-  const AccountScreen({super.key});
+class SetttingScreen extends StatelessWidget {
+  const SetttingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -3,14 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../presentation/providers/auth/auth_notifier.dart';
-import '../../presentation/screens/account/about_screen.dart';
+import '../../presentation/screens/setting/about_screen.dart';
 import '../../presentation/screens/address/address_form_screen.dart';
 import '../../presentation/screens/address/address_screen.dart';
 import '../../presentation/screens/category/category_form_screen.dart';
 import '../../presentation/screens/category/category_screen.dart';
-import '../../presentation/screens/account/account_screen.dart';
-import '../../presentation/screens/account/printer_settings_screen.dart';
-import '../../presentation/screens/account/profile_form_screen.dart';
+import '../../presentation/screens/setting/setting_screen.dart';
+import '../../presentation/screens/setting/printer_settings_screen.dart';
+import '../../presentation/screens/setting/profile_form_screen.dart';
 import '../../presentation/screens/error/error_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/main/main_screen.dart';
@@ -250,7 +250,7 @@ class AppRoutes {
       path: '/account',
       pageBuilder: (context, state) {
         return const NoTransitionPage<void>(
-          child: AccountScreen(),
+          child: SetttingScreen(),
         );
       },
       routes: [
