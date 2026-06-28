@@ -12,6 +12,8 @@ class Constants {
   static const int minSyncIntervalToleranceForCriticalInMinutes = 5;
   static const int minSyncIntervalToleranceForLessCriticalInMinutes = 100;
 
+  static const double listTileFontSize = 13;
+
   // Google OAuth scopes required for user authentication
   static const List<String> authScopes = [
     'https://www.googleapis.com/auth/userinfo.profile',

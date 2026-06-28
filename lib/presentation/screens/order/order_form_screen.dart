@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/constants/constants.dart';
 import '../../../domain/entities/product_entity.dart';
 import '../../../core/enums/order_status.dart';
 import '../../../core/themes/app_sizes.dart';
@@ -404,7 +405,13 @@ class _UserAutocomplete extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final option = options.elementAt(index);
                     return ListTile(
-                      title: Text(option.name ?? ''),
+                      dense: true,
+                      minTileHeight: 36,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: Constants.listTileFontSize),
+                      title: Text(
+                        option.name ?? '',
+                        style: const TextStyle(fontSize: Constants.listTileFontSize),
+                      ),
                       onTap: () => onSelected(option),
                     );
                   },

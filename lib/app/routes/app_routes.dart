@@ -250,7 +250,7 @@ class AppRoutes {
       path: '/setting',
       pageBuilder: (context, state) {
         return const NoTransitionPage<void>(
-          child: SetttingScreen(),
+          child: SettingScreen(),
         );
       },
       routes: [

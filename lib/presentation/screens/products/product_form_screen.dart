@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/constants/constants.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../../domain/entities/category_entity.dart';
 import '../../providers/category/category_notifier.dart';
@@ -314,7 +315,13 @@ class _CategoryAutocomplete extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final option = options.elementAt(index);
                     return ListTile(
-                      title: Text(option.name ?? ''),
+                      dense: true,
+                      minTileHeight: 36,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: Constants.listTileFontSize),
+                      title: Text(
+                        option.name ?? '',
+                        style: const TextStyle(fontSize: Constants.listTileFontSize),
+                      ),
                       onTap: () => onSelected(option),
                     );
                   },

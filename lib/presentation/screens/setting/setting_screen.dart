@@ -11,8 +11,8 @@ import '../../widgets/app_button.dart';
 import '../../widgets/app_dialog.dart';
 import '../../widgets/app_snack_bar.dart';
 
-class SetttingScreen extends StatelessWidget {
-  const SetttingScreen({super.key});
+class SettingScreen extends StatelessWidget {
+  const SettingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

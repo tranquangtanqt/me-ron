@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/di/app_providers.dart';
+import '../../../../core/enums/order_status.dart';
 import '../../../../data/models/order_model.dart';
 import '../../../../data/models/product_summary_model.dart';
 import '../../../../domain/usecases/params/base_params.dart';
@@ -117,6 +118,9 @@ class ReportOrderNotifier extends Notifier<ReportOrderState> {
     return orders.fold<Map<int, ProductSummaryModel>>(
       {},
           (map, order) {
+            if (order.status == OrderStatus.cancelled.value) {
+              return map;
+            }
         for (final item in order.items ?? []) {
           map.update(
             item.productId,
@@ -136,5 +140,4 @@ class ReportOrderNotifier extends Notifier<ReportOrderState> {
       },
     );
   }
-
 }
