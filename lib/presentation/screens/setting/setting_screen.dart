@@ -25,7 +25,7 @@ class SettingScreen extends StatelessWidget {
             _UserInfo(),
             // _ProfileButton(),
             _ThemeButton(),
-            // _BackupButton(),
+            _BackupButton(),
             // _PrinterSettingsButton(),
             // _AboutButton(),
             // _SignOutButton(),
@@ -195,7 +195,7 @@ class _BackupButton extends StatelessWidget {
           ],
         ),
         onTap: () {
-          context.go('/setting/about');
+          context.go('/setting/backup-data');
         },
       ),
     );

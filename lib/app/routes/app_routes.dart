@@ -8,6 +8,8 @@ import '../../presentation/screens/address/address_form_screen.dart';
 import '../../presentation/screens/address/address_screen.dart';
 import '../../presentation/screens/category/category_form_screen.dart';
 import '../../presentation/screens/category/category_screen.dart';
+import '../../presentation/screens/setting/backup_data_screen.dart';
+import '../../presentation/screens/setting/import_data_screen.dart';
 import '../../presentation/screens/setting/setting_screen.dart';
 import '../../presentation/screens/setting/printer_settings_screen.dart';
 import '../../presentation/screens/setting/profile_form_screen.dart';
@@ -254,7 +256,7 @@ class AppRoutes {
         );
       },
       routes: [
-        _profileEdit(),
+        _backupData(),
         _about(),
         _printerSettings(),
       ],
@@ -335,6 +337,27 @@ class AppRoutes {
       parentNavigatorKey: navNavigatorKey,
       builder: (context, state) {
         return const OrderDetailScreen();
+      },
+    );
+  }
+
+  GoRoute _backupData() {
+    return GoRoute(
+      path: 'backup-data',
+      builder: (context, state) {
+        return BackupDataScreen();
+      },
+      routes: [
+        _importData(),
+      ],
+    );
+  }
+
+  GoRoute _importData() {
+    return GoRoute(
+      path: 'import',
+      builder: (context, state) {
+        return const ImportDataScreen();
       },
     );
   }
