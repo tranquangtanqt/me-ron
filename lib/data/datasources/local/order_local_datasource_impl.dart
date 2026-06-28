@@ -202,11 +202,15 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
       }
 
       if (sqlWhere.isNotEmpty) {
-        sql += ' WHERE status <> ${OrderStatus.cancelled.value}'; //TODO status
-        sql += ' AND $sqlWhere'; //TODO status
-      } else {
-        sql += ' WHERE status <> ${OrderStatus.cancelled.value}'; //TODO status
+        sql += ' WHERE $sqlWhere';
       }
+
+      // if (sqlWhere.isNotEmpty) {
+      //   sql += ' WHERE status <> ${OrderStatus.cancelled.value}'; //TODO status
+      //   sql += ' AND $sqlWhere'; //TODO status
+      // } else {
+      //   sql += ' WHERE status <> ${OrderStatus.cancelled.value}'; //TODO status
+      // }
 
       sql += ' ORDER BY deliveryDatetime DESC';
       print(sql);

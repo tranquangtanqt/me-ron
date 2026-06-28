@@ -56,11 +56,39 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     final allOrder = ref.watch(reportOrderNotifierProvider.select((s) => s.allOrder));
     final productSummary = ref.watch(reportOrderNotifierProvider.select((s) => s.productSummary));
+    final currencyFormat = NumberFormat('#,###', 'vi_VN');
 
-    print(productSummary?.values.toList());
+    final orderSummaryByStatus = <OrderStatus, _OrderSummary>{};
+    for (final status in OrderStatus.values) {
+      orderSummaryByStatus[status] = const _OrderSummary();
+    }
+
+    if (allOrder != null && allOrder.isNotEmpty) {
+      for (final order in allOrder) {
+        final status = OrderStatusExtension.fromValue(order.status ?? OrderStatus.shipping.value);
+        final current = orderSummaryByStatus[status] ?? const _OrderSummary();
+        orderSummaryByStatus[status] = _OrderSummary(
+          count: current.count + 1,
+          totalAmount: current.totalAmount + (order.total ?? 0),
+        );
+      }
+    }
+
+    final totalOrderCount = allOrder?.length ?? 0;
+    // final totalOrderAmount = allOrder?.fold<int>(0, (sum, order) => sum + (order.total ?? 0)) ?? 0;
+
+    final totalOrderAmount =
+        allOrder
+            ?.where((o) {
+          final status = OrderStatusExtension.fromValue(
+            o.status ?? OrderStatus.shipping.value,
+          );
+          return status != OrderStatus.cancelled;
+        })
+            .fold<int>(0, (sum, order) => sum + (order.total ?? 0)) ??
+            0;
 
     return Scaffold(
       appBar: AppBar(
@@ -86,6 +114,117 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
                   })
                 ),
               ),
+              if (allOrder != null && allOrder.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.padding,
+                      vertical: 8,
+                    ),
+                    child: Card(
+                      elevation: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Tổng cộng theo đơn hàng',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _SummaryMetricTitle2Row(
+                                    title: 'Tổng số đơn',
+                                    value: '$totalOrderCount',
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: _SummaryMetricTitle2Row(
+                                    title: 'Tổng thành tiền',
+                                    value: '${currencyFormat.format(totalOrderAmount)} đ',
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: orderSummaryByStatus.entries
+                                    .where((entry) => entry.value.count > 0)
+                                    .map((entry) {
+                                  final status = entry.key;
+                                  final summary = entry.value;
+                                  final statusLabel = OrderStatusExtension(status).label;
+                                  final statusColor = status == OrderStatus.completed
+                                      ? Colors.green
+                                      : status == OrderStatus.cancelled
+                                          ? Colors.red
+                                          : Colors.orange;
+
+                                  return Container(
+                                    width: 165,
+                                    margin: const EdgeInsets.only(right: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 10,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: statusColor.withOpacity(0.09),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: statusColor.withOpacity(0.25),
+                                      ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          statusLabel,
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          'Số đơn: ${summary.count}',
+                                          style: const TextStyle(fontSize: 13),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            'Tiền: ${currencyFormat.format(summary.totalAmount)} đ',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: statusColor,
+                                            ),
+                                          ),
+                                        ),
+
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               if (productSummary != null && productSummary.isNotEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
@@ -116,7 +255,7 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
                               style: const TextStyle(
                                 fontWeight: FontWeight.w500,
                                 fontSize: 13,
-                                color: Colors.blueGrey,
+                                // color: Colors.blueGrey,
                               ),
                             ),
 
@@ -216,6 +355,55 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
       ),
     );
   }
+}
+
+class _SummaryMetricTitle2Row extends StatelessWidget {
+  final String title;
+  final String value;
+  final Color color;
+
+  const _SummaryMetricTitle2Row({
+    required this.title,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title),
+          const SizedBox(height: 4),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OrderSummary {
+  final int count;
+  final int totalAmount;
+
+  const _OrderSummary({this.count = 0, this.totalAmount = 0});
 }
 
 class _ReportOrderFilterBar extends ConsumerStatefulWidget {

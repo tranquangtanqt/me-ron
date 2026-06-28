@@ -59,7 +59,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.receipt_long_rounded),
-            label: 'Món ăn',
+            label: 'Thống kê',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),
@@ -83,7 +83,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       return 1;
     }
 
-    if (location.startsWith('/product')) {
+    if (location.startsWith('/report')) {
       return 2;
     }
 
@@ -103,7 +103,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       case 1:
         router.go('/order');
       case 2:
-        router.go('/product');
+        router.go('/report');
       case 3:
         router.go('/account');
     }

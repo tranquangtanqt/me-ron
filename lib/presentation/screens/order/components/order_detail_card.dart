@@ -111,7 +111,7 @@ class OrderDetailCard extends StatelessWidget {
                                 fontSize: 11,
                                 // height: 1.3,
                                 fontWeight: FontWeight.normal,
-                                color: Theme.of(context).colorScheme.primary,
+                                // color: Theme.of(context).colorScheme.primary,
                               ),
                             ),
                           ],

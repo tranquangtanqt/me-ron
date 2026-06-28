@@ -31,8 +31,10 @@ extension OrderStatusExtension on OrderStatus {
       // OrderStatus.pending => Colors.blue,
       OrderStatus.shipping => null,  //Colors.amber.shade900
       // OrderStatus.shipping => Color(0xFF3A2E00),  //Colors.amber.shade900
-      OrderStatus.completed => Color(0xFF0D3B2A), //Colors.green.shade900
-      OrderStatus.cancelled => Color(0xFF3D1A1A), //Colors.red.shade900
+      // OrderStatus.completed => Color(0xFF0D3B2A), //Colors.green.shade900
+      // OrderStatus.cancelled => Color(0xFF3D1A1A), //Colors.red.shade900
+      OrderStatus.completed => Colors.green.withOpacity(0.4), //Colors.green.shade900
+      OrderStatus.cancelled => Colors.red.withOpacity(0.4), //Colors.red.shade900
     };
   }
 
