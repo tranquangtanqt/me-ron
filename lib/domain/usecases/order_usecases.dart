@@ -1,12 +1,11 @@
-import 'package:me_ron/domain/usecases/params/report_order_params.dart';
-import 'package:me_ron/domain/usecases/params/report_product_params.dart';
-
 import '../../core/common/result.dart';
 import '../../core/usecase/usecase.dart';
 import '../../data/models/order_model.dart';
 import '../entities/order_entity.dart';
 import '../repositories/order_repository.dart';
 import '../../../domain/usecases/params/order_params.dart';
+import '../../../domain/usecases/params/report_order_params.dart';
+import '../../../domain/usecases/params/report_product_params.dart';
 
 class GetAllOrderUsecase extends Usecase<Result, OrderParams> {
   GetAllOrderUsecase(this._orderRepository);

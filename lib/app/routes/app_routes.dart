@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:me_ron/presentation/screens/report/report_product_screen.dart';
-import 'package:me_ron/presentation/screens/report/report_screen.dart';
 
 import '../../presentation/providers/auth/auth_notifier.dart';
 import '../../presentation/screens/account/about_screen.dart';
@@ -27,6 +25,8 @@ import '../../presentation/screens/transactions/transactions_screen.dart';
 import '../../presentation/screens/user/user_form_screen.dart';
 import '../../presentation/screens/user/user_screen.dart';
 import '../../presentation/screens/welcome/welcome_screen.dart';
+import '../../presentation/screens/report/report_product_screen.dart';
+import '../../presentation/screens/report/report_screen.dart';
 import 'params/error_screen_param.dart';
 
 /// Route paths

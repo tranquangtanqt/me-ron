@@ -1,6 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:me_ron/presentation/providers/report/order/report_order_filter_notifier.dart';
-import 'package:me_ron/presentation/providers/report/order/report_order_state.dart';
 
 import '../../../../app/di/app_providers.dart';
 import '../../../../data/models/order_model.dart';
@@ -8,6 +6,8 @@ import '../../../../data/models/product_summary_model.dart';
 import '../../../../domain/usecases/params/base_params.dart';
 import '../../../../domain/usecases/order_usecases.dart';
 import '../../../../domain/usecases/params/report_order_params.dart';
+import '../../../../presentation/providers/report/order/report_order_filter_notifier.dart';
+import '../../../../presentation/providers/report/order/report_order_state.dart';
 
 final reportOrderNotifierProvider = NotifierProvider<ReportOrderNotifier, ReportOrderState>(
   ReportOrderNotifier.new,
