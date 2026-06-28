@@ -21,6 +21,21 @@ final orderFormNotifierProvider = NotifierProvider.autoDispose<OrderFormNotifier
   OrderFormNotifier.new,
 );
 
+int calculateOrderItemPrice(OrderItemForm item, {Map<int, int>? disabledProductSnapshotPrices}) {
+  if (disabledProductSnapshotPrices != null &&
+      item.product != null &&
+      item.product!.id != null &&
+      disabledProductSnapshotPrices.containsKey(item.product!.id)) {
+    return disabledProductSnapshotPrices[item.product!.id] ?? item.product!.price;
+  }
+
+  return item.product?.price ?? 0;
+}
+
+int calculateOrderItemLineTotal(OrderItemForm item, {Map<int, int>? disabledProductSnapshotPrices}) {
+  return calculateOrderItemPrice(item, disabledProductSnapshotPrices: disabledProductSnapshotPrices) * item.quantity;
+}
+
 class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
   @override
   OrderFormState build() {
@@ -67,11 +82,13 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
 
       for (OrderModel order in orders ?? []) {
         final item = OrderItemForm(
-            id: order.orderItemId,
-            product: allProduct.firstWhere(
-                  (p) => p.id == order.productId,
-            ),
-            quantity: order.quantity ?? 0
+          id: order.orderItemId,
+          product: allProduct.firstWhere(
+            (p) => p.id == order.productId,
+          ),
+          quantity: order.quantity ?? 0,
+          snapshotPrice: order.snapshotPrice,
+          originalProductId: order.productId,
         );
 
         final current = state.items ?? [];
@@ -104,15 +121,16 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
         );
 
         // create order + items atomically (local + queued action)
+        final disabledProductSnapshotPrices = _getDisabledProductSnapshotPrices(state.items ?? []);
         final items = <OrderItemEntity>[];
         for (final OrderItemForm item in state.items ?? []) {
           final oderItem = OrderItemEntity(
             orderId: null,
             productId: item.product?.id,
             snapshotName: item.product?.name,
-            snapshotPrice: item.product?.price ?? 0,
+            snapshotPrice: calculateOrderItemPrice(item, disabledProductSnapshotPrices: disabledProductSnapshotPrices),
             quantity: item.quantity,
-            lineTotal: (item.product?.price ?? 0) * item.quantity,
+            lineTotal: calculateOrderItemLineTotal(item, disabledProductSnapshotPrices: disabledProductSnapshotPrices),
           );
           items.add(oderItem);
         }
@@ -145,6 +163,7 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
           note: state.note ?? '',
         );
 
+        final disabledProductSnapshotPrices = _getDisabledProductSnapshotPrices(state.items ?? []);
         final items = <OrderItemEntity>[];
         for (final OrderItemForm item in state.items ?? []) {
           items.add(
@@ -153,9 +172,9 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
               orderId: id,
               productId: item.product?.id,
               snapshotName: item.product?.name,
-              snapshotPrice: item.product?.price ?? 0,
+              snapshotPrice: calculateOrderItemPrice(item, disabledProductSnapshotPrices: disabledProductSnapshotPrices),
               quantity: item.quantity,
-              lineTotal: (item.product?.price ?? 0) * item.quantity,
+              lineTotal: calculateOrderItemLineTotal(item, disabledProductSnapshotPrices: disabledProductSnapshotPrices),
             ),
           );
         }
@@ -300,6 +319,24 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
     );
   }
 
+  Map<int, int> _getDisabledProductSnapshotPrices(List<OrderItemForm> items) {
+    final disabledProductSnapshotPrices = <int, int>{};
+
+    for (final item in items) {
+      final productId = item.product?.id;
+
+      if (productId != null &&
+          item.snapshotPrice != null &&
+          item.originalProductId != null &&
+          productId == item.originalProductId &&
+          item.snapshotPrice != item.product!.price) {
+        disabledProductSnapshotPrices[productId] = item.snapshotPrice!;
+      }
+    }
+
+    return disabledProductSnapshotPrices;
+  }
+
   void onChangedNote(String value) {
     state = state.copyWith(note: value);
   }
@@ -326,11 +363,19 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
   }
 
   int _calcSubTotal(List<OrderItemForm> items) {
-    return items.fold<int>(
-      0,
-          (sum, item) =>
-      sum + ((item.product?.price ?? 0) * item.quantity),
-    );
+    final disabledProductSnapshotPrices = _getDisabledProductSnapshotPrices(items);
+
+    int total = 0;
+
+    for (final item in items) {
+      int totalLineItem = calculateOrderItemLineTotal(
+        item,
+        disabledProductSnapshotPrices: disabledProductSnapshotPrices,
+      );
+      total += totalLineItem;
+    }
+
+    return total;
   }
 
   int _calcTotal(int subTotal, int discountValue) {

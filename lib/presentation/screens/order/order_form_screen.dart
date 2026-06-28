@@ -172,21 +172,38 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                   ),
                   Column(
                     children: [
-                      for (var i = 0; i < (formState.items ?? []).length; i++)
-                        _OrderItemRow(
-                          index: i,
-                          item: (formState.items ?? [])[i],
-                          products: allProduct,
-                          onDelete: () {
-                            ref.read(orderFormNotifierProvider.notifier).removeItem(i);
+                      Column(
+                        children: List.generate(
+                          formState.items?.length ?? 0,
+                              (i) {
+                            final item = formState.items![i];
+
+                            final isPriceChanged =
+                                widget.id != null &&
+                                    item.snapshotPrice != null &&
+                                    item.product != null &&
+                                    item.originalProductId != null &&
+                                    item.product!.id == item.originalProductId &&
+                                    item.snapshotPrice != item.product!.price;
+
+                            return _OrderItemRow(
+                              index: i,
+                              item: item,
+                              products: allProduct,
+                              isDisabled: isPriceChanged,
+                              onDelete: () {
+                                ref.read(orderFormNotifierProvider.notifier).removeItem(i);
+                              },
+                              onQuantityChanged: (qty) {
+                                ref.read(orderFormNotifierProvider.notifier).updateQuantity(i, qty);
+                              },
+                              onProductChanged: (product) {
+                                ref.read(orderFormNotifierProvider.notifier).updateProduct(i, product);
+                              },
+                            );
                           },
-                          onQuantityChanged: (qty) {
-                            ref.read(orderFormNotifierProvider.notifier).updateQuantity(i, qty);
-                          },
-                          onProductChanged: (product) {
-                            ref.read(orderFormNotifierProvider.notifier).updateProduct(i, product);
-                          },
-                        )
+                        ),
+                      ),
                     ],
                   ),
                   TextButton.icon(
@@ -858,6 +875,7 @@ class _OrderItemRow extends StatelessWidget {
   final int index;
   final OrderItemForm item;
   final List<ProductEntity> products;
+  final bool isDisabled;
   final VoidCallback onDelete;
   final ValueChanged<int> onQuantityChanged;
   final ValueChanged<ProductEntity?> onProductChanged;
@@ -866,6 +884,7 @@ class _OrderItemRow extends StatelessWidget {
     required this.index,
     required this.item,
     required this.products,
+    required this.isDisabled,
     required this.onDelete,
     required this.onQuantityChanged,
     required this.onProductChanged,
@@ -875,112 +894,116 @@ class _OrderItemRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final qty = item.quantity;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: SizedBox(
-              height: 36,
-              child: DropdownButtonFormField<ProductEntity>(
-                value: item.product ?? products.firstOrNull,
-                isExpanded: true,
-                decoration: InputDecoration(
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-                style: const TextStyle(fontSize: 13),
-                items: products.map((p) {
-                  return DropdownMenuItem(
-                    value: p,
-                    child: Text(
-                      p.name,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 13),
+    return Opacity(
+      opacity: isDisabled ? 0.65 : 1,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: SizedBox(
+                height: 36,
+                child: DropdownButtonFormField<ProductEntity>(
+                  value: item.product != null && products.contains(item.product)
+                      ? item.product
+                      : null,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 6,
                     ),
-                  );
-                }).toList(),
-                onChanged: onProductChanged,
-              ),
-            ),
-          ),
-
-          const SizedBox(width: 6),
-
-          Container(
-            height: 32,
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outlineVariant,
-              ),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                InkWell(
-                  onTap: qty > 1 ? () => onQuantityChanged(qty - 1) : null,
-                  child: const SizedBox(
-                    width: 28,
-                    child: Center(
-                      child: Icon(Icons.remove, size: 16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6),
                     ),
                   ),
+                  style: const TextStyle(fontSize: 13),
+                  items: products.map((p) {
+                    return DropdownMenuItem(
+                      value: p,
+                      child: Text(
+                        p.name,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: isDisabled ? null : onProductChanged,
                 ),
+              ),
+            ),
 
-                SizedBox(
-                  width: 22,
-                  child: Center(
-                    child: Text(
-                      '$qty',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+            const SizedBox(width: 6),
+
+            Container(
+              height: 32,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  InkWell(
+                    onTap: isDisabled || qty <= 1 ? null : () => onQuantityChanged(qty - 1),
+                    child: const SizedBox(
+                      width: 28,
+                      child: Center(
+                        child: Icon(Icons.remove, size: 16),
                       ),
                     ),
                   ),
-                ),
 
-                InkWell(
-                  onTap: () => onQuantityChanged(qty + 1),
-                  child: const SizedBox(
-                    width: 28,
+                  SizedBox(
+                    width: 22,
                     child: Center(
-                      child: Icon(Icons.add, size: 16),
+                      child: Text(
+                        '$qty',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
 
-          const SizedBox(width: 4),
-
-          SizedBox(
-            width: 28,
-            height: 28,
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              iconSize: 16,
-              splashRadius: 16,
-              icon: Icon(
-                Icons.close,
-                color: Theme.of(context).colorScheme.error,
-                size: 16,
+                  InkWell(
+                    onTap: isDisabled ? null : () => onQuantityChanged(qty + 1),
+                    child: const SizedBox(
+                      width: 28,
+                      child: Center(
+                        child: Icon(Icons.add, size: 16),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              onPressed: onDelete,
             ),
-          )
-        ],
+
+            const SizedBox(width: 4),
+
+            SizedBox(
+              width: 28,
+              height: 28,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                iconSize: 16,
+                splashRadius: 16,
+                icon: Icon(
+                  Icons.close,
+                  color: Theme.of(context).colorScheme.error,
+                  size: 16,
+                ),
+                onPressed: isDisabled ? null : onDelete,
+              ),
+            )
+          ],
+        ),
       ),
     );
-
   }
 }
