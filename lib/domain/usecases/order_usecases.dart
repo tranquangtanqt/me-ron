@@ -1,3 +1,5 @@
+import 'package:me_ron/domain/usecases/params/report_product_params.dart';
+
 import '../../core/common/result.dart';
 import '../../core/usecase/usecase.dart';
 import '../../data/models/order_model.dart';
@@ -12,6 +14,15 @@ class GetAllOrderUsecase extends Usecase<Result, OrderParams> {
 
   @override
   Future<Result<List<OrderModel>>> call(OrderParams params) async => _orderRepository.getAllOrders(params);
+}
+
+class GetAllOrderReportProductUsecase extends Usecase<Result, ReportProductParams> {
+  GetAllOrderReportProductUsecase(this._orderRepository);
+
+  final OrderRepository _orderRepository;
+
+  @override
+  Future<Result<List<OrderModel>>> call(ReportProductParams params) async => _orderRepository.getAllOrderReportProduct(params);
 }
 
 class GetOrderUsecase extends Usecase<Result, int> {

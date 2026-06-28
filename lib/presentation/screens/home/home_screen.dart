@@ -61,6 +61,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               _CategoryButton(),
               _ProductButton(),
               _AddressButton(),
+              _ReportButton(),
             ],
           ),
         ),
@@ -278,6 +279,48 @@ class _AddressButton extends StatelessWidget {
         ),
         onTap: () {
           context.push('/address');
+        },
+      ),
+    );
+  }
+}
+
+class _ReportButton extends StatelessWidget {
+  const _ReportButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSizes.padding),
+      child: AppButton(
+        buttonColor: Theme.of(context).colorScheme.surface,
+        borderColor: Theme.of(context).colorScheme.surfaceContainer,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.location_on,
+                  size: 18,
+                ),
+                const SizedBox(width: AppSizes.padding / 1.5),
+                Text(
+                  'Thống kê',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 18,
+            ),
+          ],
+        ),
+        onTap: () {
+          context.push('/report');
         },
       ),
     );

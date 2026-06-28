@@ -3,6 +3,13 @@ import 'package:intl/intl.dart';
 import '../../domain/entities/order_entity.dart';
 import 'order_item_model.dart';
 
+int _parseIntValue(dynamic value, {int fallback = 0}) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? fallback;
+  return fallback;
+}
+
 class OrderModel {
   int? id;
   int? userId;
@@ -49,6 +56,32 @@ class OrderModel {
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
+    final dynamic itemsJson = json['items'];
+    final bool hasFlatItemFields = json['orderItemId'] != null ||
+        json['productId'] != null ||
+        json['snapshotName'] != null ||
+        json['quantity'] != null ||
+        json['lineTotal'] != null;
+
+    final List<OrderItemModel>? parsedItems = itemsJson is List
+        ? itemsJson
+            .whereType<Map>()
+            .map((item) => OrderItemModel.fromJson(Map<String, dynamic>.from(item)))
+            .toList()
+        : hasFlatItemFields
+            ? [
+                OrderItemModel(
+                  id: json['orderItemId'],
+                  orderId: json['orderId'],
+                  productId: _parseIntValue(json['productId']),
+                  snapshotName: json['snapshotName']?.toString(),
+                  snapshotPrice: _parseIntValue(json['snapshotPrice']),
+                  quantity: _parseIntValue(json['quantity']),
+                  lineTotal: _parseIntValue(json['lineTotal']),
+                ),
+              ]
+            : null;
+
     return OrderModel(
       id: json['id'],
       userId: json['userId'],
@@ -60,12 +93,13 @@ class OrderModel {
       paymentDatetime: json['paymentDatetime'] != null
           ? DateTime.parse(json['paymentDatetime'])
           : null,
-      discountValue: json['discountValue'] ?? '',
-      subTotal: json['subTotal'] ?? '',
-      total: json['total'] ?? 0,
-      note: json['note'],
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
+      discountValue: _parseIntValue(json['discountValue']),
+      subTotal: _parseIntValue(json['subTotal']),
+      total: _parseIntValue(json['total']),
+      note: json['note']?.toString(),
+      createdAt: json['createdAt']?.toString(),
+      updatedAt: json['updatedAt']?.toString(),
+      items: parsedItems,
       orderId: json['orderId'],
       orderItemId: json['orderItemId'],
       productId: json['productId'],

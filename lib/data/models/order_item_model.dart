@@ -25,16 +25,23 @@ class OrderItemModel {
   });
 
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
+    int parseInt(dynamic value, {int fallback = 0}) {
+      if (value is int) return value;
+      if (value is num) return value.toInt();
+      if (value is String) return int.tryParse(value) ?? fallback;
+      return fallback;
+    }
+
     return OrderItemModel(
       id: json['id'],
       orderId: json['orderId'],
-      productId: json['productId'],
-      snapshotName: json['snapshotName'],
-      snapshotPrice: json['snapshotPrice'],
-      quantity: json['quantity'] ?? '',
-      lineTotal: json['lineTotal'] ?? '',
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
+      productId: parseInt(json['productId']),
+      snapshotName: json['snapshotName']?.toString(),
+      snapshotPrice: parseInt(json['snapshotPrice']),
+      quantity: parseInt(json['quantity']),
+      lineTotal: parseInt(json['lineTotal']),
+      createdAt: json['createdAt']?.toString(),
+      updatedAt: json['updatedAt']?.toString(),
     );
   }
 

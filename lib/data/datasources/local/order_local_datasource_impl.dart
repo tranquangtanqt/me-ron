@@ -1,9 +1,11 @@
 import 'package:intl/intl.dart';
+import 'package:me_ron/core/enums/order_status.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../core/common/result.dart';
 import '../../../core/services/database/database_config.dart';
 import '../../../core/services/database/database_service.dart';
+import '../../../domain/usecases/params/report_product_params.dart';
 import '../../models/order_model.dart';
 import '../../models/order_item_model.dart';
 import '../interfaces/order_datasource.dart';
@@ -65,6 +67,72 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
 
       if (sqlWhere.isNotEmpty) {
         sql += ' WHERE $sqlWhere';
+      }
+
+      sql += ' ORDER BY deliveryDatetime DESC';
+      print(sql);
+
+      var res = await _databaseService.database.rawQuery(sql, args);
+      print(args);
+
+      return res.isEmpty
+          ? Result.success(data: [])
+          : Result.success(
+        data: res.map((e) => OrderModel.fromJson(e)).toList(),
+      );
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<List<OrderModel>>> getAllOrderReportProduct(ReportProductParams params) async {
+    try {
+      String sql = '''
+          SELECT 
+            O.*, 
+            U.name AS userName,
+            D.id AS orderItemId,
+            D.orderId AS orderId,
+            D.productId AS productId,
+            D.snapshotName As snapshotName,
+            D.snapshotPrice As snapshotPrice,
+            D.quantity As quantity,
+            D.lineTotal As lineTotal
+          FROM ${DatabaseConfig.orderTableName} AS O
+            LEFT JOIN ${DatabaseConfig.userTableName} AS U
+              ON O.userId = U.id
+            LEFT JOIN ${DatabaseConfig.orderItemTableName} AS D
+              ON O.id = D.orderId
+        ''';
+
+      List<dynamic> args = [];
+
+      final format = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+      String sqlWhere = '';
+
+      if (params.fromDate != null) {
+        sqlWhere += 'deliveryDatetime >= ?';
+        args.add(format.format(params.fromDate!));
+      }
+
+      if (params.toDate != null) {
+        if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
+        sqlWhere += 'deliveryDatetime <= ?';
+        args.add(format.format(params.toDate!));
+      }
+
+      if (params.productId != null) {
+        if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
+        sqlWhere += 'D.productId = ?';
+        args.add(params.productId);
+      }
+
+      if (sqlWhere.isNotEmpty) {
+        sql += ' WHERE status <> ${OrderStatus.cancelled.value}'; //TODO status
+        sql += ' AND $sqlWhere'; //TODO status
+      } else {
+        sql += ' WHERE status <> ${OrderStatus.cancelled.value}'; //TODO status
       }
 
       sql += ' ORDER BY deliveryDatetime DESC';

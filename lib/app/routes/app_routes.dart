@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:me_ron/presentation/screens/report/report_product_screen.dart';
+import 'package:me_ron/presentation/screens/report/report_screen.dart';
 
 import '../../presentation/providers/auth/auth_notifier.dart';
 import '../../presentation/screens/account/about_screen.dart';
@@ -121,6 +123,7 @@ class AppRoutes {
         _category(),
         _user(),
         _order(),
+        _report(),
       ],
     );
   }
@@ -226,6 +229,22 @@ class AppRoutes {
     );
   }
 
+  GoRoute _report() {
+    return GoRoute(
+      path: '/report',
+      pageBuilder: (context, state) {
+        return const NoTransitionPage<void>(
+          child: ReportScreen(),
+        );
+      },
+      routes: [
+        _reportProduct(),
+        // _orderEdit(),
+        // _orderDetail(),
+      ],
+    );
+  }
+
   GoRoute _account() {
     return GoRoute(
       path: '/account',
@@ -273,6 +292,15 @@ class AppRoutes {
       parentNavigatorKey: navNavigatorKey,
       builder: (context, state) {
         return const OrderFormScreen();
+      },
+    );
+  }
+
+  GoRoute _reportProduct() {
+    return GoRoute(
+      path: 'report-product',
+      builder: (context, state) {
+        return ReportProductScreen();
       },
     );
   }

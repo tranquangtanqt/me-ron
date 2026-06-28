@@ -7,6 +7,7 @@ import '../../domain/entities/order_item_entity.dart';
 import '../../domain/repositories/order_repository.dart';
 import '../../domain/usecases/params/base_params.dart';
 import '../../domain/usecases/params/order_params.dart';
+import '../../domain/usecases/params/report_product_params.dart';
 import '../datasources/local/order_local_datasource_impl.dart';
 import '../datasources/local/order_item_local_datasource_impl.dart';
 import '../datasources/local/queued_action_local_datasource_impl.dart';
@@ -30,6 +31,21 @@ class OrderRepositoryImpl extends OrderRepository {
   Future<Result<List<OrderModel>>> getAllOrders(OrderParams params) async {
     try {
       final local = await orderLocalDatasource.getAllOrders(params);
+
+      if (local.isFailure) return Result.failure(error: local.error!);
+
+      final list = local.data ?? [];
+      // return Result.success(data: list.map((e) => e.toEntity()).toList());
+      return Result.success(data: list.toList());
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<List<OrderModel>>> getAllOrderReportProduct(ReportProductParams params) async {
+    try {
+      final local = await orderLocalDatasource.getAllOrderReportProduct(params);
 
       if (local.isFailure) return Result.failure(error: local.error!);
 
