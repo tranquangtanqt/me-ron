@@ -95,8 +95,14 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.id == null ? 'Thêm danh mục sản phẩn' : 'Chỉnh sửa danh mục sản phẩn'),
+        title: Text(widget.id == null ? 'Thêm danh mục món ăn' : 'Chỉnh sửa danh mục món ăn'),
         titleSpacing: 0,
+        shadowColor: Colors.transparent,
+        actions: [_CreateOrUpdateButton(
+          id: widget.id,
+          onCreate: createCategory,
+          onUpdated: updateCategory,
+        ),],
       ),
       body: !isLoaded
           ? const AppProgressIndicator()
@@ -112,11 +118,6 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                   _DescriptionField(
                     controller: descriptionController,
                     onChanged: notifier.onChangedDescription,
-                  ),
-                  _CreateOrUpdateButton(
-                    id: widget.id,
-                    onCreateCategory: createCategory,
-                    onUpdateCategory: updateCategory,
                   ),
                   _DeleteButton(
                     id: widget.id,
@@ -175,16 +176,15 @@ class _DescriptionField extends StatelessWidget {
   }
 }
 
-
 class _CreateOrUpdateButton extends ConsumerWidget {
   final int? id;
-  final VoidCallback onCreateCategory;
-  final VoidCallback onUpdateCategory;
+  final VoidCallback onCreate;
+  final VoidCallback onUpdated;
 
   const _CreateOrUpdateButton({
     required this.id,
-    required this.onCreateCategory,
-    required this.onUpdateCategory,
+    required this.onCreate,
+    required this.onUpdated,
   });
 
   @override
@@ -196,17 +196,46 @@ class _CreateOrUpdateButton extends ConsumerWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.only(top: AppSizes.padding * 1.5),
-      child: AppButton(
-        text: id == null ? 'Thêm danh mục sản phẩm' : 'Chỉnh sửa danh mục sản phẩm',
-        enabled: isFormValid,
-        onTap: () {
-          if (id != null) {
-            onUpdateCategory();
-          } else {
-            onCreateCategory();
-          }
-        },
+      padding: const EdgeInsets.only(right: AppSizes.padding),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ===== SAVE BUTTON =====
+          AppButton(
+            height: 26,
+            borderRadius: BorderRadius.circular(4),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.padding / 2,
+            ),
+            buttonColor: Theme.of(context).colorScheme.surfaceContainer,
+            onTap: () {
+              if (id != null) {
+                onUpdated();
+              } else {
+                onCreate();
+              }
+            },
+            enabled: isFormValid,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.save,
+                  size: 12,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: AppSizes.padding / 4),
+                Text(
+                  'Lưu',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

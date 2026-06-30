@@ -142,6 +142,12 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       appBar: AppBar(
         title: Text(widget.id == null ? 'Thêm món ăn' : 'Chỉnh sửa món ăn'),
         titleSpacing: 0,
+        shadowColor: Colors.transparent,
+        actions: [_CreateOrUpdateButton(
+          id: widget.id,
+          onCreate: createProduct,
+          onUpdated: updatedProduct,
+        ),],
       ),
       body: !isLoaded
           ? const AppProgressIndicator()
@@ -168,11 +174,6 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     controller: descController,
                     onChanged: notifier.onChangedDesc,
                   ),
-                  _CreateOrUpdateButton(
-                    id: widget.id,
-                    onCreateProduct: createProduct,
-                    onUpdatedProduct: updatedProduct,
-                  ),
                   _DeleteButton(
                     id: widget.id,
                     onDeleteProduct: deleteProduct,
@@ -180,66 +181,6 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 ],
               ),
             ),
-    );
-  }
-}
-
-class _ImageSection extends ConsumerWidget {
-  final VoidCallback onTapImage;
-
-  const _ImageSection({required this.onTapImage});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final imageFile = ref.watch(productFormNotifierProvider.select((p) => p.imageFile));
-    final imageUrl = ref.watch(productFormNotifierProvider.select((p) => p.imageUrl));
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Hình ảnh',
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: AppSizes.padding / 2),
-        Stack(
-          children: [
-            GestureDetector(
-              onTap: onTapImage,
-              child: AppImage(
-                image: imageFile?.path ?? imageUrl ?? '',
-                imgProvider: imageFile != null ? ImgProvider.fileImage : ImgProvider.networkImage,
-                width: 100,
-                height: 100,
-                borderRadius: BorderRadius.circular(AppSizes.radius),
-                backgroundColor: Theme.of(context).colorScheme.surface,
-                border: Border.all(
-                  width: 1,
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                ),
-                errorWidget: Icon(
-                  Icons.image,
-                  color: Theme.of(context).colorScheme.surfaceDim,
-                  size: 32,
-                ),
-              ),
-            ),
-            Positioned(
-              right: 8,
-              bottom: 8,
-              child: AppIconButton(
-                icon: Icons.camera_alt_rounded,
-                iconSize: 14,
-                borderRadius: 8,
-                padding: const EdgeInsets.all(6),
-                onTap: onTapImage,
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }
@@ -408,13 +349,13 @@ class _DescriptionField extends StatelessWidget {
 
 class _CreateOrUpdateButton extends ConsumerWidget {
   final int? id;
-  final VoidCallback onCreateProduct;
-  final VoidCallback onUpdatedProduct;
+  final VoidCallback onCreate;
+  final VoidCallback onUpdated;
 
   const _CreateOrUpdateButton({
     required this.id,
-    required this.onCreateProduct,
-    required this.onUpdatedProduct,
+    required this.onCreate,
+    required this.onUpdated,
   });
 
   @override
@@ -426,18 +367,46 @@ class _CreateOrUpdateButton extends ConsumerWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.only(top: AppSizes.padding * 1.5),
-      child: AppButton(
-        // text: id == null ? 'Thêm mới sản phẩm' : 'Chỉnh sửa sản phẩm',
-        text: 'Lưu',
-        enabled: isFormValid,
-        onTap: () {
-          if (id != null) {
-            onUpdatedProduct();
-          } else {
-            onCreateProduct();
-          }
-        },
+      padding: const EdgeInsets.only(right: AppSizes.padding),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ===== SAVE BUTTON =====
+          AppButton(
+            height: 26,
+            borderRadius: BorderRadius.circular(4),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.padding / 2,
+            ),
+            buttonColor: Theme.of(context).colorScheme.surfaceContainer,
+            onTap: () {
+              if (id != null) {
+                onUpdated();
+              } else {
+                onCreate();
+              }
+            },
+            enabled: isFormValid,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.save,
+                  size: 12,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: AppSizes.padding / 4),
+                Text(
+                  'Lưu',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

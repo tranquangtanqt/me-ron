@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/app_providers.dart';
+import '../../../core/common/app_exception.dart';
 import '../../../core/common/result.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../../domain/usecases/user_usecases.dart';
@@ -45,6 +46,16 @@ class UserFormNotifier extends BaseFormNotifier<UserFormState> {
   Future<Result<int>> createUser() async {
     return performCreate(
       execute: () async {
+        // Check for duplicate name
+        final currentUsers = ref.read(userNotifierProvider).allUser ?? [];
+        final isDuplicate = currentUsers.any(
+          (user) => user.name?.toLowerCase() == (state.name ?? '').toLowerCase(),
+        );
+
+        if (isDuplicate) {
+          throw AppException('Tên khách hàng "${state.name}" đã tồn tại');
+        }
+
         final userRepository = ref.read(userRepositoryProvider);
         final user = UserEntity(
           name: state.name ?? '',
@@ -61,6 +72,16 @@ class UserFormNotifier extends BaseFormNotifier<UserFormState> {
   Future<Result<void>> updatedUser(int id) async {
     return performUpdate(
       execute: () async {
+        // Check for duplicate name
+        final currentUsers = ref.read(userNotifierProvider).allUser ?? [];
+        final isDuplicate = currentUsers.any(
+              (user) => user.name?.toLowerCase() == (state.name ?? '').toLowerCase(),
+        );
+
+        if (isDuplicate) {
+          throw AppException('Tên khách hàng "${state.name}" đã tồn tại');
+        }
+
         final userRepository = ref.read(userRepositoryProvider);
         final user = UserEntity(
           id: id,

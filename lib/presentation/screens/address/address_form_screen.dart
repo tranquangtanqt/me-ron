@@ -97,6 +97,12 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
       appBar: AppBar(
         title: Text(widget.code == null ? 'Thêm địa chỉ' : 'Chỉnh sửa địa chỉ'),
         titleSpacing: 0,
+        shadowColor: Colors.transparent,
+        actions: [_CreateOrUpdateButton(
+          code: widget.code,
+          onCreate: createAddress,
+          onUpdated: updateAddress,
+        ),],
       ),
       body: !isLoaded
           ? const AppProgressIndicator()
@@ -112,11 +118,6 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
                   _NameField(
                     controller: nameController,
                     onChanged: notifier.onChangedName,
-                  ),
-                  _CreateOrUpdateButton(
-                    code: widget.code,
-                    onCreateAddress: createAddress,
-                    onUpdateAddress: updateAddress,
                   ),
                   _DeleteButton(
                     code: widget.code,
@@ -177,13 +178,13 @@ class _NameField extends StatelessWidget {
 
 class _CreateOrUpdateButton extends ConsumerWidget {
   final String? code;
-  final VoidCallback onCreateAddress;
-  final VoidCallback onUpdateAddress;
+  final VoidCallback onCreate;
+  final VoidCallback onUpdated;
 
   const _CreateOrUpdateButton({
     required this.code,
-    required this.onCreateAddress,
-    required this.onUpdateAddress,
+    required this.onCreate,
+    required this.onUpdated,
   });
 
   @override
@@ -195,18 +196,46 @@ class _CreateOrUpdateButton extends ConsumerWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.only(top: AppSizes.padding * 1.5),
-      child: AppButton(
-        // text: code == null ? 'Thêm địa chỉ' : 'Chỉnh sửa địa chỉ',
-        text: 'Lưu',
-        enabled: isFormValid,
-        onTap: () {
-          if (code != null) {
-            onUpdateAddress();
-          } else {
-            onCreateAddress();
-          }
-        },
+      padding: const EdgeInsets.only(right: AppSizes.padding),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ===== SAVE BUTTON =====
+          AppButton(
+            height: 26,
+            borderRadius: BorderRadius.circular(4),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.padding / 2,
+            ),
+            buttonColor: Theme.of(context).colorScheme.surfaceContainer,
+            onTap: () {
+              if (code != null) {
+                onUpdated();
+              } else {
+                onCreate();
+              }
+            },
+            enabled: isFormValid,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.save,
+                  size: 12,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: AppSizes.padding / 4),
+                Text(
+                  'Lưu',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
