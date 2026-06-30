@@ -95,11 +95,13 @@ class _ImportDataScreenState extends ConsumerState<ImportDataScreen> {
 
           for (var i = 0; i < header.length && i < values.length; i++) {
             final key = header[i].trim();
-            final value = values[i].trim();
+            final rawValue = values[i];
+            final value = rawValue.trim();
+
             if (key.isEmpty) {
               continue;
             }
-            rowMap[key] = value;
+            rowMap[key] = value.isEmpty ? null : value;
           }
 
           if (rowMap.isEmpty) {
