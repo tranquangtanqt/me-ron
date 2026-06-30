@@ -21,32 +21,42 @@ class ProductsNotifier extends Notifier<ProductsState> {
   }
 
   Future<void> getAllProducts({int? offset, String? contains}) async {
-    if (offset != null) {
-      state = state.copyWith(isLoadingMore: true);
-    }
-
-    var params = BaseParams(
-      orderBy: 'id',
-      sortBy: 'ASC',
-      offset: offset,
-    );
-
-    final productRepository = ref.read(productRepositoryProvider);
-    var res = await GetAllProductsUsecase(productRepository).call(params);
-
-    if (res.isSuccess) {
-      if (offset == null) {
-        state = state.copyWith(allProducts: res.data ?? [], isLoadingMore: false);
+    try {
+      if (offset != null) {
+        state = state.copyWith(isLoadingMore: true);
       } else {
-        final current = state.allProducts ?? [];
-        state = state.copyWith(
-          allProducts: [...current, ...res.data ?? []],
-          isLoadingMore: false,
-        );
+        state = state.copyWith(allProducts: null, clearError: true);
       }
-    } else {
-      state = state.copyWith(isLoadingMore: false);
-      throw Exception(res.error?.toString() ?? 'Failed to load data');
+
+      var params = BaseParams(
+        orderBy: 'id',
+        sortBy: 'ASC',
+        offset: offset,
+      );
+
+      final productRepository = ref.read(productRepositoryProvider);
+      var res = await GetAllProductsUsecase(productRepository).call(params);
+
+      if (res.isSuccess) {
+        if (offset == null) {
+          state = state.copyWith(allProducts: res.data ?? [], isLoadingMore: false, clearError: true);
+        } else {
+          final current = state.allProducts ?? [];
+          state = state.copyWith(
+            allProducts: [...current, ...res.data ?? []],
+            isLoadingMore: false,
+            clearError: true,
+          );
+        }
+      } else {
+        final errorMsg = res.error?.toString() ?? 'Failed to load data';
+        state = state.copyWith(isLoadingMore: false, error: errorMsg);
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isLoadingMore: false,
+        error: e.toString(),
+      );
     }
   }
 }

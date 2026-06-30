@@ -72,6 +72,8 @@ class AppDialog {
     final context = AppRoutes.rootNavigatorKey.currentContext;
     if (context == null) throw Exception('No context available for dialog');
 
+    final displayMessage = message ?? error;
+
     return await showDialog(
       context: context,
       barrierDismissible: false,
@@ -79,13 +81,13 @@ class AppDialog {
         return PopScope(
           canPop: false,
           child: AppDialogWidget(
-            title: title ?? 'Oops!',
+            title: title ?? 'Ôi! Đã có lỗi xảy ra!',
             leftButtonText: buttonText,
             onTapLeftButton: onTapButton,
             child: Column(
               children: [
                 Text(
-                  message ?? 'Something went wrong, please contact your system administrator or try restart the app',
+                  displayMessage ?? 'Đã xảy ra lỗi, vui lòng liên hệ quản trị hệ thống hoặc thử khởi động lại ứng dụng',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),

@@ -16,12 +16,13 @@ class ProductsState {
     List<ProductEntity>? allProducts,
     int? categoryId,
     bool? isLoadingMore,
-    String? error
+    String? error,
+    bool clearError = false,
   }) {
     return ProductsState(
       allProducts: allProducts ?? this.allProducts,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      error: error ?? this.error,
+      error: clearError ? null : (error ?? this.error),
     );
   }
 }

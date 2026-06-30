@@ -27,7 +27,7 @@ class ProductLocalDatasourceImpl extends ProductDatasource {
         where: 'name LIKE ?',
         whereArgs: ["%${contains ?? ''}%"],
         orderBy: '$orderBy $sortBy',
-        limit: limit,
+        // limit: limit,
         offset: offset,
       );
       return res.isEmpty

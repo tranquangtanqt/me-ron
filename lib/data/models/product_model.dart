@@ -24,7 +24,9 @@ class ProductModel {
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
       id: json['id'],
-      categoryId: json['categoryId'],
+      categoryId: json['categoryId'] == null || json['categoryId'] == ''
+          ? null
+          : int.tryParse(json['categoryId'].toString()),
       name: json['name'] ?? '',
       imageUrl: json['imageUrl'] ?? '',
       price: json['price'] ?? 0,
