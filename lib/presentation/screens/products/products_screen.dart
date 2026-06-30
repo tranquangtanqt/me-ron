@@ -83,6 +83,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
     final allProducts = ref.watch(productsNotifierProvider.select((s) => s.allProducts));
     final isLoadingMore = ref.watch(productsNotifierProvider.select((s) => s.isLoadingMore));
+    final error = ref.watch(productsNotifierProvider.select((s) => s.error));
 
     return Scaffold(
       appBar: AppBar(
@@ -103,6 +104,44 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
               SliverLayoutBuilder(
                 builder: (context, _) {
                   if (allProducts == null) {
+                    if (error != null) {
+                      return SliverFillRemaining(
+                        hasScrollBody: false,
+                        fillOverscroll: true,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                size: 48,
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Không thể tải dữ liệu',
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                error,
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context).colorScheme.error,
+                                    ),
+                              ),
+                              const SizedBox(height: 24),
+                              ElevatedButton(
+                                onPressed: () {
+                                  ref.read(productsNotifierProvider.notifier).getAllProducts();
+                                },
+                                child: const Text('Thử lại'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
                     return const SliverFillRemaining(
                       hasScrollBody: false,
                       fillOverscroll: true,
