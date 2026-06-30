@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -247,10 +245,6 @@ class _ExportButton extends StatelessWidget {
                 ),
               ],
             ),
-            // const Icon(
-            //   Icons.arrow_forward_ios_rounded,
-            //   size: 18,
-            // ),
           ],
         ),
       ),
@@ -263,6 +257,59 @@ class _DeleteButton extends StatelessWidget {
 
   const _DeleteButton({required this.onDelete});
 
+  Future<void> _showConfirmDialog(BuildContext context) async {
+    final confirmFirst = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Xác nhận xóa dữ liệu'),
+        content: const Text('Bạn có chắc chắn muốn xóa toàn bộ dữ liệu không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Xóa'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmFirst != true) return;
+
+    if (!context.mounted) return;
+
+    final confirmSecond = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Xác nhận lần thứ 2'),
+        content: const Text(
+          'Hành động này KHÔNG THỂ HOÀN TẠC.\n\n'
+          'Tất cả dữ liệu sẽ bị xóa vĩnh viễn. '
+          'Bạn chắc chắn muốn tiếp tục?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('Xóa vĩnh viễn'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmSecond == true && context.mounted) {
+      onDelete();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -270,7 +317,7 @@ class _DeleteButton extends StatelessWidget {
       child: AppButton(
         buttonColor: Theme.of(context).colorScheme.surface,
         borderColor: Theme.of(context).colorScheme.surfaceContainer,
-        onTap: onDelete,
+        onTap: () => _showConfirmDialog(context),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
