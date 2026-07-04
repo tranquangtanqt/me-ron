@@ -56,6 +56,9 @@ final deviceInfoServiceProvider = Provider<DeviceInfoService>(
 final printerServiceProvider = Provider<PrinterService>(
   (ref) => PrinterService(ref.watch(sharedPreferencesProvider)),
 );
+final errorLoggerServiceProvider = Provider<ErrorLoggerService>(
+  (ref) => ErrorLoggerService(FirebaseCrashlytics.instance),
+);
 
 // Datasources
 // Local Datasources
@@ -69,16 +72,16 @@ final userLocalDatasourceProvider = Provider<UserLocalDatasourceImpl>(
   (ref) => UserLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
 );
 final addressLocalDatasourceProvider = Provider<AddressLocalDatasourceImpl>(
-      (ref) => AddressLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
+  (ref) => AddressLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
 );
 final categoryLocalDatasourceProvider = Provider<CategoryLocalDatasourceImpl>(
-      (ref) => CategoryLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
+  (ref) => CategoryLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
 );
 final orderLocalDatasourceProvider = Provider<OrderLocalDatasourceImpl>(
-      (ref) => OrderLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
+  (ref) => OrderLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
 );
 final orderItemLocalDatasourceProvider = Provider<OrderItemLocalDatasourceImpl>(
-      (ref) => OrderItemLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
+  (ref) => OrderItemLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
 );
 final queuedActionLocalDatasourceProvider = Provider<QueuedActionLocalDatasourceImpl>(
   (ref) => QueuedActionLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
@@ -104,26 +107,26 @@ final userRepositoryProvider = Provider<UserRepository>(
   ),
 );
 final addressRepositoryProvider = Provider<AddressRepository>(
-      (ref) => AddressRepositoryImpl(
+  (ref) => AddressRepositoryImpl(
     addressLocalDatasource: ref.watch(addressLocalDatasourceProvider),
     queuedActionLocalDatasource: ref.watch(queuedActionLocalDatasourceProvider),
   ),
 );
 final categoryRepositoryProvider = Provider<CategoryRepository>(
-      (ref) => CategoryRepositoryImpl(
+  (ref) => CategoryRepositoryImpl(
     categoryLocalDatasource: ref.watch(categoryLocalDatasourceProvider),
     queuedActionLocalDatasource: ref.watch(queuedActionLocalDatasourceProvider),
   ),
 );
 final orderRepositoryProvider = Provider<OrderRepository>(
-      (ref) => OrderRepositoryImpl(
+  (ref) => OrderRepositoryImpl(
     orderLocalDatasource: ref.watch(orderLocalDatasourceProvider),
     orderItemLocalDatasource: ref.watch(orderItemLocalDatasourceProvider),
     queuedActionLocalDatasource: ref.watch(queuedActionLocalDatasourceProvider),
   ),
 );
 final orderItemRepositoryProvider = Provider<OrderItemRepository>(
-      (ref) => OrderItemRepositoryImpl(
+  (ref) => OrderItemRepositoryImpl(
     orderItemLocalDatasource: ref.watch(orderItemLocalDatasourceProvider),
     queuedActionLocalDatasource: ref.watch(queuedActionLocalDatasourceProvider),
   ),

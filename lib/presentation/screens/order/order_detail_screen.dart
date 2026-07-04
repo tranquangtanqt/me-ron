@@ -17,12 +17,10 @@ class OrderDetailScreen extends ConsumerStatefulWidget {
   const OrderDetailScreen({super.key});
 
   @override
-  ConsumerState<OrderDetailScreen> createState() =>
-      _OrderDetailScreenState();
+  ConsumerState<OrderDetailScreen> createState() => _OrderDetailScreenState();
 }
 
 class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -31,6 +29,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
       ref.read(orderNotifierProvider.notifier).reload();
     });
   }
+
   void updateOrder(int id) async {
     final result = await context.push('/order/order-edit/$id');
     if (result == true) {
@@ -44,7 +43,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
 
     bool check = true;
     for (int i = 0; i < allOrder!.length; i++) {
-      if (allOrder[i].status == OrderStatus.completed) {
+      if (allOrder[i].status == OrderStatus.completed.value) {
         check = false;
       }
     }
@@ -70,9 +69,10 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
         // updateOrderStatus
         bool successFlg = true;
         for (int i = 0; i < allOrder!.length; i++) {
-
           var res = await AppDialog.showProgress(() {
-            return ref.read(orderFormNotifierProvider.notifier).updatedStatusOrder(allOrder[i].id!, OrderStatus.completed.value);
+            return ref
+                .read(orderFormNotifierProvider.notifier)
+                .updatedStatusOrder(allOrder[i].id!, OrderStatus.completed.value);
           });
 
           if (!screenContext.mounted) return;
@@ -140,7 +140,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
             padding: const EdgeInsets.all(AppSizes.padding),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
-                    (context, index) {
+                (context, index) {
                   final entry = groupedOrders.entries.elementAt(index);
 
                   return _UserOrderCardGroup(
@@ -175,7 +175,10 @@ class _UserOrderCardGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userTotal = orders.fold<int>(0,(sum, order) => sum + (order.total ?? 0),);
+    final userTotal = orders.fold<int>(
+      0,
+      (sum, order) => sum + (order.total ?? 0),
+    );
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -198,7 +201,7 @@ class _UserOrderCardGroup extends StatelessWidget {
 
             // ===== ORDERS LIST =====
             ...orders.map(
-                  (order) => Padding(
+              (order) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: _OrderDetailCard(
                   order: order,

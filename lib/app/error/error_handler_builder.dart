@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/constants.dart';
 import '../../core/services/logger/error_logger_service.dart';
-import '../../core/utilities/console_logger.dart';
 import '../../presentation/widgets/app_error_widget.dart';
 import '../di/app_providers.dart';
 import '../routes/app_routes.dart';
@@ -23,7 +22,7 @@ class ErrorHandlerBuilder extends ConsumerStatefulWidget {
 }
 
 class ErrorHandlerBuilderState extends ConsumerState<ErrorHandlerBuilder> {
-  // ErrorLoggerService get _errorLoggerService => ref.read(errorLoggerServiceProvider);	TODO comment
+  ErrorLoggerService get _errorLoggerService => ref.read(errorLoggerServiceProvider);
   AppRoutes get _appRoutes => ref.read(appRoutesProvider);
 
   @override
@@ -47,9 +46,7 @@ class ErrorHandlerBuilderState extends ConsumerState<ErrorHandlerBuilder> {
     debugPrint(flutterError.exceptionAsString());
     debugPrint(flutterError.stack?.toString());
 
-    ce(flutterError.exception);
-
-    // _errorLoggerService.log(error: flutterError);	TODO comment
+    _errorLoggerService.log(error: flutterError.exception, stackTrace: flutterError.stack);
 
     if (!mounted) return;
 
@@ -71,9 +68,7 @@ class ErrorHandlerBuilderState extends ConsumerState<ErrorHandlerBuilder> {
     debugPrint(error.toString());
     debugPrint(stackTrace.toString());
 
-    ce(error);
-
-    // _errorLoggerService.log(error: error, stackTrace: stackTrace);	TODO comment
+    _errorLoggerService.log(error: error, stackTrace: stackTrace);
 
     if (!mounted) return false;
 
