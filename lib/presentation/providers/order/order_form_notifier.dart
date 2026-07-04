@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/app_providers.dart';
@@ -231,6 +229,10 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
 
   void onChangedUser(int? value) {
     state = state.copyWith(userId: value);
+  }
+
+  void onClear() {
+    state = state.copyWith(userId: null);
   }
 
   // void onChangedStatus(OrderStatus? value) {

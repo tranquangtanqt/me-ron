@@ -3,18 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/constants/constants.dart';
 import '../../../core/enums/order_status.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../../data/models/order_model.dart';
 import '../../../domain/entities/category_entity.dart';
-import '../../../domain/entities/user_entity.dart';
 import '../../providers/category/category_notifier.dart';
 import '../../providers/report/order/report_order_filter_notifier.dart';
 import '../../providers/report/order/report_order_notifier.dart';
 import '../../providers/user/user_notifier.dart';
 import '../../widgets/app_empty_state.dart';
 import '../../widgets/app_progress_indicator.dart';
+import '../../widgets/app_user_autocomplete.dart';
 import 'components/report_order_card.dart';
 
 class ReportOrderScreen extends ConsumerStatefulWidget {
@@ -83,13 +82,13 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
     final totalOrderAmount =
         allOrder
             ?.where((o) {
-          final status = OrderStatusExtension.fromValue(
-            o.status ?? OrderStatus.shipping.value,
-          );
-          return status != OrderStatus.cancelled;
-        })
+              final status = OrderStatusExtension.fromValue(
+                o.status ?? OrderStatus.shipping.value,
+              );
+              return status != OrderStatus.cancelled;
+            })
             .fold<int>(0, (sum, order) => sum + (order.total ?? 0)) ??
-            0;
+        0;
 
     return Scaffold(
       appBar: AppBar(
@@ -110,9 +109,11 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
                     horizontal: AppSizes.padding,
                     vertical: 8,
                   ),
-                  child: _ReportOrderFilterBar(onSearch: () {
-                    ref.read(reportOrderNotifierProvider.notifier).reloadByReportOrder();
-                  })
+                  child: _ReportOrderFilterBar(
+                    onSearch: () {
+                      ref.read(reportOrderNotifierProvider.notifier).reloadByReportOrder();
+                    },
+                  ),
                 ),
               ),
               if (allOrder != null && allOrder.isNotEmpty)
@@ -160,17 +161,17 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
                             SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Row(
-                                children: orderSummaryByStatus.entries
-                                    .where((entry) => entry.value.count > 0)
-                                    .map((entry) {
+                                children: orderSummaryByStatus.entries.where((entry) => entry.value.count > 0).map((
+                                  entry,
+                                ) {
                                   final status = entry.key;
                                   final summary = entry.value;
                                   final statusLabel = OrderStatusExtension(status).label;
                                   final statusColor = status == OrderStatus.completed
                                       ? Colors.green
                                       : status == OrderStatus.cancelled
-                                          ? Colors.red
-                                          : Colors.orange;
+                                      ? Colors.red
+                                      : Colors.orange;
 
                                   return Container(
                                     width: 165,
@@ -213,7 +214,6 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
                                             ),
                                           ),
                                         ),
-
                                       ],
                                     ),
                                   );
@@ -265,45 +265,46 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
                             SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Row(
-                                children: (productSummary.values.toList()
-                                  ..sort((a, b) => b.quantity.compareTo(a.quantity)))
-                                    .map((e) {
-                                  return Container(
-                                    margin: const EdgeInsets.only(right: 8),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue.withOpacity(0.08),
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: Colors.blue.withOpacity(0.2),
-                                      ),
-                                    ),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          e.productName,
-                                          style: const TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          '${e.quantity}',
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.blue,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }).toList(),
+                                children:
+                                    (productSummary.values.toList()..sort((a, b) => b.quantity.compareTo(a.quantity)))
+                                        .map((e) {
+                                          return Container(
+                                            margin: const EdgeInsets.only(right: 8),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 8,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.blue.withOpacity(0.08),
+                                              borderRadius: BorderRadius.circular(10),
+                                              border: Border.all(
+                                                color: Colors.blue.withOpacity(0.2),
+                                              ),
+                                            ),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  e.productName,
+                                                  style: const TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  '${e.quantity}',
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.blue,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        })
+                                        .toList(),
                               ),
                             ),
                           ],
@@ -367,8 +368,7 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: allOrder.length,
-                            separatorBuilder: (_, __) =>
-                            const SizedBox(height: AppSizes.padding / 2),
+                            separatorBuilder: (_, __) => const SizedBox(height: AppSizes.padding / 2),
                             itemBuilder: (context, i) {
                               return _ReportOrderCard(
                                 order: allOrder[i],
@@ -521,7 +521,7 @@ class _ReportOrderFilterBarState extends ConsumerState<_ReportOrderFilterBar> wi
         const SizedBox(height: 10),
         const SizedBox(height: 10),
 
-        _UserAutocomplete(
+        AppUserAutocomplete(
           selected: filter.userId,
           users: allUser,
           onChanged: (userId) {
@@ -684,137 +684,9 @@ class _DateField extends StatelessWidget {
             // ),
           ),
           child: Text(
-            controller.text.isEmpty
-                ? ''
-                : controller.text,
+            controller.text.isEmpty ? '' : controller.text,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _UserAutocomplete extends StatelessWidget {
-  final int? selected;
-  final List<UserEntity> users;
-  final ValueChanged<int?> onChanged;
-  final VoidCallback onClear;
-
-  const _UserAutocomplete({
-    super.key,
-    required this.selected,
-    required this.users,
-    required this.onChanged,
-    required this.onClear,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 4),
-      child: Autocomplete<UserEntity>(
-        displayStringForOption: (u) => u.name ?? '',
-
-        optionsBuilder: (TextEditingValue value) {
-          final query = value.text.trim().toLowerCase();
-
-          if (query.isEmpty) return users;
-
-          return users.where(
-                (u) => (u.name ?? '').toLowerCase().contains(query),
-          );
-        },
-
-        onSelected: (UserEntity user) {
-          FocusScope.of(context).unfocus();
-          onChanged(user.id);
-        },
-
-        fieldViewBuilder:(context, textController, focusNode, onFieldSubmitted) {
-          final selectedUser = selected == null
-              ? null
-              : users.where((u) => u.id == selected).firstOrNull;
-
-          // 🔥 sync từ state -> text
-          if (selectedUser != null
-              &&
-              textController.text != selectedUser.name
-          ) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              textController.text = selectedUser.name ?? '';
-            });
-          }
-
-          return SizedBox(
-            height: 40,
-            child: TextFormField(
-              controller: textController,
-              focusNode: focusNode,
-              style: const TextStyle(fontSize: 14),
-
-              onChanged: (value) {
-                // 🔥 quan trọng: nếu user xoá text → reset filter
-                if (value.trim().isEmpty) {
-                  onClear();
-                  onChanged(null);
-                }
-              },
-
-              decoration: InputDecoration(
-                labelText: 'Chọn khách hàng',
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-
-                suffixIcon:
-                (textController.text.isNotEmpty || selected != null)
-                    ? IconButton(
-                  icon: const Icon(Icons.close, size: 18),
-                  onPressed: () {
-                    onClear();
-                    textController.clear();
-                    onChanged(null);
-                  },
-                )
-                    : null,
-              ),
-            ),
-          );
-        },
-
-        optionsViewBuilder: (context, onSelected, options) {
-          return Align(
-            alignment: Alignment.topLeft,
-            child: Material(
-              elevation: 4,
-              child: SizedBox(
-                height: 220,
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: options.length,
-                  itemBuilder: (context, index) {
-                    final option = options.elementAt(index);
-                    return ListTile(
-                      dense: true,
-                      minTileHeight: 36,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: Constants.listTileFontSize),
-                      title: Text(
-                        option.name ?? '',
-                        style: const TextStyle(fontSize: Constants.listTileFontSize),
-                      ),
-                      onTap: () => onSelected(option),
-                    );
-                  },
-                ),
-              ),
-            ),
-          );
-        },
       ),
     );
   }

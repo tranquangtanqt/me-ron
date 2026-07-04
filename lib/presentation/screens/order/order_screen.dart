@@ -3,12 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/constants/constants.dart';
 import '../../../core/enums/order_status.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../../data/models/order_model.dart';
 import '../../../domain/entities/category_entity.dart';
-import '../../../domain/entities/user_entity.dart';
 import '../../providers/category/category_notifier.dart';
 import '../../providers/order/order_filter_notifier.dart';
 import '../../providers/order/order_notifier.dart';
@@ -16,6 +14,7 @@ import '../../providers/user/user_notifier.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_empty_state.dart';
 import '../../widgets/app_progress_indicator.dart';
+import '../../widgets/app_user_autocomplete.dart';
 import 'components/order_card.dart';
 
 class OrderScreen extends ConsumerStatefulWidget {
@@ -78,7 +77,12 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
         title: const Text('Đặt hàng'),
         elevation: 0,
         shadowColor: Colors.transparent,
-        actions: [_AddButton(onCreate: createOrder, onDetail: toDetailOrder,)],
+        actions: [
+          _AddButton(
+            onCreate: createOrder,
+            onDetail: toDetailOrder,
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: () => ref.read(orderNotifierProvider.notifier).reload(),
@@ -93,9 +97,11 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                     horizontal: AppSizes.padding,
                     vertical: 8,
                   ),
-                  child: _OrderFilterBar(onSearch: () {
-                    ref.read(orderNotifierProvider.notifier).reload();
-                  })
+                  child: _OrderFilterBar(
+                    onSearch: () {
+                      ref.read(orderNotifierProvider.notifier).reload();
+                    },
+                  ),
                 ),
               ),
               SliverLayoutBuilder(
@@ -129,10 +135,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                           padding: const EdgeInsets.only(
                             bottom: AppSizes.padding / 2,
                           ),
-                          child: _OrderCard(
-                              order: allOrder[i],
-                              onTap: updateOrder
-                          ),
+                          child: _OrderCard(order: allOrder[i], onTap: updateOrder),
                         );
                       },
                     ),
@@ -150,10 +153,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
 class _AddButton extends StatelessWidget {
   final VoidCallback onCreate;
   final VoidCallback onDetail;
-  const _AddButton({
-    required this.onCreate,
-    required this.onDetail
-  });
+  const _AddButton({required this.onCreate, required this.onDetail});
 
   @override
   Widget build(BuildContext context) {
@@ -310,7 +310,7 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> with RouteAwar
 
         const SizedBox(height: 10),
 
-        _UserAutocomplete(
+        AppUserAutocomplete(
           selected: filter.userId,
           users: allUser,
           onChanged: (userId) {
@@ -473,137 +473,9 @@ class _DateField extends StatelessWidget {
             // ),
           ),
           child: Text(
-            controller.text.isEmpty
-                ? ''
-                : controller.text,
+            controller.text.isEmpty ? '' : controller.text,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _UserAutocomplete extends StatelessWidget {
-  final int? selected;
-  final List<UserEntity> users;
-  final ValueChanged<int?> onChanged;
-  final VoidCallback onClear;
-
-  const _UserAutocomplete({
-    super.key,
-    required this.selected,
-    required this.users,
-    required this.onChanged,
-    required this.onClear,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 4),
-      child: Autocomplete<UserEntity>(
-        displayStringForOption: (u) => u.name ?? '',
-
-        optionsBuilder: (TextEditingValue value) {
-          final query = value.text.trim().toLowerCase();
-
-          if (query.isEmpty) return users;
-
-          return users.where(
-                (u) => (u.name ?? '').toLowerCase().contains(query),
-          );
-        },
-
-        onSelected: (UserEntity user) {
-          FocusScope.of(context).unfocus();
-          onChanged(user.id);
-        },
-
-        fieldViewBuilder:(context, textController, focusNode, onFieldSubmitted) {
-          final selectedUser = selected == null
-              ? null
-              : users.where((u) => u.id == selected).firstOrNull;
-
-          // 🔥 sync từ state -> text
-          if (selectedUser != null
-              &&
-              textController.text != selectedUser.name
-          ) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              textController.text = selectedUser.name ?? '';
-            });
-          }
-
-          return SizedBox(
-            height: 40,
-            child: TextFormField(
-              controller: textController,
-              focusNode: focusNode,
-              style: const TextStyle(fontSize: 14),
-
-              onChanged: (value) {
-                // 🔥 quan trọng: nếu user xoá text → reset filter
-                if (value.trim().isEmpty) {
-                  onClear();
-                  onChanged(null);
-                }
-              },
-
-              decoration: InputDecoration(
-                labelText: 'Chọn khách hàng',
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-
-                suffixIcon:
-                (textController.text.isNotEmpty || selected != null)
-                    ? IconButton(
-                  icon: const Icon(Icons.close, size: 18),
-                  onPressed: () {
-                    onClear();
-                    textController.clear();
-                    onChanged(null);
-                  },
-                )
-                    : null,
-              ),
-            ),
-          );
-        },
-
-        optionsViewBuilder: (context, onSelected, options) {
-          return Align(
-            alignment: Alignment.topLeft,
-            child: Material(
-              elevation: 4,
-              child: SizedBox(
-                height: 220,
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: options.length,
-                  itemBuilder: (context, index) {
-                    final option = options.elementAt(index);
-                    return ListTile(
-                      dense: true,
-                      minTileHeight: 36,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: Constants.listTileFontSize),
-                      title: Text(
-                        option.name ?? '',
-                        style: const TextStyle(fontSize: Constants.listTileFontSize),
-                      ),
-                      onTap: () => onSelected(option),
-                    );
-                  },
-                ),
-              ),
-            ),
-          );
-        },
       ),
     );
   }

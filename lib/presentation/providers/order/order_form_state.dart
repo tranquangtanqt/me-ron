@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import '../../../data/models/order_model.dart';
 import '../../screens/order/components/order_item_form.dart';
 
@@ -32,8 +30,11 @@ class OrderFormState {
     this.items,
   });
 
+  // sentinel used to detect when `userId` was not provided to copyWith
+  static const _noUserValue = Object();
+
   OrderFormState copyWith({
-    int? userId,
+    Object? userId = _noUserValue,
     int? status,
     int? originalStatus,
     DateTime? deliveryDatetime,
@@ -47,7 +48,7 @@ class OrderFormState {
     List<OrderItemForm>? items,
   }) {
     return OrderFormState(
-      userId: userId ?? this.userId,
+      userId: identical(userId, _noUserValue) ? this.userId : userId as int?,
       status: status ?? this.status,
       originalStatus: originalStatus ?? this.originalStatus,
       deliveryDatetime: deliveryDatetime ?? this.deliveryDatetime,
@@ -88,12 +89,12 @@ class OrderFormState {
       status: status ?? this.status,
       deliveryDatetime: deliveryDatetime ?? this.deliveryDatetime,
       paymentDatetime: paymentDatetime ?? this.paymentDatetime,
-      isPrepaid: isPrepaid ?? this.isPrepaid,
+      isPrepaid: isPrepaid,
       discountValue: discountValue ?? this.discountValue,
       subTotal: subTotal ?? this.subTotal,
       total: total ?? this.total,
       note: note ?? this.note,
-      isLoaded: isLoaded ?? this.isLoaded,
+      isLoaded: isLoaded,
       items: items ?? this.items,
     );
   }

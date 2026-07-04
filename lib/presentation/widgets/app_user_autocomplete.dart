@@ -1,50 +1,54 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/constants.dart';
-import '../../../../domain/entities/user_entity.dart';
+import '../../core/constants/constants.dart';
+import '../../domain/entities/user_entity.dart';
 
-class OrderUserAutocomplete extends StatelessWidget {
+/// Autocomplete field for picking a [UserEntity], with a clear ("x") button
+/// that resets both the text and the selection.
+class AppUserAutocomplete extends StatelessWidget {
   final int? selected;
   final List<UserEntity> users;
   final ValueChanged<int?> onChanged;
+  final VoidCallback onClear;
 
-  const OrderUserAutocomplete({
+  const AppUserAutocomplete({
     super.key,
     required this.selected,
     required this.users,
     required this.onChanged,
+    required this.onClear,
   });
 
   @override
   Widget build(BuildContext context) {
-    final selectedUser = users.where((e) => e.id == selected).cast<UserEntity?>().firstOrNull;
-
     return Padding(
       padding: const EdgeInsets.only(top: 4),
       child: Autocomplete<UserEntity>(
-        displayStringForOption: (c) => c.name ?? '',
+        displayStringForOption: (u) => u.name ?? '',
 
         optionsBuilder: (TextEditingValue value) {
           final query = value.text.trim().toLowerCase();
 
-          if (query.isEmpty) {
-            return users;
-          }
+          if (query.isEmpty) return users;
 
-          return users.where((c) {
-            final deliveryDatetime = (c.name ?? '').toLowerCase();
-            return deliveryDatetime.contains(query);
-          });
+          return users.where(
+            (u) => (u.name ?? '').toLowerCase().contains(query),
+          );
         },
 
-        onSelected: (UserEntity selection) {
-          onChanged(selection.id);
+        onSelected: (UserEntity user) {
+          FocusScope.of(context).unfocus();
+          onChanged(user.id);
         },
 
         fieldViewBuilder: (context, textController, focusNode, onFieldSubmitted) {
-          // sync selected text khi edit
-          if (selectedUser != null && textController.text.isEmpty) {
-            textController.text = selectedUser.name ?? '';
+          final selectedUser = selected == null ? null : users.where((u) => u.id == selected).firstOrNull;
+
+          // Keep re-syncing text with state, overriding stale input.
+          if (selectedUser != null && textController.text != selectedUser.name) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              textController.text = selectedUser.name ?? '';
+            });
           }
 
           return SizedBox(
@@ -53,6 +57,12 @@ class OrderUserAutocomplete extends StatelessWidget {
               controller: textController,
               focusNode: focusNode,
               style: const TextStyle(fontSize: 14),
+              onChanged: (value) {
+                if (value.trim().isEmpty) {
+                  onClear();
+                  onChanged(null);
+                }
+              },
               decoration: InputDecoration(
                 labelText: 'Chọn khách hàng',
                 isDense: true,
@@ -63,6 +73,16 @@ class OrderUserAutocomplete extends StatelessWidget {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),
+                suffixIcon: (textController.text.isEmpty && selected == null)
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.close, size: 18),
+                        onPressed: () {
+                          onClear();
+                          textController.clear();
+                          onChanged(null);
+                        },
+                      ),
               ),
             ),
           );

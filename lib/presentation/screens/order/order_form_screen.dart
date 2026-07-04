@@ -12,12 +12,12 @@ import '../../providers/user/user_notifier.dart';
 import '../../widgets/app_dialog.dart';
 import '../../widgets/app_progress_indicator.dart';
 import '../../widgets/app_snack_bar.dart';
+import '../../widgets/app_user_autocomplete.dart';
 import 'components/order_date_field.dart';
 import 'components/order_form_action_buttons.dart';
 import 'components/order_form_fields.dart';
 import 'components/order_form_save_button.dart';
 import 'components/order_item_row.dart';
-import 'components/order_user_autocomplete.dart';
 
 class OrderFormScreen extends ConsumerStatefulWidget {
   final int? id;
@@ -158,10 +158,11 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  OrderUserAutocomplete(
+                  AppUserAutocomplete(
                     selected: formState.userId,
                     users: allUser,
                     onChanged: notifier.onChangedUser,
+                    onClear: notifier.onClear,
                   ),
                   Column(
                     children: [
