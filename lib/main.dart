@@ -59,22 +59,22 @@ void main() async {
 
 /// Performs a real network round-trip to Firestore to confirm the app
 /// can actually reach the Firebase backend, not just that the SDK initialized.
-Future<void> _verifyFirebaseConnection() async {
-  try {
-    await FirebaseFirestore.instance
-        .collection('_connection_check')
-        .limit(1)
-        .get(const GetOptions(source: Source.server));
-
-    cl('Firebase connection check: OK (reached Firestore server)', title: 'Firebase');
-  } on FirebaseException catch (e) {
-    // A response from the server (even permission-denied) still proves connectivity.
-    cl(
-      'Firebase connection check: reached server, response=${e.code}',
-      title: 'Firebase',
-      type: LogType.warning,
-    );
-  } catch (e) {
-    cl('Firebase connection check: FAILED — $e', title: 'Firebase', type: LogType.error);
-  }
-}
+// Future<void> _verifyFirebaseConnection() async {
+//   try {
+//     await FirebaseFirestore.instance
+//         .collection('_connection_check')
+//         .limit(1)
+//         .get(const GetOptions(source: Source.server));
+//
+//     cl('Firebase connection check: OK (reached Firestore server)', title: 'Firebase');
+//   } on FirebaseException catch (e) {
+//     // A response from the server (even permission-denied) still proves connectivity.
+//     cl(
+//       'Firebase connection check: reached server, response=${e.code}',
+//       title: 'Firebase',
+//       type: LogType.warning,
+//     );
+//   } catch (e) {
+//     cl('Firebase connection check: FAILED — $e', title: 'Firebase', type: LogType.error);
+//   }
+// }
