@@ -3,21 +3,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/constants/constants.dart';
-import '../../../domain/entities/product_entity.dart';
 import '../../../core/enums/order_status.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../../core/utilities/currency_formatter.dart';
-import '../../../domain/entities/user_entity.dart';
 import '../../providers/order/order_form_notifier.dart';
 import '../../providers/products/products_notifier.dart';
 import '../../providers/user/user_notifier.dart';
-import '../../widgets/app_button.dart';
 import '../../widgets/app_dialog.dart';
 import '../../widgets/app_progress_indicator.dart';
 import '../../widgets/app_snack_bar.dart';
-import '../../widgets/app_text_field.dart';
-import 'components/order_item_form.dart';
+import 'components/order_date_field.dart';
+import 'components/order_form_action_buttons.dart';
+import 'components/order_form_fields.dart';
+import 'components/order_form_save_button.dart';
+import 'components/order_item_row.dart';
+import 'components/order_user_autocomplete.dart';
 
 class OrderFormScreen extends ConsumerStatefulWidget {
   final int? id;
@@ -51,12 +51,10 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
       final now = DateTime.now();
       final today = DateFormat('dd/MM/yyyy').format(now);
 
-      deliveryDatetimeController.text =
-      state.deliveryDatetime != null
+      deliveryDatetimeController.text = state.deliveryDatetime != null
           ? DateFormat('dd/MM/yyyy').format(state.deliveryDatetime!)
           : today;
-      paymentDatetimeController.text =
-      state.paymentDatetime != null
+      paymentDatetimeController.text = state.paymentDatetime != null
           ? DateFormat('dd/MM/yyyy').format(state.paymentDatetime!)
           : today;
       noteController.text = state.note ?? '';
@@ -131,32 +129,27 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ref.listen(orderNotifierProvider, (previous, next) {
-    //   print("error: ${next.error}");
-    //   print("data: ${next.allOrder}");
-    // });
-
     final allUser = ref.watch(userNotifierProvider.select((s) => s.allUser)) ?? [];
 
     final allProduct = ref.watch(productsNotifierProvider.select((s) => s.allProducts)) ?? [];
-    
+
     final notifier = ref.read(orderFormNotifierProvider.notifier);
 
     final formState = ref.watch(orderFormNotifierProvider);
     final isLoaded = formState.isLoaded;
-
-    // final status = OrderStatusExtension.fromValue(formState.status ?? 0);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.id == null ? 'Thêm đặt hàng' : 'Chỉnh sửa đặt hàng'),
         elevation: 0,
         shadowColor: Colors.transparent,
-        actions: [_CreateOrUpdateButton(
-          id: widget.id,
-          onCreateOrder: createOrder,
-          onUpdatedOrder: updatedOrder,
-        ),],
+        actions: [
+          OrderFormSaveButton(
+            id: widget.id,
+            onCreateOrder: createOrder,
+            onUpdatedOrder: updatedOrder,
+          ),
+        ],
       ),
       body: !isLoaded
           ? const AppProgressIndicator()
@@ -165,7 +158,7 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _UserAutocomplete(
+                  OrderUserAutocomplete(
                     selected: formState.userId,
                     users: allUser,
                     onChanged: notifier.onChangedUser,
@@ -175,18 +168,18 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                       Column(
                         children: List.generate(
                           formState.items?.length ?? 0,
-                              (i) {
+                          (i) {
                             final item = formState.items![i];
 
                             final isPriceChanged =
                                 widget.id != null &&
-                                    item.snapshotPrice != null &&
-                                    item.product != null &&
-                                    item.originalProductId != null &&
-                                    item.product!.id == item.originalProductId &&
-                                    item.snapshotPrice != item.product!.price;
+                                item.snapshotPrice != null &&
+                                item.product != null &&
+                                item.originalProductId != null &&
+                                item.product!.id == item.originalProductId &&
+                                item.snapshotPrice != item.product!.price;
 
-                            return _OrderItemRow(
+                            return OrderItemRow(
                               index: i,
                               item: item,
                               products: allProduct,
@@ -215,7 +208,7 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                     icon: const Icon(Icons.add),
                     label: const Text('Thêm món'),
                   ),
-                  _DiscountValueField(
+                  OrderDiscountValueField(
                     controller: discountValueController,
                     onChanged: notifier.onChangedDiscountValue,
                   ),
@@ -239,771 +232,38 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                       ),
                     ),
                   ),
-                  // _StatusDropdown(
-                  //   selected: OrderStatusExtension.fromValue(formState.status ?? 0),
-                  //   onChanged: notifier.onChangedStatus,
-                  // ),
-                  _DeliveryDatetimeField(
+                  OrderDateField(
+                    label: 'Ngày giao hàng',
                     controller: deliveryDatetimeController,
                     onChanged: notifier.onChangedDeliveryDatetime,
                   ),
-                  _PrepaidCheckbox(
+                  OrderPrepaidCheckbox(
                     value: formState.isPrepaid,
                     onChanged: notifier.onChangedPrepaid,
                   ),
                   if (formState.isPrepaid)
-                    _PaymentDatetimeField(
-                    controller: paymentDatetimeController,
-                    onChanged: notifier.onChangedPaymentDatetime,
-                  ),
-                  _NoteField(
+                    OrderDateField(
+                      label: 'Ngày thanh toán',
+                      topPadding: 2,
+                      controller: paymentDatetimeController,
+                      onChanged: notifier.onChangedPaymentDatetime,
+                    ),
+                  OrderNoteField(
                     controller: noteController,
                     onChanged: notifier.onChangedNote,
                   ),
                   if (widget.id != null && formState.status != OrderStatus.cancelled.value)
-                  _CancelButton(
-                    id: widget.id,
-                    onCancelOrder: cancelOrder,
-                  ),
-                  _DeleteButton(
+                    OrderCancelButton(
+                      id: widget.id,
+                      onCancelOrder: cancelOrder,
+                    ),
+                  OrderDeleteButton(
                     id: widget.id,
                     onDeleteOrder: deleteOrder,
                   ),
                 ],
               ),
             ),
-    );
-  }
-}
-
-class _CreateOrUpdateButton extends ConsumerWidget {
-  final int? id;
-  final VoidCallback onCreateOrder;
-  final VoidCallback onUpdatedOrder;
-
-  const _CreateOrUpdateButton({
-    required this.id,
-    required this.onCreateOrder,
-    required this.onUpdatedOrder,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isFormValid = ref.watch(
-      orderFormNotifierProvider.select((s) {
-        return s.userId != null && (s.items?.isNotEmpty ?? false);
-      }),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.only(right: AppSizes.padding),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // ===== SAVE BUTTON =====
-          AppButton(
-            height: 26,
-            borderRadius: BorderRadius.circular(4),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.padding / 2,
-            ),
-            buttonColor: Theme.of(context).colorScheme.surfaceContainer,
-            onTap: () {
-              if (id != null) {
-                onUpdatedOrder();
-              } else {
-                onCreateOrder();
-              }
-            },
-            enabled: isFormValid,
-            child: Row(
-              children: [
-                Icon(
-                  Icons.save,
-                  size: 12,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: AppSizes.padding / 4),
-                Text(
-                  'Lưu',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _UserAutocomplete extends StatelessWidget {
-  final int? selected;
-  final List<UserEntity> users;
-  final ValueChanged<int?> onChanged;
-
-  const _UserAutocomplete({
-    required this.selected,
-    required this.users,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final selectedUser = users
-        .where((e) => e.id == selected)
-        .cast<UserEntity?>()
-        .firstOrNull;
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 4),
-      child: Autocomplete<UserEntity>(
-        displayStringForOption: (c) => c.name ?? '',
-
-        optionsBuilder: (TextEditingValue value) {
-          final query = value.text.trim().toLowerCase();
-
-          if (query.isEmpty) {
-            return users;
-          }
-
-          return users.where((c) {
-            final deliveryDatetime = (c.name ?? '').toLowerCase();
-            return deliveryDatetime.contains(query);
-          });
-        },
-
-        onSelected: (UserEntity selection) {
-          onChanged(selection.id);
-        },
-
-        fieldViewBuilder: (context, textController, focusNode, onFieldSubmitted) {
-          // sync selected text khi edit
-          if (selectedUser != null &&
-              textController.text.isEmpty) {
-            textController.text = selectedUser.name ?? '';
-          }
-
-          return SizedBox(
-            height: 40,
-            child: TextFormField(
-              controller: textController,
-              focusNode: focusNode,
-              style: const TextStyle(fontSize: 14),
-              decoration: InputDecoration(
-                labelText: 'Chọn khách hàng',
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-            ),
-          );
-        },
-
-        optionsViewBuilder: (context, onSelected, options) {
-          return Align(
-            alignment: Alignment.topLeft,
-            child: Material(
-              elevation: 4,
-              child: SizedBox(
-                height: 220,
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: options.length,
-                  itemBuilder: (context, index) {
-                    final option = options.elementAt(index);
-                    return ListTile(
-                      dense: true,
-                      minTileHeight: 36,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: Constants.listTileFontSize),
-                      title: Text(
-                        option.name ?? '',
-                        style: const TextStyle(fontSize: Constants.listTileFontSize),
-                      ),
-                      onTap: () => onSelected(option),
-                    );
-                  },
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _StatusDropdown extends StatelessWidget {
-  final OrderStatus? selected;
-  final ValueChanged<OrderStatus?> onChanged;
-
-  const _StatusDropdown({
-    required this.selected,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSizes.padding),
-      child: SizedBox(
-        height: 40,
-        child: DropdownButtonFormField<OrderStatus>(
-          value: selected,
-          isExpanded: true,
-          decoration: InputDecoration(
-            labelText: 'Trạng thái',
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 10,
-            ),
-            border: const OutlineInputBorder(),
-          ),
-          style: const TextStyle(fontSize: 13),
-
-          items: OrderStatus.values.map((status) {
-            return DropdownMenuItem<OrderStatus>(
-              value: status,
-              child: Text(
-                status.label,
-                style: const TextStyle(fontSize: 13),
-              ),
-            );
-          }).toList(),
-
-          onChanged: onChanged,
-        ),
-      ),
-    );
-  }
-}
-
-class _DeliveryDatetimeField extends StatelessWidget {
-  final TextEditingController controller;
-  final ValueChanged<DateTime> onChanged;
-
-  const _DeliveryDatetimeField({
-    required this.controller,
-    required this.onChanged,
-  });
-
-  Future<void> _pickDate(BuildContext context) async {
-    DateTime initialDate = DateTime.now();
-
-    if (controller.text.isNotEmpty) {
-      try {
-        initialDate = DateFormat('dd/MM/yyyy').parse(controller.text);
-      } catch (_) {}
-    }
-
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-    );
-
-    if (picked != null) {
-      final formatted = DateFormat('dd/MM/yyyy').format(picked);
-
-      controller.text = formatted;
-      onChanged(picked);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSizes.padding),
-      child: SizedBox(
-        height: 40,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: () => _pickDate(context),
-          child: InputDecorator(
-            isEmpty: controller.text.isEmpty,
-            decoration: InputDecoration(
-              labelText: 'Ngày giao hàng',
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 10,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-              prefixIcon: const Icon(
-                Icons.event_available_rounded,
-                size: 16,
-              ),
-              suffixIcon: const Icon(
-                Icons.calendar_month_rounded,
-                size: 16,
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    controller.text.isEmpty
-                        // ? 'Chọn ngày'
-                        ? ''
-                        : controller.text,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: controller.text.isEmpty
-                          ? theme.colorScheme.outline
-                          : theme.textTheme.bodyMedium?.color,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PrepaidCheckbox extends StatelessWidget {
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  const _PrepaidCheckbox({
-    required this.value,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.primary;
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: CheckboxListTile(
-        value: value,
-        dense: true,
-        contentPadding: const EdgeInsets.only(left: 4),
-        controlAffinity: ListTileControlAffinity.leading,
-
-        // 🔵 màu text
-        title: Text(
-          'Thanh toán',
-          style: TextStyle(
-            fontSize: 14,
-            color: color,
-          ),
-        ),
-
-        // 🔵 màu checkbox
-        activeColor: color, // fallback cho older Flutter
-        checkColor: Colors.white,
-
-        // 🔵 Flutter mới (quan trọng)
-        fillColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
-            return color;
-          }
-          return Colors.transparent;
-        }),
-
-        side: BorderSide(
-          color: color,
-          width: 1.5,
-        ),
-
-        onChanged: (v) => onChanged(v ?? false),
-      ),
-    );
-  }
-}
-
-class _PaymentDatetimeField extends StatelessWidget {
-  final TextEditingController controller;
-  final ValueChanged<DateTime> onChanged;
-
-  const _PaymentDatetimeField({
-    required this.controller,
-    required this.onChanged,
-  });
-
-  Future<void> _pickDate(BuildContext context) async {
-    DateTime initialDate = DateTime.now();
-
-    if (controller.text.isNotEmpty) {
-      try {
-        initialDate = DateFormat('dd/MM/yyyy').parse(controller.text);
-      } catch (_) {}
-    }
-
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-    );
-
-    if (picked != null) {
-      final formatted = DateFormat('dd/MM/yyyy').format(picked);
-
-      controller.text = formatted;
-      onChanged(picked);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 2),
-      child: SizedBox(
-        height: 40,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: () => _pickDate(context),
-          child: InputDecorator(
-            isEmpty: controller.text.isEmpty,
-            decoration: InputDecoration(
-              labelText: 'Ngày thanh toán',
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 10,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-              prefixIcon: const Icon(
-                Icons.event_available_rounded,
-                size: 16,
-              ),
-              suffixIcon: const Icon(
-                Icons.calendar_month_rounded,
-                size: 16,
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    controller.text.isEmpty
-                    // ? 'Chọn ngày'
-                        ? ''
-                        : controller.text,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: controller.text.isEmpty
-                          ? theme.colorScheme.outline
-                          : theme.textTheme.bodyMedium?.color,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DiscountValueField extends StatelessWidget {
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
-
-  const _DiscountValueField({
-    required this.controller,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSizes.padding / 2),
-      child: SizedBox(
-        height: 40, // 👈 nhỏ lại (40 → 36)
-        child: TextField(
-          controller: controller,
-          onChanged: onChanged,
-          keyboardType: TextInputType.number,
-          style: const TextStyle(fontSize: 12.5),
-
-          decoration: InputDecoration(
-            isDense: true,
-
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 8,
-            ),
-
-            labelText: 'Giảm giá',
-
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(6),
-            ),
-
-            prefixIcon: const Icon(Icons.discount, size: 16),
-            suffixIcon: const Icon(Icons.attach_money, size: 16),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NoteField extends StatelessWidget {
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
-
-  const _NoteField({
-    required this.controller,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSizes.padding),
-      child: AppTextField(
-        controller: controller,
-        labelText: 'Ghi chú',
-        hintText: 'Nhập ghi chú...',
-        maxLines: 2,
-        onChanged: onChanged,
-      ),
-    );
-  }
-}
-
-class _CancelButton extends ConsumerWidget {
-  final int? id;
-  final VoidCallback onCancelOrder;
-
-  const _CancelButton({
-    required this.id,
-    required this.onCancelOrder,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isFormValid = ref.watch(
-      orderFormNotifierProvider.select((s) {
-        return s.userId != null && (s.items?.isNotEmpty ?? false);
-      }),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSizes.padding * 1.5),
-      child: AppButton(
-        text: 'Hủy đơn',
-        enabled: isFormValid,
-        onTap: () {
-          AppDialog.show(
-            title: 'Xác nhận',
-            text: 'Bạn có chắc chắn muốn hủy đơn?',
-            leftButtonText: 'Không',
-            rightButtonText: 'Có',
-            rightButtonColor: Theme.of(context).colorScheme.errorContainer,
-            rightButtonTextColor: Theme.of(context).colorScheme.error,
-            onTapRightButton: (context) async {
-              context.pop();
-              onCancelOrder();
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _DeleteButton extends StatelessWidget {
-  final int? id;
-  final VoidCallback onDeleteOrder;
-
-  const _DeleteButton({
-    required this.id,
-    required this.onDeleteOrder,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (id == null) return const SizedBox(height: AppSizes.padding * 2);
-
-    return Padding(
-      padding: const EdgeInsets.only(
-        top: AppSizes.padding,
-        bottom: AppSizes.padding * 2,
-      ),
-      child: AppButton(
-        text: 'Xóa',
-        textColor: Theme.of(context).colorScheme.error,
-        buttonColor: Theme.of(context).colorScheme.surfaceContainerLowest,
-        onTap: () {
-          AppDialog.show(
-            title: 'Xác nhận',
-            text: 'Bạn có chắc chắn muốn xóa dữ liệu?',
-            leftButtonText: 'Hủy',
-            rightButtonText: 'Xóa',
-            rightButtonColor: Theme.of(context).colorScheme.errorContainer,
-            rightButtonTextColor: Theme.of(context).colorScheme.error,
-            onTapRightButton: (context) async {
-              context.pop();
-              onDeleteOrder();
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _OrderItemRow extends StatelessWidget {
-  final int index;
-  final OrderItemForm item;
-  final List<ProductEntity> products;
-  final bool isDisabled;
-  final VoidCallback onDelete;
-  final ValueChanged<int> onQuantityChanged;
-  final ValueChanged<ProductEntity?> onProductChanged;
-
-  const _OrderItemRow({
-    required this.index,
-    required this.item,
-    required this.products,
-    required this.isDisabled,
-    required this.onDelete,
-    required this.onQuantityChanged,
-    required this.onProductChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final qty = item.quantity;
-
-    return Opacity(
-      opacity: isDisabled ? 0.65 : 1,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 3,
-              child: SizedBox(
-                height: 36,
-                child: DropdownButtonFormField<ProductEntity>(
-                  value: item.product != null && products.contains(item.product)
-                      ? item.product
-                      : null,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 6,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
-                  style: const TextStyle(fontSize: 13),
-                  items: products.map((p) {
-                    return DropdownMenuItem(
-                      value: p,
-                      child: Text(
-                        p.name,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 13),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: isDisabled ? null : onProductChanged,
-                ),
-              ),
-            ),
-
-            const SizedBox(width: 6),
-
-            Container(
-              height: 32,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  InkWell(
-                    onTap: isDisabled || qty <= 1 ? null : () => onQuantityChanged(qty - 1),
-                    child: const SizedBox(
-                      width: 28,
-                      child: Center(
-                        child: Icon(Icons.remove, size: 16),
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(
-                    width: 22,
-                    child: Center(
-                      child: Text(
-                        '$qty',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  InkWell(
-                    onTap: isDisabled ? null : () => onQuantityChanged(qty + 1),
-                    child: const SizedBox(
-                      width: 28,
-                      child: Center(
-                        child: Icon(Icons.add, size: 16),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(width: 4),
-
-            SizedBox(
-              width: 28,
-              height: 28,
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                iconSize: 16,
-                splashRadius: 16,
-                icon: Icon(
-                  Icons.close,
-                  color: Theme.of(context).colorScheme.error,
-                  size: 16,
-                ),
-                onPressed: isDisabled ? null : onDelete,
-              ),
-            )
-          ],
-        ),
-      ),
     );
   }
 }
