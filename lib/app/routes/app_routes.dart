@@ -9,6 +9,8 @@ import '../../presentation/screens/address/address_screen.dart';
 import '../../presentation/screens/category/category_form_screen.dart';
 import '../../presentation/screens/category/category_screen.dart';
 import '../../presentation/screens/setting/backup_data_screen.dart';
+import '../../presentation/screens/setting/delete_cloud_screen.dart';
+import '../../presentation/screens/setting/download_cloud_screen.dart';
 import '../../presentation/screens/setting/import_data_screen.dart';
 import '../../presentation/screens/setting/setting_screen.dart';
 import '../../presentation/screens/setting/printer_settings_screen.dart';
@@ -22,6 +24,7 @@ import '../../presentation/screens/order/order_screen.dart';
 import '../../presentation/screens/products/product_form_screen.dart';
 import '../../presentation/screens/products/products_screen.dart';
 import '../../presentation/screens/report/report_order_screen.dart';
+import '../../presentation/screens/setting/upload_cloud_screen.dart';
 import '../../presentation/screens/transactions/transaction_detail_screen.dart';
 import '../../presentation/screens/transactions/transactions_screen.dart';
 import '../../presentation/screens/user/user_form_screen.dart';
@@ -349,6 +352,9 @@ class AppRoutes {
       },
       routes: [
         _importData(),
+        _uploadData(),
+        _downloadData(),
+        _deleteData(),
       ],
     );
   }
@@ -361,6 +367,34 @@ class AppRoutes {
       },
     );
   }
+
+  GoRoute _uploadData() {
+    return GoRoute(
+      path: 'upload-cloud',
+      builder: (context, state) {
+        return const UploadCloudScreen();
+      },
+    );
+  }
+
+  GoRoute _downloadData() {
+    return GoRoute(
+      path: 'download-cloud',
+      builder: (context, state) {
+        return const DownloadCloudScreen();
+      },
+    );
+  }
+
+  GoRoute _deleteData() {
+    return GoRoute(
+      path: 'delete-cloud',
+      builder: (context, state) {
+        return const DeleteCloudScreen();
+      },
+    );
+  }
+
 
   GoRoute _transactionDetail() {
     return GoRoute(

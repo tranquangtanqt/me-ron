@@ -164,6 +164,16 @@ class _BackupDataScreenState extends ConsumerState<BackupDataScreen> {
             _ExportButton(onExport: () => _exportDatabaseToTsv(context)),
             _ImportButton(),
             _DeleteButton(onDelete: () => _deleteAllData(context)),
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+            ),
+            Divider(
+              color: Colors.grey,
+              thickness: 1,
+            ),
+            _UploadCloudButton(),
+            _DownloadCloudButton(),
+            _DeleteCloudButton(),
           ],
         ),
       ),
@@ -196,7 +206,7 @@ class _ImportButton extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSizes.padding / 1.5),
                 Text(
-                  'Nhập dữ liệu',
+                  'Nhập dữ liệu từ tệp sao lưu',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -329,7 +339,7 @@ class _DeleteButton extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSizes.padding / 1.5),
                 Text(
-                  'Xóa toàn bộ dữ liệu',
+                  'Xóa toàn bộ dữ liệu ở máy',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -343,4 +353,131 @@ class _DeleteButton extends StatelessWidget {
   }
 }
 
+class _UploadCloudButton extends StatelessWidget {
 
+  const _UploadCloudButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSizes.padding),
+      child: AppButton(
+        buttonColor: Theme.of(context).colorScheme.surface,
+        borderColor: Theme.of(context).colorScheme.surfaceContainer,
+        onTap: () {
+          context.go('/setting/backup-data/upload-cloud');
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.receipt_long,
+                  size: 18,
+                ),
+                const SizedBox(width: AppSizes.padding / 1.5),
+                Text(
+                  'Tải lên đám mây',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 18,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DownloadCloudButton extends StatelessWidget {
+
+  const _DownloadCloudButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSizes.padding),
+      child: AppButton(
+        buttonColor: Theme.of(context).colorScheme.surface,
+        borderColor: Theme.of(context).colorScheme.surfaceContainer,
+        onTap: () {
+          context.go('/setting/backup-data/download-cloud');
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.receipt_long,
+                  size: 18,
+                ),
+                const SizedBox(width: AppSizes.padding / 1.5),
+                Text(
+                  'Tải về máy',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 18,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DeleteCloudButton extends StatelessWidget {
+
+  const _DeleteCloudButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSizes.padding),
+      child: AppButton(
+        buttonColor: Theme.of(context).colorScheme.surface,
+        borderColor: Theme.of(context).colorScheme.surfaceContainer,
+        onTap: () {
+          context.go('/setting/backup-data/delete-cloud');
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.receipt_long,
+                  size: 18,
+                ),
+                const SizedBox(width: AppSizes.padding / 1.5),
+                Text(
+                  'Xóa dữ liệu đám mây',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 18,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
