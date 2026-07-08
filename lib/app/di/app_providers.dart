@@ -14,6 +14,8 @@ import '../../core/services/printer/printer_service.dart';
 import '../../data/datasources/local/order_item_local_datasource_impl.dart';
 import '../../data/datasources/local/order_local_datasource_impl.dart';
 import '../../data/datasources/local/product_local_datasource_impl.dart';
+import '../../data/datasources/local/purchase_item_local_datasource_impl.dart';
+import '../../data/datasources/local/purchase_local_datasource_impl.dart';
 import '../../data/datasources/local/queued_action_local_datasource_impl.dart';
 import '../../data/datasources/local/transaction_local_datasource_impl.dart';
 import '../../data/datasources/local/user_local_datasource_impl.dart';
@@ -22,6 +24,8 @@ import '../../data/datasources/local/category_local_datasource_impl.dart';
 import '../../data/repositories/order_item_repository_impl.dart';
 import '../../data/repositories/order_repository_impl.dart';
 import '../../data/repositories/product_repository_impl.dart';
+import '../../data/repositories/purchase_item_repository_impl.dart';
+import '../../data/repositories/purchase_repository_impl.dart';
 import '../../data/repositories/queued_action_repository_impl.dart';
 import '../../data/repositories/transaction_repository_impl.dart';
 import '../../data/repositories/user_repository_impl.dart';
@@ -30,6 +34,8 @@ import '../../data/repositories/category_repository_impl.dart';
 import '../../domain/repositories/order_item_repository.dart';
 import '../../domain/repositories/order_repository.dart';
 import '../../domain/repositories/product_repository.dart';
+import '../../domain/repositories/purchase_item_repository.dart';
+import '../../domain/repositories/purchase_repository.dart';
 import '../../domain/repositories/queued_action_repository.dart';
 import '../../domain/repositories/transaction_repository.dart';
 import '../../domain/repositories/user_repository.dart';
@@ -83,6 +89,12 @@ final orderLocalDatasourceProvider = Provider<OrderLocalDatasourceImpl>(
 final orderItemLocalDatasourceProvider = Provider<OrderItemLocalDatasourceImpl>(
   (ref) => OrderItemLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
 );
+final purchaseLocalDatasourceProvider = Provider<PurchaseLocalDatasourceImpl>(
+  (ref) => PurchaseLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
+);
+final purchaseItemLocalDatasourceProvider = Provider<PurchaseItemLocalDatasourceImpl>(
+  (ref) => PurchaseItemLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
+);
 final queuedActionLocalDatasourceProvider = Provider<QueuedActionLocalDatasourceImpl>(
   (ref) => QueuedActionLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
 );
@@ -128,6 +140,18 @@ final orderRepositoryProvider = Provider<OrderRepository>(
 final orderItemRepositoryProvider = Provider<OrderItemRepository>(
   (ref) => OrderItemRepositoryImpl(
     orderItemLocalDatasource: ref.watch(orderItemLocalDatasourceProvider),
+    queuedActionLocalDatasource: ref.watch(queuedActionLocalDatasourceProvider),
+  ),
+);
+final purchaseRepositoryProvider = Provider<PurchaseRepository>(
+  (ref) => PurchaseRepositoryImpl(
+    purchaseLocalDatasource: ref.watch(purchaseLocalDatasourceProvider),
+    queuedActionLocalDatasource: ref.watch(queuedActionLocalDatasourceProvider),
+  ),
+);
+final purchaseItemRepositoryProvider = Provider<PurchaseItemRepository>(
+  (ref) => PurchaseItemRepositoryImpl(
+    purchaseItemLocalDatasource: ref.watch(purchaseItemLocalDatasourceProvider),
     queuedActionLocalDatasource: ref.watch(queuedActionLocalDatasourceProvider),
   ),
 );

@@ -1,46 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 import '../../../core/themes/app_sizes.dart';
-import '../../providers/home/home_notifier.dart';
+import '../../providers/main/main_notifier.dart';
+import '../../providers/theme/theme_notifier.dart';
 import '../../widgets/app_button.dart';
+import '../../widgets/app_dialog.dart';
 
-class ReportScreen extends ConsumerStatefulWidget {
-  const ReportScreen({super.key});
-
-  @override
-  ConsumerState<ReportScreen> createState() => _ReportScreenState();
-}
-
-class _ReportScreenState extends ConsumerState<ReportScreen> {
-  final panelController = PanelController();
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
+class CateScreen extends StatelessWidget {
+  const CateScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final homeNotifier = ref.read(homeNotifierProvider.notifier);
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Thống kê')),
+      appBar: AppBar(title: const Text('Cài đặt')),
       body: const SingleChildScrollView(
         padding: EdgeInsets.all(AppSizes.padding),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _ReportOrderButton(),
-            _ReportProductButton(),
-            _ReportSummaryButton(),
+            _AddressButton(),
+            _CategoryButton(),
           ],
         ),
       ),
@@ -48,8 +28,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   }
 }
 
-class _ReportOrderButton extends StatelessWidget {
-  const _ReportOrderButton();
+class _AddressButton extends StatelessWidget {
+  const _AddressButton();
 
   @override
   Widget build(BuildContext context) {
@@ -64,12 +44,12 @@ class _ReportOrderButton extends StatelessWidget {
             Row(
               children: [
                 const Icon(
-                  Icons.receipt_long,
+                  Icons.location_on,
                   size: 18,
                 ),
                 const SizedBox(width: AppSizes.padding / 1.5),
                 Text(
-                  'Theo đơn hàng',
+                  'Địa chỉ',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -83,15 +63,15 @@ class _ReportOrderButton extends StatelessWidget {
           ],
         ),
         onTap: () {
-          context.push('/report/report-order');
+          context.push('/address');
         },
       ),
     );
   }
 }
 
-class _ReportProductButton extends StatelessWidget {
-  const _ReportProductButton();
+class _CategoryButton extends StatelessWidget {
+  const _CategoryButton();
 
   @override
   Widget build(BuildContext context) {
@@ -106,12 +86,12 @@ class _ReportProductButton extends StatelessWidget {
             Row(
               children: [
                 const Icon(
-                  Icons.receipt_long,
+                  Icons.category,
                   size: 18,
                 ),
                 const SizedBox(width: AppSizes.padding / 1.5),
                 Text(
-                  'Theo món ăn',
+                  'Danh mục món ăn',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -125,49 +105,7 @@ class _ReportProductButton extends StatelessWidget {
           ],
         ),
         onTap: () {
-          context.push('/report/report-product');
-        },
-      ),
-    );
-  }
-}
-
-class _ReportSummaryButton extends StatelessWidget {
-  const _ReportSummaryButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSizes.padding),
-      child: AppButton(
-        buttonColor: Theme.of(context).colorScheme.surface,
-        borderColor: Theme.of(context).colorScheme.surfaceContainer,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                const Icon(
-                  Icons.receipt_long,
-                  size: 18,
-                ),
-                const SizedBox(width: AppSizes.padding / 1.5),
-                Text(
-                  'Tổng hợp',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 18,
-            ),
-          ],
-        ),
-        onTap: () {
-          context.push('/report/report-summary');
+          context.push('/category');
         },
       ),
     );

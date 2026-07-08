@@ -53,6 +53,8 @@ class DatabaseService {
       db.execute(DatabaseConfig.createProductTable),
       db.execute(DatabaseConfig.createOrderTable),
       db.execute(DatabaseConfig.createOrderItemTable),
+      db.execute(DatabaseConfig.createPurchaseTable),
+      db.execute(DatabaseConfig.createPurchaseItemTable),
       db.execute(DatabaseConfig.createTransactionTable),
       db.execute(DatabaseConfig.createQueuedActionTable),
     ]);
@@ -65,9 +67,10 @@ class DatabaseService {
       int oldVersion,
       int newVersion,
       ) async {
-    // if (oldVersion < 2) {
-    //   await db.execute(DatabaseConfig.createAddressTable);
-    // }
+    if (oldVersion < 2) {
+      await db.execute(DatabaseConfig.createPurchaseTable);
+      await db.execute(DatabaseConfig.createPurchaseItemTable);
+    }
 
     // future version
     // if (oldVersion < 3) { ... }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../presentation/providers/auth/auth_notifier.dart';
+import '../../presentation/screens/main/cate_screen.dart';
 import '../../presentation/screens/setting/about_screen.dart';
 import '../../presentation/screens/address/address_form_screen.dart';
 import '../../presentation/screens/address/address_screen.dart';
@@ -23,6 +24,8 @@ import '../../presentation/screens/order/order_form_screen.dart';
 import '../../presentation/screens/order/order_screen.dart';
 import '../../presentation/screens/products/product_form_screen.dart';
 import '../../presentation/screens/products/products_screen.dart';
+import '../../presentation/screens/purchase/purchase_form_screen.dart';
+import '../../presentation/screens/purchase/purchase_screen.dart';
 import '../../presentation/screens/report/report_order_screen.dart';
 import '../../presentation/screens/setting/upload_cloud_screen.dart';
 import '../../presentation/screens/transactions/transaction_detail_screen.dart';
@@ -32,6 +35,7 @@ import '../../presentation/screens/user/user_screen.dart';
 import '../../presentation/screens/welcome/welcome_screen.dart';
 import '../../presentation/screens/report/report_product_screen.dart';
 import '../../presentation/screens/report/report_screen.dart';
+import '../../presentation/screens/report/report_summary_screen.dart';
 import 'params/error_screen_param.dart';
 
 /// Route paths
@@ -41,11 +45,9 @@ class AppRouteConst {
   static const splash = '/';
 }
 
-final GlobalKey<NavigatorState> _rootNavigatorKey =
-GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
-final GlobalKey<NavigatorState> _shellNavigatorKey =
-GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 /// App routes
 class AppRoutes {
@@ -127,9 +129,11 @@ class AppRoutes {
         _setting(),
         _address(),
         _category(),
+        _cate(),
         _user(),
         _order(),
         _report(),
+        _purchase(),
       ],
     );
   }
@@ -204,6 +208,18 @@ class AppRoutes {
     );
   }
 
+  GoRoute _cate() {
+    return GoRoute(
+      path: '/cate',
+      pageBuilder: (context, state) {
+        return const NoTransitionPage<void>(
+          child: CateScreen(),
+        );
+      },
+      routes: [],
+    );
+  }
+
   GoRoute _user() {
     return GoRoute(
       path: '/user',
@@ -246,6 +262,22 @@ class AppRoutes {
       routes: [
         _reportOrder(),
         _reportProduct(),
+        _reportSummary(),
+      ],
+    );
+  }
+
+  GoRoute _purchase() {
+    return GoRoute(
+      path: '/purchase',
+      pageBuilder: (context, state) {
+        return const NoTransitionPage<void>(
+          child: PurchaseScreen(),
+        );
+      },
+      routes: [
+        _purchaseCreate(),
+        _purchaseEdit(),
       ],
     );
   }
@@ -315,6 +347,15 @@ class AppRoutes {
       path: 'report-product',
       builder: (context, state) {
         return ReportProductScreen();
+      },
+    );
+  }
+
+  GoRoute _reportSummary() {
+    return GoRoute(
+      path: 'report-summary',
+      builder: (context, state) {
+        return const ReportSummaryScreen();
       },
     );
   }
@@ -394,7 +435,6 @@ class AppRoutes {
       },
     );
   }
-
 
   GoRoute _transactionDetail() {
     return GoRoute(
@@ -486,7 +526,6 @@ class AppRoutes {
     );
   }
 
-
   GoRoute _userCreate() {
     return GoRoute(
       path: 'user-create',
@@ -507,6 +546,31 @@ class AppRoutes {
         }
 
         return UserFormScreen(id: id);
+      },
+    );
+  }
+
+  GoRoute _purchaseCreate() {
+    return GoRoute(
+      path: 'purchase-create',
+      parentNavigatorKey: navNavigatorKey,
+      builder: (context, state) {
+        return const PurchaseFormScreen();
+      },
+    );
+  }
+
+  GoRoute _purchaseEdit() {
+    return GoRoute(
+      path: 'purchase-edit/:id',
+      builder: (context, state) {
+        int? id = int.tryParse(state.pathParameters["id"] ?? '');
+
+        if (id == null) {
+          throw 'Required purchaseId is not provided!';
+        }
+
+        return PurchaseFormScreen(id: id);
       },
     );
   }

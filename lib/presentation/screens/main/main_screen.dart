@@ -62,6 +62,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             label: 'Thống kê',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.category_outlined),
+            label: 'Danh mục',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),
             label: 'Cài đặt',
           ),
@@ -87,8 +91,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       return 2;
     }
 
-    if (location.startsWith('/setting')) {
+    if (location.startsWith('/cate')) {
       return 3;
+    }
+
+    if (location.startsWith('/setting')) {
+      return 4;
     }
 
     return 0;
@@ -105,6 +113,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       case 2:
         router.go('/report');
       case 3:
+        router.go('/cate');
+      case 4:
         router.go('/setting');
     }
   }

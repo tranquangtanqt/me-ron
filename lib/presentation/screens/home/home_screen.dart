@@ -57,10 +57,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Column(
             children: [
               _OrderButton(),
+              _PurchaseButton(),
               _UserButton(),
-              _CategoryButton(),
               _ProductButton(),
-              _AddressButton(),
               _ReportButton(),
             ],
           ),
@@ -117,6 +116,48 @@ class _OrderButton extends StatelessWidget {
   }
 }
 
+class _PurchaseButton extends StatelessWidget {
+  const _PurchaseButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSizes.padding),
+      child: AppButton(
+        buttonColor: Theme.of(context).colorScheme.surface,
+        borderColor: Theme.of(context).colorScheme.surfaceContainer,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.shopping_cart,
+                  size: 18,
+                ),
+                const SizedBox(width: AppSizes.padding / 1.5),
+                Text(
+                  'Mua hàng',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 18,
+            ),
+          ],
+        ),
+        onTap: () {
+          context.push('/purchase');
+        },
+      ),
+    );
+  }
+}
+
 class _UserButton extends StatelessWidget {
   const _UserButton();
 
@@ -159,48 +200,6 @@ class _UserButton extends StatelessWidget {
   }
 }
 
-class _CategoryButton extends StatelessWidget {
-  const _CategoryButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSizes.padding),
-      child: AppButton(
-        buttonColor: Theme.of(context).colorScheme.surface,
-        borderColor: Theme.of(context).colorScheme.surfaceContainer,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                const Icon(
-                  Icons.category,
-                  size: 18,
-                ),
-                const SizedBox(width: AppSizes.padding / 1.5),
-                Text(
-                  'Danh mục món ăn',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 18,
-            ),
-          ],
-        ),
-        onTap: () {
-          context.push('/category');
-        },
-      ),
-    );
-  }
-}
-
 class _ProductButton extends StatelessWidget {
   const _ProductButton();
 
@@ -237,48 +236,6 @@ class _ProductButton extends StatelessWidget {
         ),
         onTap: () {
           context.push('/product');
-        },
-      ),
-    );
-  }
-}
-
-class _AddressButton extends StatelessWidget {
-  const _AddressButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSizes.padding),
-      child: AppButton(
-        buttonColor: Theme.of(context).colorScheme.surface,
-        borderColor: Theme.of(context).colorScheme.surfaceContainer,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                const Icon(
-                  Icons.location_on,
-                  size: 18,
-                ),
-                const SizedBox(width: AppSizes.padding / 1.5),
-                Text(
-                  'Địa chỉ',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 18,
-            ),
-          ],
-        ),
-        onTap: () {
-          context.push('/address');
         },
       ),
     );

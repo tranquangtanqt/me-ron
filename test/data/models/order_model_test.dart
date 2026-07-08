@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:me_ron/data/models/order_model.dart';
+
+import '../../../lib/data/models/order_model.dart';
 
 void main() {
   group('OrderModel.fromJson', () {

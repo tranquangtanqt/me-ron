@@ -3,7 +3,7 @@ class DatabaseConfig {
   DatabaseConfig._();
 
   static const String dbPath = 'app_database.db';
-  static const int version = 1;
+  static const int version = 2;
 
   static const String addressTableName = 'Address';
   static const String userTableName = 'Users';
@@ -11,6 +11,9 @@ class DatabaseConfig {
   static const String productTableName = 'Products';
   static const String orderTableName = 'Orders';
   static const String orderItemTableName = 'OrderItems';
+  static const String purchaseTableName = 'Purchases';
+  static const String purchaseItemTableName = 'PurchaseItems';
+
   static const String transactionTableName = 'Transactions';
   static const String queuedActionTableName = 'QueuedActions';
 
@@ -98,6 +101,30 @@ CREATE TABLE IF NOT EXISTS '$orderItemTableName' (
     'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY ('orderId') REFERENCES 'orders' ('id'),
     FOREIGN KEY ('productId') REFERENCES 'products' ('id')
+);
+''';
+
+  static const String createPurchaseTable =
+  '''
+CREATE TABLE IF NOT EXISTS '$purchaseTableName' (
+    'id' INTEGER PRIMARY KEY AUTOINCREMENT,
+    'date' TEXT DEFAULT (DATE('now')),
+    'total' INTEGER,
+    'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
+    'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+''';
+
+  static const String createPurchaseItemTable =
+  '''
+CREATE TABLE IF NOT EXISTS '$purchaseItemTableName' (
+    'id' INTEGER PRIMARY KEY AUTOINCREMENT,
+    'purchaseId' INTEGER,
+    'name' TEXT,
+    'price' INTEGER,
+    'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
+    'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY ('purchaseId') REFERENCES 'Purchases' ('id')
 );
 ''';
 //paidAmount: số tiền chia cô từng đơn dựa vào payment.amount
