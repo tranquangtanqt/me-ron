@@ -1,0 +1,69 @@
+React UI
+    |
+    | 1. User chọn option
+    v
+Checkbox / Form controls
+    |
+    | 2. Gửi cấu hình
+    v
+PrintOptions DTO
+    |
+    | 3. POST
+    v
+POST /pdf/preview
+    |
+    | 4. Backend xử lý
+    v
+.NET PDF Generator
+    |
+    | 5. Render layout + data + style
+    v
+PDF Stream
+    |
+    | 6. Trả file
+    v
+React PDF Viewer
+---
+React chỉ chịu trách nhiệm:
+
+Hiển thị checkbox, dropdown, input.
+Thu thập lựa chọn người dùng.
+Gửi PrintOptions.
+Hiển thị trạng thái loading/error.
+Render kết quả PDF.
+
+Ví dụ:
+{
+  "showHeader": true,
+  "showLogo": false,
+  "includeDetails": true,
+  "language": "vi"
+}
+
+.NET chịu trách nhiệm:
+
+Lấy dữ liệu.
+Quyết định layout.
+Header/footer.
+Pagination.
+Table rendering.
+Font.
+Margin.
+Page break.
+Watermark.
+Template version.
+Export format.
+
+
+PrintOptions
+      |
+      v
+PdfReportService
+      |
+      +-- Load Data
+      |
+      +-- Apply Template
+      |
+      +-- Render HTML/Razor/QuestPDF/etc.
+      |
+      +-- Generate PDF

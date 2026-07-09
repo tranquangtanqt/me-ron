@@ -1,0 +1,19 @@
+Tóm tắt và các việc bạn cần làm thủ công trên Google Cloud/Firebase:
+
+Thay đổi code:
+
+dùng GoogleSignIn.instance (gói google_sign_in đã có sẵn) để đăng nhập,
+xin quyền scope drive.file, rồi upload bằng access token của chính tài khoản Google đăng nhập — file sẽ tính vào dung lượng Drive của người dùng đó,
+
+Việc bạn cần làm (tôi không có quyền vào Google Cloud/Firebase Console của bạn):
+
+Vào Firebase Console → project me-ron → Project Settings → Your apps → app Android me_ron.app → thêm SHA-1 certificate fingerprint. Fingerprint debug keystore trên máy bạn hiện là:
+
+DD:1E:8E:36:5B:8F:B4:0D:A7:BD:B0:26:17:04:44:D0:AD:51:46:AA
+(Nhớ thêm cả SHA-1 của keystore release khi build bản chính thức.)
+Vào Authentication → Sign-in method trong Firebase, bật provider Google (bước này tự tạo OAuth client cho Android trong GCP).
+Tải lại file google-services.json mới (lúc này oauth_client sẽ không còn rỗng nữa) và thay vào android/app/google-services.json.
+Vào Google Cloud Console → project me-ron → bật Google Drive API (APIs & Services → Library).
+Đảm bảo tài khoản Google bạn dùng để đăng nhập trong app đã được share quyền Editor trên folder Drive đích (bạn đã làm bước share trước đó rồi).
+Rebuild app (Stop hẳn rồi Run lại trong Android Studio).
+Khi bấm "Xuất file sao lưu", lần đầu app sẽ hiện màn hình đăng nhập/chọn tài khoản Google + màn xin quyền truy cập Drive — bạn cần đồng ý thì upload mới chạy.
