@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/app_providers.dart';
+import '../../providers/backup/auto_export_notifier.dart';
 import '../../providers/main/main_notifier.dart';
 import '../welcome/welcome_screen.dart';
 
@@ -23,6 +24,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await ref.read(mainNotifierProvider.notifier).initMainProvider();
+      await ref.read(autoExportNotifierProvider.notifier).checkAndRunIfDue();
     });
   }
 

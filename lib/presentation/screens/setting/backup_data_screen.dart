@@ -1,15 +1,13 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
+import '../../../core/constants/constants.dart';
+import '../../../core/services/backup/backup_service.dart';
 import '../../../core/services/cloud/cloud_sync_service.dart';
 import '../../../core/services/cloud/cloud_sync_target.dart';
+import '../../../core/services/cloud/drive_upload_service.dart';
 import '../../../core/services/database/database_config.dart';
 import '../../../core/services/database/database_service.dart';
 import '../../../core/themes/app_sizes.dart';
@@ -26,26 +24,6 @@ class BackupDataScreen extends ConsumerStatefulWidget {
 
 class _BackupDataScreenState extends ConsumerState<BackupDataScreen> {
   final panelController = PanelController();
-  static const _mediaStoreChannel = MethodChannel('me_ron/media_store');
-
-  Future<String> _saveFileToDownloads({
-    required String fileName,
-    required String relativePath,
-    required String contents,
-  }) async {
-    final result = await _mediaStoreChannel.invokeMethod<String>('saveFileToDownloads', {
-      'fileName': fileName,
-      'relativePath': relativePath,
-      'mimeType': 'text/tab-separated-values',
-      'bytes': Uint8List.fromList(utf8.encode(contents)),
-    });
-
-    if (result == null || result.isEmpty) {
-      throw Exception('Không thể lưu file vào thư mục Download');
-    }
-
-    return result;
-  }
 
   @override
   void initState() {
@@ -59,65 +37,50 @@ class _BackupDataScreenState extends ConsumerState<BackupDataScreen> {
 
   Future<void> _exportDatabaseToTsv(BuildContext context) async {
     try {
-      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-      final downloadRelativePath = 'Download/MeRon/$timestamp';
-      final db = DatabaseService.instance.database;
-      final tables = <String>[
-        DatabaseConfig.addressTableName,
-        DatabaseConfig.userTableName,
-        DatabaseConfig.categoriesTableName,
-        DatabaseConfig.productTableName,
-        DatabaseConfig.orderTableName,
-        DatabaseConfig.orderItemTableName,
-        DatabaseConfig.transactionTableName,
-        DatabaseConfig.queuedActionTableName,
-      ];
-
-      final exportedFiles = <String>[];
-
-      for (final tableName in tables) {
-        final rows = await db.query(tableName);
-        final fileName = '${tableName.toLowerCase()}_$timestamp.tsv';
-        final contents = rows.isEmpty
-            ? ''
-            : () {
-                final columns = rows.first.keys.toList();
-                final lines = <String>[
-                  columns.join('\t'),
-                ];
-
-                for (final row in rows) {
-                  final sanitized = columns.map((column) {
-                    final value = row[column];
-                    if (value == null) {
-                      return '';
-                    }
-                    return value.toString().replaceAll('\t', ' ').replaceAll('\n', ' ');
-                  }).toList();
-                  lines.add(sanitized.join('\t'));
-                }
-
-                return lines.join('\n');
-              }();
-
-        final savedPath = await _saveFileToDownloads(
-          fileName: fileName,
-          relativePath: downloadRelativePath,
-          contents: contents,
-        );
-        exportedFiles.add(savedPath);
-      }
+      final result = await BackupService.exportToLocal();
 
       if (!mounted) return;
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Đã xuất ${exportedFiles.length} file vào thư mục Download/MeRon/$timestamp')),
+        SnackBar(
+          content: Text(
+            'Đã xuất ${result.fileContents.length} file vào thư mục Download/MeRon/${result.timestamp}',
+          ),
+        ),
       );
+
+      await _uploadExportToDrive(context, fileContents: result.fileContents, subfolderName: result.timestamp);
     } catch (e) {
       if (!mounted) return;
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Xuất file thất bại: $e')),
+      );
+    }
+  }
+
+  Future<void> _uploadExportToDrive(
+    BuildContext context, {
+    required Map<String, String> fileContents,
+    required String subfolderName,
+  }) async {
+    try {
+      final uploadedCount = await DriveUploadService.uploadFiles(
+        files: fileContents,
+        parentFolderId: Constants.driveBackupFolderId,
+        subfolderName: subfolderName,
+      );
+
+      if (!mounted) return;
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đã tải $uploadedCount file lên Google Drive')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Tải file lên Google Drive thất bại: $e')),
       );
     }
   }
@@ -134,6 +97,8 @@ class _BackupDataScreenState extends ConsumerState<BackupDataScreen> {
         DatabaseConfig.userTableName,
         DatabaseConfig.categoriesTableName,
         DatabaseConfig.addressTableName,
+        DatabaseConfig.purchaseTableName,
+        DatabaseConfig.purchaseItemTableName,
       ];
 
       await db.transaction((txn) async {
@@ -307,8 +272,8 @@ class _ExportButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.padding),
       child: AppButton(
-        buttonColor: Theme.of(context).colorScheme.surface,
-        borderColor: Theme.of(context).colorScheme.surfaceContainer,
+        buttonColor: Theme.of(context).colorScheme.primaryContainer,
+        borderColor: Theme.of(context).colorScheme.primary,
         onTap: onExport,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

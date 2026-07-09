@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/themes/app_sizes.dart';
 import '../../providers/auth/auth_notifier.dart';
+import '../../providers/backup/auto_export_notifier.dart';
 import '../../providers/main/main_notifier.dart';
 import '../../providers/theme/theme_notifier.dart';
 import '../../widgets/app_button.dart';
@@ -24,14 +25,9 @@ class SettingScreen extends StatelessWidget {
           children: [
             _UserInfo(),
             _ThemeButton(),
+            _AutoExportButton(),
+            _BackupPasswordButton(),
             _BackupButton(),
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-            ),
-            Divider(
-              color: Colors.grey,
-              thickness: 1,
-            ),
             // _PrinterSettingsButton(),
             // _AboutButton(),
             // _SignOutButton(),
@@ -119,6 +115,124 @@ class _ThemeButton extends StatelessWidget {
             child: const _ThemeDialogBody(),
           );
         },
+      ),
+    );
+  }
+}
+
+class _AutoExportButton extends StatelessWidget {
+  const _AutoExportButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSizes.padding),
+      child: AppButton(
+        buttonColor: Theme.of(context).colorScheme.surface,
+        borderColor: Theme.of(context).colorScheme.surfaceContainer,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.schedule_outlined,
+                  size: 18,
+                ),
+                const SizedBox(width: AppSizes.padding / 1.5),
+                Text(
+                  'Giờ tự động sao lưu',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 18,
+            ),
+          ],
+        ),
+        onTap: () {
+          AppDialog.show(
+            title: 'Giờ tự động sao lưu',
+            leftButtonText: 'Đóng',
+            child: const _AutoExportDialogBody(),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _BackupPasswordButton extends ConsumerWidget {
+  const _BackupPasswordButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSizes.padding),
+      child: AppButton(
+        buttonColor: Theme.of(context).colorScheme.surface,
+        borderColor: Theme.of(context).colorScheme.surfaceContainer,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.lock_outline_rounded,
+                  size: 18,
+                ),
+                const SizedBox(width: AppSizes.padding / 1.5),
+                Text(
+                  'Mật khẩu sao lưu',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 18,
+            ),
+          ],
+        ),
+        onTap: () {
+          final controller = TextEditingController();
+
+          AppDialog.show(
+            title: 'Mật khẩu sao lưu',
+            leftButtonText: 'Hủy',
+            rightButtonText: 'OK',
+            child: _BackupPasswordDialogBody(controller: controller),
+            onTapRightButton: (dialogContext) {
+              ref.read(autoExportNotifierProvider.notifier).verifyBackupPassword(controller.text);
+              Navigator.of(dialogContext).pop();
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _BackupPasswordDialogBody extends StatelessWidget {
+  final TextEditingController controller;
+
+  const _BackupPasswordDialogBody({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      obscureText: true,
+      keyboardType: TextInputType.number,
+      decoration: const InputDecoration(
+        hintText: 'Nhập mật khẩu',
+        border: OutlineInputBorder(),
       ),
     );
   }
@@ -250,6 +364,50 @@ class _AboutButton extends StatelessWidget {
   }
 }
 
+class _AutoExportDialogBody extends ConsumerWidget {
+  const _AutoExportDialogBody();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final autoExportState = ref.watch(autoExportNotifierProvider);
+    final label = autoExportState.isConfigured
+        ? '${autoExportState.hour!.toString().padLeft(2, '0')}:${autoExportState.minute!.toString().padLeft(2, '0')}'
+        : 'Chưa thiết lập';
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: AppSizes.padding),
+        AppButton(
+          text: 'Chọn giờ',
+          onTap: () async {
+            final initialTime = TimeOfDay(
+              hour: autoExportState.hour ?? 22,
+              minute: autoExportState.minute ?? 0,
+            );
+            final picked = await showTimePicker(context: context, initialTime: initialTime);
+
+            if (picked == null) return;
+
+            await ref
+                .read(autoExportNotifierProvider.notifier)
+                .changeTime(
+                  hour: picked.hour,
+                  minute: picked.minute,
+                );
+          },
+        ),
+      ],
+    );
+  }
+}
+
 class _ThemeDialogBody extends ConsumerWidget {
   const _ThemeDialogBody();
 
@@ -277,4 +435,3 @@ class _ThemeDialogBody extends ConsumerWidget {
     );
   }
 }
-

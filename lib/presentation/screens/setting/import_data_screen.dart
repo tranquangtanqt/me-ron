@@ -182,6 +182,16 @@ class _ImportDataScreenState extends ConsumerState<ImportDataScreen> {
       //   title: 'Hành động đang chờ (QueuedActions)',
       //   identityColumn: 'id',
       // ),
+      const _ImportTarget(
+        tableName: DatabaseConfig.purchaseTableName,
+        title: 'Phiếu nhập (Purchases)',
+        identityColumn: 'id',
+      ),
+      const _ImportTarget(
+        tableName: DatabaseConfig.purchaseItemTableName,
+        title: 'Chi tiết phiếu nhập (PurchaseItems)',
+        identityColumn: 'id',
+      ),
     ];
 
     return Scaffold(

@@ -26,4 +26,14 @@ class Constants {
   };
 
   static const String dateFormatDDMMYYYY = 'dd/MM/yyyy';
+
+  // Shared Google Drive folder that backup exports are uploaded to
+  static const String driveBackupFolderId = '1c0cznqHuK3hCUdLC5LRtSJoSGb1qM_qT';
+
+  // Auto-export daily backup schedule
+  static const String autoExportHourKey = 'auto_export_hour';
+  static const String autoExportMinuteKey = 'auto_export_minute';
+  static const String autoExportLastDateKey = 'auto_export_last_date';
+  static const String autoExportAllowedKey = 'auto_export_allowed';
+  static const String backupPassword = '123';
 }
