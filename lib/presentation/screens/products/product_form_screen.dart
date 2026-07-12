@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:app_image/app_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,7 +14,6 @@ import '../../providers/category/category_notifier.dart';
 import '../../providers/products/product_form_notifier.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_dialog.dart';
-import '../../widgets/app_icon_button.dart';
 import '../../widgets/app_progress_indicator.dart';
 import '../../widgets/app_snack_bar.dart';
 import '../../widgets/app_text_field.dart';
@@ -174,10 +172,10 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     controller: descController,
                     onChanged: notifier.onChangedDesc,
                   ),
-                  _DeleteButton(
-                    id: widget.id,
-                    onDeleteProduct: deleteProduct,
-                  ),
+                  // _DeleteButton(
+                  //   id: widget.id,
+                  //   onDeleteProduct: deleteProduct,
+                  // ),
                 ],
               ),
             ),

@@ -185,7 +185,18 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                                   child: Text('STT',style: TextStyle(fontWeight: FontWeight.bold,)),
                                 ),),
                                 DataColumn(label: Text('Tên',style: TextStyle(fontWeight: FontWeight.bold,))),
-                                DataColumn(label: Text('Giá',style: TextStyle(fontWeight: FontWeight.bold,))),
+                                DataColumn(
+                                  label: SizedBox(
+                                    width: 100,
+                                    child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Text(
+                                        'Giá',
+                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                                ),
                                 // DataColumn(label: Text('cate')),
                                 // DataColumn(label: Text('Tùy chọn')),
                               ],
@@ -202,7 +213,17 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                                       child: Text(item.id.toString()),
                                     ),),
                                     DataCell(Text(item.name ?? '')),
-                                    DataCell(Text(CurrencyFormatter.formatVND(item.price))),
+                                    DataCell(
+                                      SizedBox(
+                                        width: 100,
+                                        child: Align(
+                                          alignment: Alignment.centerRight,
+                                          child: Text(
+                                            CurrencyFormatter.formatVND(item.price),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                     // DataCell(Text(item.categoryId.toString() ?? '')),
                                     // DataCell(
                                     //   Row(

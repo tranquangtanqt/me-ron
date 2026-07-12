@@ -41,6 +41,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
             _ReportOrderButton(),
             _ReportProductButton(),
             _ReportSummaryButton(),
+            _ReportCustomerButton(),
           ],
         ),
       ),
@@ -168,6 +169,48 @@ class _ReportSummaryButton extends StatelessWidget {
         ),
         onTap: () {
           context.push('/report/report-summary');
+        },
+      ),
+    );
+  }
+}
+
+class _ReportCustomerButton extends StatelessWidget {
+  const _ReportCustomerButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSizes.padding),
+      child: AppButton(
+        buttonColor: Theme.of(context).colorScheme.surface,
+        borderColor: Theme.of(context).colorScheme.surfaceContainer,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.emoji_events,
+                  size: 18,
+                ),
+                const SizedBox(width: AppSizes.padding / 1.5),
+                Text(
+                  'Theo khách hàng tiềm năng',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 18,
+            ),
+          ],
+        ),
+        onTap: () {
+          context.push('/report/report-customer');
         },
       ),
     );

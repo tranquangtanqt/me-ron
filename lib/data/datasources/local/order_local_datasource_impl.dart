@@ -4,8 +4,10 @@ import 'package:sqflite/sqflite.dart';
 import '../../../core/common/result.dart';
 import '../../../core/services/database/database_config.dart';
 import '../../../core/services/database/database_service.dart';
+import '../../../domain/usecases/params/report_customer_params.dart';
 import '../../../domain/usecases/params/report_order_params.dart';
 import '../../../domain/usecases/params/report_product_params.dart';
+import '../../models/customer_summary_model.dart';
 import '../../models/order_model.dart';
 import '../../models/order_item_model.dart';
 import '../../models/order_status_summary_model.dart';
@@ -387,6 +389,47 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
 
       return Result.success(
         data: res.map((e) => ProductSummaryModel.fromJson(e)).toList(),
+      );
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<List<CustomerSummaryModel>>> getTopCustomers(ReportCustomerParams params) async {
+    try {
+      final format = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+      List<dynamic> args = [];
+      String sqlWhere = 'O.status <> ${OrderStatus.cancelled.value}';
+
+      if (params.fromDate != null) {
+        sqlWhere += ' AND O.deliveryDatetime >= ?';
+        args.add(format.format(params.fromDate!));
+      }
+
+      if (params.toDate != null) {
+        sqlWhere += ' AND O.deliveryDatetime <= ?';
+        args.add(format.format(params.toDate!));
+      }
+
+      args.add(params.base.limit);
+
+      String sql =
+          '''
+          SELECT O.userId AS userId, U.name AS userName, COUNT(*) AS cnt, SUM(O.total) AS amt
+          FROM ${DatabaseConfig.orderTableName} AS O
+            INNER JOIN ${DatabaseConfig.userTableName} AS U
+              ON O.userId = U.id
+          WHERE $sqlWhere
+          GROUP BY O.userId
+          ORDER BY amt DESC
+          LIMIT ?
+        ''';
+
+      var res = await _databaseService.database.rawQuery(sql, args);
+
+      return Result.success(
+        data: res.map((e) => CustomerSummaryModel.fromJson(e)).toList(),
       );
     } catch (e) {
       return Result.failure(error: e);

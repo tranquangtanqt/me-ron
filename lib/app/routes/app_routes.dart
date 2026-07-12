@@ -26,6 +26,7 @@ import '../../presentation/screens/products/product_form_screen.dart';
 import '../../presentation/screens/products/products_screen.dart';
 import '../../presentation/screens/purchase/purchase_form_screen.dart';
 import '../../presentation/screens/purchase/purchase_screen.dart';
+import '../../presentation/screens/report/report_customer_screen.dart';
 import '../../presentation/screens/report/report_order_screen.dart';
 import '../../presentation/screens/setting/upload_cloud_screen.dart';
 import '../../presentation/screens/transactions/transaction_detail_screen.dart';
@@ -263,6 +264,7 @@ class AppRoutes {
         _reportOrder(),
         _reportProduct(),
         _reportSummary(),
+        _reportCustomer(),
       ],
     );
   }
@@ -356,6 +358,15 @@ class AppRoutes {
       path: 'report-summary',
       builder: (context, state) {
         return const ReportSummaryScreen();
+      },
+    );
+  }
+
+  GoRoute _reportCustomer() {
+    return GoRoute(
+      path: 'report-customer',
+      builder: (context, state) {
+        return const ReportCustomerScreen();
       },
     );
   }

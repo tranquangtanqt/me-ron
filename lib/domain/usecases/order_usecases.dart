@@ -1,11 +1,13 @@
 import '../../core/common/result.dart';
 import '../../core/usecase/usecase.dart';
+import '../../data/models/customer_summary_model.dart';
 import '../../data/models/order_model.dart';
 import '../../data/models/order_status_summary_model.dart';
 import '../../data/models/product_summary_model.dart';
 import '../entities/order_entity.dart';
 import '../repositories/order_repository.dart';
 import '../../../domain/usecases/params/order_params.dart';
+import '../../../domain/usecases/params/report_customer_params.dart';
 import '../../../domain/usecases/params/report_order_params.dart';
 import '../../../domain/usecases/params/report_product_params.dart';
 
@@ -93,6 +95,16 @@ class GetOrderProductSummaryUsecase extends Usecase<Result, ReportOrderParams> {
   @override
   Future<Result<List<ProductSummaryModel>>> call(ReportOrderParams params) async =>
       _orderRepository.getOrderProductSummary(params);
+}
+
+class GetTopCustomersUsecase extends Usecase<Result, ReportCustomerParams> {
+  GetTopCustomersUsecase(this._orderRepository);
+
+  final OrderRepository _orderRepository;
+
+  @override
+  Future<Result<List<CustomerSummaryModel>>> call(ReportCustomerParams params) async =>
+      _orderRepository.getTopCustomers(params);
 }
 
 class GetOrderUsecase extends Usecase<Result, int> {

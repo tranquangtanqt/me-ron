@@ -7,11 +7,13 @@ import '../../domain/entities/order_item_entity.dart';
 import '../../domain/repositories/order_repository.dart';
 import '../../domain/usecases/params/base_params.dart';
 import '../../domain/usecases/params/order_params.dart';
+import '../../domain/usecases/params/report_customer_params.dart';
 import '../../domain/usecases/params/report_order_params.dart';
 import '../../domain/usecases/params/report_product_params.dart';
 import '../datasources/local/order_local_datasource_impl.dart';
 import '../datasources/local/order_item_local_datasource_impl.dart';
 import '../datasources/local/queued_action_local_datasource_impl.dart';
+import '../models/customer_summary_model.dart';
 import '../models/order_item_model.dart';
 import '../models/order_model.dart';
 import '../models/order_status_summary_model.dart';
@@ -143,6 +145,19 @@ class OrderRepositoryImpl extends OrderRepository {
   Future<Result<List<ProductSummaryModel>>> getOrderProductSummary(ReportOrderParams params) async {
     try {
       final local = await orderLocalDatasource.getOrderProductSummary(params);
+
+      if (local.isFailure) return Result.failure(error: local.error!);
+
+      return Result.success(data: local.data ?? []);
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<List<CustomerSummaryModel>>> getTopCustomers(ReportCustomerParams params) async {
+    try {
+      final local = await orderLocalDatasource.getTopCustomers(params);
 
       if (local.isFailure) return Result.failure(error: local.error!);
 
