@@ -1,6 +1,8 @@
 import '../../core/common/result.dart';
 import '../../core/usecase/usecase.dart';
 import '../../data/models/order_model.dart';
+import '../../data/models/order_status_summary_model.dart';
+import '../../data/models/product_summary_model.dart';
 import '../entities/order_entity.dart';
 import '../repositories/order_repository.dart';
 import '../../../domain/usecases/params/order_params.dart';
@@ -16,13 +18,42 @@ class GetAllOrderUsecase extends Usecase<Result, OrderParams> {
   Future<Result<List<OrderModel>>> call(OrderParams params) async => _orderRepository.getAllOrders(params);
 }
 
+class GetOrdersCountUsecase extends Usecase<Result, OrderParams> {
+  GetOrdersCountUsecase(this._orderRepository);
+
+  final OrderRepository _orderRepository;
+
+  @override
+  Future<Result<int>> call(OrderParams params) async => _orderRepository.getOrdersCount(params);
+}
+
 class GetAllOrderReportProductUsecase extends Usecase<Result, ReportProductParams> {
   GetAllOrderReportProductUsecase(this._orderRepository);
 
   final OrderRepository _orderRepository;
 
   @override
-  Future<Result<List<OrderModel>>> call(ReportProductParams params) async => _orderRepository.getAllOrderReportProduct(params);
+  Future<Result<List<OrderModel>>> call(ReportProductParams params) async =>
+      _orderRepository.getAllOrderReportProduct(params);
+}
+
+class GetOrdersCountReportProductUsecase extends Usecase<Result, ReportProductParams> {
+  GetOrdersCountReportProductUsecase(this._orderRepository);
+
+  final OrderRepository _orderRepository;
+
+  @override
+  Future<Result<int>> call(ReportProductParams params) async => _orderRepository.getOrdersCountReportProduct(params);
+}
+
+class GetProductSummaryReportProductUsecase extends Usecase<Result, ReportProductParams> {
+  GetProductSummaryReportProductUsecase(this._orderRepository);
+
+  final OrderRepository _orderRepository;
+
+  @override
+  Future<Result<List<ProductSummaryModel>>> call(ReportProductParams params) async =>
+      _orderRepository.getProductSummaryReportProduct(params);
 }
 
 class GetAllOrderReportOrderUsecase extends Usecase<Result, ReportOrderParams> {
@@ -31,7 +62,37 @@ class GetAllOrderReportOrderUsecase extends Usecase<Result, ReportOrderParams> {
   final OrderRepository _orderRepository;
 
   @override
-  Future<Result<List<OrderModel>>> call(ReportOrderParams params) async => _orderRepository.getAllOrderReportOrder(params);
+  Future<Result<List<OrderModel>>> call(ReportOrderParams params) async =>
+      _orderRepository.getAllOrderReportOrder(params);
+}
+
+class GetOrdersCountReportOrderUsecase extends Usecase<Result, ReportOrderParams> {
+  GetOrdersCountReportOrderUsecase(this._orderRepository);
+
+  final OrderRepository _orderRepository;
+
+  @override
+  Future<Result<int>> call(ReportOrderParams params) async => _orderRepository.getOrdersCountReportOrder(params);
+}
+
+class GetOrderStatusSummaryUsecase extends Usecase<Result, ReportOrderParams> {
+  GetOrderStatusSummaryUsecase(this._orderRepository);
+
+  final OrderRepository _orderRepository;
+
+  @override
+  Future<Result<List<OrderStatusSummaryModel>>> call(ReportOrderParams params) async =>
+      _orderRepository.getOrderStatusSummary(params);
+}
+
+class GetOrderProductSummaryUsecase extends Usecase<Result, ReportOrderParams> {
+  GetOrderProductSummaryUsecase(this._orderRepository);
+
+  final OrderRepository _orderRepository;
+
+  @override
+  Future<Result<List<ProductSummaryModel>>> call(ReportOrderParams params) async =>
+      _orderRepository.getOrderProductSummary(params);
 }
 
 class GetOrderUsecase extends Usecase<Result, int> {

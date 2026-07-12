@@ -1,8 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/di/app_providers.dart';
-import '../../../../core/enums/order_status.dart';
-import '../../../../data/models/order_model.dart';
+import '../../../../data/models/order_status_summary_model.dart';
 import '../../../../data/models/product_summary_model.dart';
 import '../../../../domain/usecases/params/base_params.dart';
 import '../../../../domain/usecases/order_usecases.dart';
@@ -15,43 +14,36 @@ final reportOrderNotifierProvider = NotifierProvider<ReportOrderNotifier, Report
 );
 
 class ReportOrderNotifier extends Notifier<ReportOrderState> {
+  static const int pageSize = 30;
+
+  ReportOrderParams? _lastFilter;
+  bool _isFetching = false;
+
   @override
   ReportOrderState build() {
     return const ReportOrderState();
   }
 
   void resetOrder() {
+    _lastFilter = null;
     state = const ReportOrderState(
       allOrder: [],
-      // isLoadingMore: false,
+      total: null,
+      productSummary: null,
+      orderStatusSummary: null,
       error: null,
     );
   }
 
-  //*************************************
-  Future<void> getAllOrderReportOrder({int? offset, String? contains,
-    DateTime? fromDate, DateTime? toDate, int? status, int? userId}) async {
-    state = const ReportOrderState(
-      allOrder: [],
-      // isLoadingMore: false,
-      error: null,
-    );
-
-    // if (offset != null && state.isLoadingMore) return;
-
-    if (offset != null) {
-      // state = state.copyWith(isLoadingMore: true);
-      state = state.copyWith();
-    }
-
-    final baseParams = BaseParams(
-      orderBy: 'id',
-      sortBy: 'ASC',
-      offset: offset,
-    );
-
-    final params = ReportOrderParams(
-      base: baseParams,
+  Future<void> getAllOrderReportOrder({
+    String? contains,
+    DateTime? fromDate,
+    DateTime? toDate,
+    int? status,
+    int? userId,
+  }) async {
+    _lastFilter = ReportOrderParams(
+      base: const BaseParams(),
       contains: contains,
       fromDate: fromDate,
       toDate: toDate,
@@ -59,35 +51,105 @@ class ReportOrderNotifier extends Notifier<ReportOrderState> {
       userId: userId,
     );
 
+    state = const ReportOrderState(
+      allOrder: [],
+      total: null,
+      productSummary: null,
+      orderStatusSummary: null,
+      error: null,
+    );
+
     final orderRepository = ref.read(orderRepositoryProvider);
-    final res = await GetAllOrderReportOrderUsecase(orderRepository).call(params);
 
-    if (res.isSuccess) {
-      final newData = res.data ?? [];
+    final countRes = await GetOrdersCountReportOrderUsecase(orderRepository).call(_lastFilter!);
 
-      final productSummary = _buildProductSummary(newData);
+    if (countRes.isFailure) {
+      state = state.copyWith(error: countRes.error?.toString());
+      throw Exception(countRes.error?.toString() ?? 'Failed to load data');
+    }
 
-      if (offset == null) {
-        state = state.copyWithGroup(
-          allOrder: newData,
-          productSummary: productSummary,
-          // isLoadingMore: false,
-        );
-      } else {
-        final currentOrder = state.allOrder ?? [];
+    final statusSummaryRes = await GetOrderStatusSummaryUsecase(orderRepository).call(_lastFilter!);
+    final productSummaryRes = await GetOrderProductSummaryUsecase(orderRepository).call(_lastFilter!);
 
-        final merged = [...currentOrder, ...newData];
+    if (statusSummaryRes.isFailure) {
+      state = state.copyWith(error: statusSummaryRes.error?.toString());
+      throw Exception(statusSummaryRes.error?.toString() ?? 'Failed to load data');
+    }
 
-        state = state.copyWith(
-          allOrder: merged,
-          productSummary: _buildProductSummary(merged),
-          // isLoadingMore: false,
-        );
+    if (productSummaryRes.isFailure) {
+      state = state.copyWith(error: productSummaryRes.error?.toString());
+      throw Exception(productSummaryRes.error?.toString() ?? 'Failed to load data');
+    }
+
+    final total = countRes.data ?? 0;
+
+    final orderStatusSummary = <int, OrderStatusSummaryModel>{
+      for (final s in statusSummaryRes.data ?? []) s.status: s,
+    };
+
+    final productSummary = <int, ProductSummaryModel>{
+      for (final p in productSummaryRes.data ?? []) (p.productId ?? 0): p,
+    };
+
+    state = state.copyWith(
+      total: total,
+      orderStatusSummary: orderStatusSummary,
+      productSummary: productSummary,
+    );
+
+    if (total == 0) return;
+
+    while ((state.allOrder?.length ?? 0) < (state.total ?? 0) && (state.total ?? 0) <= pageSize) {
+      final before = state.allOrder?.length ?? 0;
+
+      await loadMore();
+
+      if ((state.allOrder?.length ?? 0) <= before) break;
+    }
+  }
+
+  Future<void> loadMore() async {
+    if (_isFetching || _lastFilter == null) return;
+
+    final total = state.total ?? 0;
+    final current = state.allOrder ?? [];
+
+    if (total == 0 || current.length >= total) return;
+
+    _isFetching = true;
+
+    try {
+      final orderRepository = ref.read(orderRepositoryProvider);
+
+      final baseParams = BaseParams(
+        orderBy: 'id',
+        sortBy: 'ASC',
+        limit: pageSize,
+        offset: current.length,
+      );
+
+      final params = ReportOrderParams(
+        base: baseParams,
+        contains: _lastFilter!.contains,
+        fromDate: _lastFilter!.fromDate,
+        toDate: _lastFilter!.toDate,
+        status: _lastFilter!.status,
+        userId: _lastFilter!.userId,
+      );
+
+      final res = await GetAllOrderReportOrderUsecase(orderRepository).call(params);
+
+      if (res.isFailure) {
+        state = state.copyWith(error: res.error?.toString());
+        throw Exception(res.error?.toString() ?? 'Failed to load data');
       }
-    } else {
-      // state = state.copyWith(isLoadingMore: false);
-      state = state.copyWith();
-      throw Exception(res.error?.toString() ?? 'Failed to load data');
+
+      state = state.copyWithGroup(
+        newRows: res.data ?? [],
+        append: current.isNotEmpty,
+      );
+    } finally {
+      _isFetching = false;
     }
   }
 
@@ -109,35 +171,6 @@ class ReportOrderNotifier extends Notifier<ReportOrderState> {
       toDate: toDate,
       status: filter.status,
       userId: filter.userId,
-    );
-  }
-
-  Map<int, ProductSummaryModel> _buildProductSummary(List<OrderModel>? orders) {
-    if (orders == null) return {};
-
-    return orders.fold<Map<int, ProductSummaryModel>>(
-      {},
-          (map, order) {
-            if (order.status == OrderStatus.cancelled.value) {
-              return map;
-            }
-        for (final item in order.items ?? []) {
-          map.update(
-            item.productId,
-                (value) => ProductSummaryModel(
-              productId: value.productId,
-              productName: value.productName,
-              quantity: value.quantity + (item.quantity as int),
-            ),
-            ifAbsent: () => ProductSummaryModel(
-              productId: item.productId,
-              productName: item.snapshotName,
-              quantity: item.quantity.toInt(),
-            ),
-          );
-        }
-        return map;
-      },
     );
   }
 }

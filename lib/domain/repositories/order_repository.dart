@@ -1,5 +1,7 @@
 import '../../core/common/result.dart';
 import '../../data/models/order_model.dart';
+import '../../data/models/order_status_summary_model.dart';
+import '../../data/models/product_summary_model.dart';
 import '../entities/order_entity.dart';
 import '../../domain/usecases/params/order_params.dart';
 import '../usecases/params/report_order_params.dart';
@@ -8,9 +10,21 @@ import '../usecases/params/report_product_params.dart';
 abstract class OrderRepository {
   Future<Result<List<OrderModel>>> getAllOrders(OrderParams params);
 
+  Future<Result<int>> getOrdersCount(OrderParams params);
+
   Future<Result<List<OrderModel>>> getAllOrderReportProduct(ReportProductParams params);
 
+  Future<Result<int>> getOrdersCountReportProduct(ReportProductParams params);
+
+  Future<Result<List<ProductSummaryModel>>> getProductSummaryReportProduct(ReportProductParams params);
+
   Future<Result<List<OrderModel>>> getAllOrderReportOrder(ReportOrderParams params);
+
+  Future<Result<int>> getOrdersCountReportOrder(ReportOrderParams params);
+
+  Future<Result<List<OrderStatusSummaryModel>>> getOrderStatusSummary(ReportOrderParams params);
+
+  Future<Result<List<ProductSummaryModel>>> getOrderProductSummary(ReportOrderParams params);
 
   Future<Result<List<OrderModel>>> getOrder(int orderId);
 

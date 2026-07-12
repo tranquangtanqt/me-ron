@@ -26,20 +26,20 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     super.initState();
 
     Future.microtask(() {
-      ref.read(orderNotifierProvider.notifier).reload();
+      ref.read(orderDetailNotifierProvider.notifier).reload(loadAll: true);
     });
   }
 
   void updateOrder(int id) async {
     final result = await context.push('/order/order-edit/$id');
     if (result == true) {
-      ref.read(orderNotifierProvider.notifier).reload();
+      ref.read(orderDetailNotifierProvider.notifier).reload(loadAll: true);
     }
   }
 
   // thanh toán
   void onPayment() {
-    final allOrder = ref.read(orderNotifierProvider).allOrder;
+    final allOrder = ref.read(orderDetailNotifierProvider).allOrder;
 
     bool check = true;
     for (int i = 0; i < allOrder!.length; i++) {
@@ -112,7 +112,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(orderNotifierProvider);
+    final state = ref.watch(orderDetailNotifierProvider);
 
     List<OrderModel> orders = state.allOrder ?? [];
     final hasDeliveredOrder = orders.any(

@@ -13,6 +13,7 @@ import '../../providers/category/category_notifier.dart';
 import '../../providers/products/products_notifier.dart';
 import '../../providers/report/product/report_product_filter_notifier.dart';
 import '../../providers/report/product/report_product_notifier.dart';
+import '../../widgets/app_button.dart';
 import '../../widgets/app_empty_state.dart';
 import '../../widgets/app_progress_indicator.dart';
 import 'components/report_product_card.dart';
@@ -57,11 +58,9 @@ class _ReportProductScreenState extends ConsumerState<ReportProductScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     final allOrder = ref.watch(reportProductNotifierProvider.select((s) => s.allOrder));
+    final total = ref.watch(reportProductNotifierProvider.select((s) => s.total));
     final summary = ref.watch(reportProductNotifierProvider.select((s) => s.productSummary));
-
-    print(summary?.values.toList());
 
     return Scaffold(
       appBar: AppBar(
@@ -74,7 +73,7 @@ class _ReportProductScreenState extends ConsumerState<ReportProductScreen> {
         displacement: 60,
         child: Scrollbar(
           child: CustomScrollView(
-            physics: (allOrder?.isEmpty ?? true) ? const NeverScrollableScrollPhysics() : null,
+            physics: (total == 0) ? const NeverScrollableScrollPhysics() : null,
             slivers: [
               SliverToBoxAdapter(
                 child: Padding(
@@ -82,9 +81,11 @@ class _ReportProductScreenState extends ConsumerState<ReportProductScreen> {
                     horizontal: AppSizes.padding,
                     vertical: 8,
                   ),
-                  child: _ReportProductFilterBar(onSearch: () {
-                    ref.read(reportProductNotifierProvider.notifier).reloadByReportProduct();
-                  })
+                  child: _ReportProductFilterBar(
+                    onSearch: () {
+                      ref.read(reportProductNotifierProvider.notifier).reloadByReportProduct();
+                    },
+                  ),
                 ),
               ),
               if (summary != null && summary.isNotEmpty)
@@ -127,45 +128,45 @@ class _ReportProductScreenState extends ConsumerState<ReportProductScreen> {
                             SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Row(
-                                children: (summary.values.toList()
-                                  ..sort((a, b) => b.quantity.compareTo(a.quantity)))
+                                children: (summary.values.toList()..sort((a, b) => b.quantity.compareTo(a.quantity)))
                                     .map((e) {
-                                  return Container(
-                                    margin: const EdgeInsets.only(right: 8),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue.withOpacity(0.08),
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: Colors.blue.withOpacity(0.2),
-                                      ),
-                                    ),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          e.productName,
-                                          style: const TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w500,
+                                      return Container(
+                                        margin: const EdgeInsets.only(right: 8),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue.withOpacity(0.08),
+                                          borderRadius: BorderRadius.circular(10),
+                                          border: Border.all(
+                                            color: Colors.blue.withOpacity(0.2),
                                           ),
                                         ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          '${e.quantity}',
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.blue,
-                                          ),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              e.productName,
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              '${e.quantity}',
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.blue,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                                  );
-                                }).toList(),
+                                      );
+                                    })
+                                    .toList(),
                               ),
                             ),
                           ],
@@ -176,7 +177,7 @@ class _ReportProductScreenState extends ConsumerState<ReportProductScreen> {
                 ),
               SliverLayoutBuilder(
                 builder: (context, _) {
-                  if (allOrder == null) {
+                  if (total == null) {
                     return const SliverFillRemaining(
                       hasScrollBody: false,
                       fillOverscroll: true,
@@ -184,13 +185,43 @@ class _ReportProductScreenState extends ConsumerState<ReportProductScreen> {
                     );
                   }
 
-                  if (allOrder.isEmpty) {
+                  if (total == 0) {
                     return SliverFillRemaining(
                       hasScrollBody: false,
                       fillOverscroll: true,
                       child: AppEmptyState(),
                     );
                   }
+
+                  final loaded = allOrder ?? [];
+
+                  if (loaded.isEmpty) {
+                    return SliverFillRemaining(
+                      hasScrollBody: false,
+                      fillOverscroll: true,
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSizes.padding,
+                            AppSizes.padding / 2,
+                            AppSizes.padding,
+                            AppSizes.padding,
+                          ),
+                          child: AppButton(
+                            width: double.infinity,
+                            height: 32,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            text: 'Xem danh sách ($total)',
+                            onTap: () => ref.read(reportProductNotifierProvider.notifier).loadMore(),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+
+                  final hasMore = loaded.length < total;
+
                   return SliverPadding(
                     padding: const EdgeInsets.fromLTRB(
                       AppSizes.padding,
@@ -227,12 +258,22 @@ class _ReportProductScreenState extends ConsumerState<ReportProductScreen> {
                           ListView.separated(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            itemCount: allOrder.length,
-                            separatorBuilder: (_, __) =>
-                            const SizedBox(height: AppSizes.padding / 2),
+                            itemCount: loaded.length + (hasMore ? 1 : 0),
+                            separatorBuilder: (_, __) => const SizedBox(height: AppSizes.padding / 2),
                             itemBuilder: (context, i) {
+                              if (i == loaded.length) {
+                                return Center(
+                                  child: AppButton(
+                                    height: 32,
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    text: 'Xem thêm',
+                                    onTap: () => ref.read(reportProductNotifierProvider.notifier).loadMore(),
+                                  ),
+                                );
+                              }
+
                               return _ReportProductCard(
-                                order: allOrder[i],
+                                order: loaded[i],
                                 onTap: updateOrder,
                               );
                             },
@@ -241,24 +282,6 @@ class _ReportProductScreenState extends ConsumerState<ReportProductScreen> {
                       ),
                     ),
                   );
-
-                  // return SliverPadding(
-                  //   padding: const EdgeInsets.fromLTRB(AppSizes.padding, 2, AppSizes.padding, AppSizes.padding),
-                  //   sliver: SliverList.builder(
-                  //     itemCount: allOrder.length,
-                  //     itemBuilder: (context, i) {
-                  //       return Padding(
-                  //         padding: const EdgeInsets.only(
-                  //           bottom: AppSizes.padding / 2,
-                  //         ),
-                  //         child: _ReportProductCard(
-                  //             order: allOrder[i],
-                  //             onTap: updateOrder
-                  //         ),
-                  //       );
-                  //     },
-                  //   ),
-                  // );
                 },
               ),
             ],
@@ -480,9 +503,7 @@ class _DateField extends StatelessWidget {
             // ),
           ),
           child: Text(
-            controller.text.isEmpty
-                ? ''
-                : controller.text,
+            controller.text.isEmpty ? '' : controller.text,
           ),
         ),
       ),
@@ -517,7 +538,7 @@ class _ProductAutocomplete extends StatelessWidget {
           if (query.isEmpty) return products;
 
           return products.where(
-                (u) => (u.name ?? '').toLowerCase().contains(query),
+            (u) => (u.name ?? '').toLowerCase().contains(query),
           );
         },
 
@@ -526,16 +547,11 @@ class _ProductAutocomplete extends StatelessWidget {
           onChanged(user.id);
         },
 
-        fieldViewBuilder:(context, textController, focusNode, onFieldSubmitted) {
-          final selectedUser = selected == null
-              ? null
-              : products.where((u) => u.id == selected).firstOrNull;
+        fieldViewBuilder: (context, textController, focusNode, onFieldSubmitted) {
+          final selectedUser = selected == null ? null : products.where((u) => u.id == selected).firstOrNull;
 
           // 🔥 sync từ state -> text
-          if (selectedUser != null
-              &&
-              textController.text != selectedUser.name
-          ) {
+          if (selectedUser != null && textController.text != selectedUser.name) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               textController.text = selectedUser.name ?? '';
             });
@@ -567,16 +583,15 @@ class _ProductAutocomplete extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
 
-                suffixIcon:
-                (textController.text.isNotEmpty || selected != null)
+                suffixIcon: (textController.text.isNotEmpty || selected != null)
                     ? IconButton(
-                  icon: const Icon(Icons.close, size: 18),
-                  onPressed: () {
-                    onClear();
-                    textController.clear();
-                    onChanged(null);
-                  },
-                )
+                        icon: const Icon(Icons.close, size: 18),
+                        onPressed: () {
+                          onClear();
+                          textController.clear();
+                          onChanged(null);
+                        },
+                      )
                     : null,
               ),
             ),

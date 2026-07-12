@@ -43,12 +43,26 @@ class ReportSummaryNotifier extends Notifier<ReportSummaryState> {
     final baseParams = BaseParams(orderBy: 'id', sortBy: 'ASC');
 
     final orderRepository = ref.read(orderRepositoryProvider);
-    final orderRes = await GetAllOrderReportOrderUsecase(orderRepository).call(
+
+    final countRes = await GetOrdersCountReportOrderUsecase(orderRepository).call(
       ReportOrderParams(base: baseParams, fromDate: filter.fromDate, toDate: toDate),
     );
+    final total = countRes.data ?? 0;
 
-    final List<OrderModel> allOrder =
-        const ReportOrderState().copyWithGroup(allOrder: orderRes.data ?? []).allOrder ?? [];
+    List<OrderModel> allOrder = [];
+
+    if (total > 0) {
+      final orderRes = await GetAllOrderReportOrderUsecase(orderRepository).call(
+        ReportOrderParams(
+          base: BaseParams(orderBy: 'id', sortBy: 'ASC', limit: total),
+          fromDate: filter.fromDate,
+          toDate: toDate,
+        ),
+      );
+
+      allOrder = const ReportOrderState().copyWithGroup(newRows: orderRes.data ?? [], append: false).allOrder ?? [];
+    }
+
     final productSummary = _buildProductSummary(allOrder);
 
     final purchaseRepository = ref.read(purchaseRepositoryProvider);

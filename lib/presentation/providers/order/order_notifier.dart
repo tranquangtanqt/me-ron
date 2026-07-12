@@ -12,51 +12,49 @@ final orderNotifierProvider = NotifierProvider<OrderNotifier, OrderState>(
   OrderNotifier.new,
 );
 
+// Separate instance/state for the order detail screen, which needs the
+// full (unpaginated) matching order list independently of the list screen.
+final orderDetailNotifierProvider = NotifierProvider<OrderNotifier, OrderState>(
+  OrderNotifier.new,
+);
+
 class OrderNotifier extends Notifier<OrderState> {
+  static const int pageSize = 30;
+
+  OrderParams? _lastFilter;
+  bool _isFetching = false;
+
   @override
   OrderState build() {
     return const OrderState();
   }
 
   void resetOrder() {
+    _lastFilter = null;
     state = const OrderState(
       allOrder: [],
-      // isLoadingMore: false,
+      total: null,
       error: null,
     );
   }
 
-  Future<void> getAllOrder(bool resetDataFlg, {int? offset, String? contains,
-  DateTime? fromDate, DateTime? toDate, int? status, int? userId}) async {
-    if (resetDataFlg == true) {
-      state = const OrderState(
-        allOrder: [],
-        // isLoadingMore: false,
-        error: null,
-      );
-    }
-
+  Future<void> getAllOrder(
+    bool resetDataFlg, {
+    String? contains,
+    DateTime? fromDate,
+    DateTime? toDate,
+    int? status,
+    int? userId,
+    bool loadAll = false,
+  }) async {
     status ??= OrderStatus.shipping.value;
 
     if (status == -1) {
       status = null;
     }
 
-    // if (offset != null && state.isLoadingMore) return;
-
-    if (offset != null) {
-      // state = state.copyWith(isLoadingMore: true);
-      state = state.copyWith();
-    }
-
-    final baseParams = BaseParams(
-      orderBy: 'id',
-      sortBy: 'ASC',
-      offset: offset,
-    );
-
-    final params = OrderParams(
-      base: baseParams,
+    _lastFilter = OrderParams(
+      base: const BaseParams(),
       contains: contains,
       fromDate: fromDate,
       toDate: toDate,
@@ -64,36 +62,84 @@ class OrderNotifier extends Notifier<OrderState> {
       userId: userId,
     );
 
+    if (!resetDataFlg) return;
+
+    state = const OrderState(
+      allOrder: [],
+      total: null,
+      error: null,
+    );
+
     final orderRepository = ref.read(orderRepositoryProvider);
-    final res = await GetAllOrderUsecase(orderRepository).call(params);
+    final countRes = await GetOrdersCountUsecase(orderRepository).call(_lastFilter!);
 
-    if (res.isSuccess) {
-      final newData = res.data ?? [];
+    if (countRes.isFailure) {
+      state = state.copyWith(error: countRes.error?.toString());
+      throw Exception(countRes.error?.toString() ?? 'Failed to load data');
+    }
 
-      if (offset == null) {
-        state = state.copyWithGroup(
-          allOrder: newData,
-          isLoadingMore: false,
-        );
-      } else {
-        final current = state.allOrder ?? [];
+    final total = countRes.data ?? 0;
+    state = state.copyWith(total: total);
 
-        state = state.copyWith(
-          allOrder: [
-            ...current,
-            ...newData,
-          ],
-          // isLoadingMore: false,
-        );
-      }
-    } else {
-      // state = state.copyWith(isLoadingMore: false);
-      state = state.copyWith();
-      throw Exception(res.error?.toString() ?? 'Failed to load data');
+    if (total == 0) return;
+
+    if (total > pageSize && !loadAll) return;
+
+    while ((state.allOrder?.length ?? 0) < (state.total ?? 0)) {
+      final before = state.allOrder?.length ?? 0;
+
+      await loadMore();
+
+      if ((state.allOrder?.length ?? 0) <= before) break;
     }
   }
 
-  Future<void> reload() async {
+  Future<void> loadMore() async {
+    if (_isFetching || _lastFilter == null) return;
+
+    final total = state.total ?? 0;
+    final current = state.allOrder ?? [];
+
+    if (total == 0 || current.length >= total) return;
+
+    _isFetching = true;
+
+    try {
+      final orderRepository = ref.read(orderRepositoryProvider);
+
+      final baseParams = BaseParams(
+        orderBy: 'id',
+        sortBy: 'ASC',
+        limit: pageSize,
+        offset: current.length,
+      );
+
+      final params = OrderParams(
+        base: baseParams,
+        contains: _lastFilter!.contains,
+        fromDate: _lastFilter!.fromDate,
+        toDate: _lastFilter!.toDate,
+        status: _lastFilter!.status,
+        userId: _lastFilter!.userId,
+      );
+
+      final res = await GetAllOrderUsecase(orderRepository).call(params);
+
+      if (res.isFailure) {
+        state = state.copyWith(error: res.error?.toString());
+        throw Exception(res.error?.toString() ?? 'Failed to load data');
+      }
+
+      state = state.copyWithGroup(
+        newRows: res.data ?? [],
+        append: current.isNotEmpty,
+      );
+    } finally {
+      _isFetching = false;
+    }
+  }
+
+  Future<void> reload({bool loadAll = false}) async {
     final filter = ref.read(orderFilterProvider);
 
     final toDate = DateTime(
@@ -112,6 +158,7 @@ class OrderNotifier extends Notifier<OrderState> {
       toDate: toDate,
       status: filter.status,
       userId: filter.userId,
+      loadAll: loadAll,
     );
   }
 }

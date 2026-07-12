@@ -3,42 +3,36 @@ import '../../../data/models/order_model.dart';
 
 class OrderState {
   final List<OrderModel>? allOrder;
-  // final bool isLoadingMore;
+  final int? total;
   final String? error;
 
   const OrderState({
     this.allOrder,
-    // this.isLoadingMore = false,
-    this.error
+    this.total,
+    this.error,
   });
 
   OrderState copyWith({
     List<OrderModel>? allOrder,
-    // bool? isLoadingMore,
-    String? error
+    int? total,
+    String? error,
   }) {
     return OrderState(
       allOrder: allOrder ?? this.allOrder,
-      // isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      total: total ?? this.total,
       error: error ?? this.error,
     );
   }
 
-  OrderState copyWithGroup({
-    List<OrderModel>? allOrder,
-    bool? isLoadingMore,
-    String? error,
-  }) {
+  static List<OrderModel> _group(List<OrderModel> rows) {
     final Map<int, OrderModel> map = {};
 
-    final source = allOrder ?? [];
-
-    for (final row in source) {
+    for (final row in rows) {
       final orderId = row.id!;
 
       map.putIfAbsent(
         orderId,
-            () => OrderModel(
+        () => OrderModel(
           id: row.id,
           userId: row.userId,
           userName: row.userName,
@@ -71,9 +65,20 @@ class OrderState {
       }
     }
 
+    return map.values.toList();
+  }
+
+  OrderState copyWithGroup({
+    required List<OrderModel> newRows,
+    required bool append,
+    int? total,
+    String? error,
+  }) {
+    final grouped = _group(newRows);
+
     return OrderState(
-      allOrder: map.values.toList(),
-      // isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      allOrder: append ? [...?allOrder, ...grouped] : grouped,
+      total: total ?? this.total,
       error: error ?? this.error,
     );
   }

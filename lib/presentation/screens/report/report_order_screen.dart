@@ -6,11 +6,13 @@ import 'package:intl/intl.dart';
 import '../../../core/enums/order_status.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../../data/models/order_model.dart';
+import '../../../data/models/order_status_summary_model.dart';
 import '../../../domain/entities/category_entity.dart';
 import '../../providers/category/category_notifier.dart';
 import '../../providers/report/order/report_order_filter_notifier.dart';
 import '../../providers/report/order/report_order_notifier.dart';
 import '../../providers/user/user_notifier.dart';
+import '../../widgets/app_button.dart';
 import '../../widgets/app_empty_state.dart';
 import '../../widgets/app_progress_indicator.dart';
 import '../../widgets/app_user_autocomplete.dart';
@@ -57,6 +59,8 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
   @override
   Widget build(BuildContext context) {
     final allOrder = ref.watch(reportOrderNotifierProvider.select((s) => s.allOrder));
+    final total = ref.watch(reportOrderNotifierProvider.select((s) => s.total));
+    final orderStatusSummary = ref.watch(reportOrderNotifierProvider.select((s) => s.orderStatusSummary));
     final productSummary = ref.watch(reportOrderNotifierProvider.select((s) => s.productSummary));
     final currencyFormat = NumberFormat('#,###', 'vi_VN');
 
@@ -65,29 +69,20 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
       orderSummaryByStatus[status] = const _OrderSummary();
     }
 
-    if (allOrder != null && allOrder.isNotEmpty) {
-      for (final order in allOrder) {
-        final status = OrderStatusExtension.fromValue(order.status ?? OrderStatus.shipping.value);
-        final current = orderSummaryByStatus[status] ?? const _OrderSummary();
-        orderSummaryByStatus[status] = _OrderSummary(
-          count: current.count + 1,
-          totalAmount: current.totalAmount + (order.total ?? 0),
-        );
-      }
+    for (final summary in orderStatusSummary?.values ?? const <OrderStatusSummaryModel>[]) {
+      final status = OrderStatusExtension.fromValue(summary.status);
+      orderSummaryByStatus[status] = _OrderSummary(
+        count: summary.count,
+        totalAmount: summary.totalAmount,
+      );
     }
 
-    final totalOrderCount = allOrder?.length ?? 0;
-    // final totalOrderAmount = allOrder?.fold<int>(0, (sum, order) => sum + (order.total ?? 0)) ?? 0;
+    final totalOrderCount = orderStatusSummary?.values.fold<int>(0, (sum, s) => sum + s.count) ?? 0;
 
     final totalOrderAmount =
-        allOrder
-            ?.where((o) {
-              final status = OrderStatusExtension.fromValue(
-                o.status ?? OrderStatus.shipping.value,
-              );
-              return status != OrderStatus.cancelled;
-            })
-            .fold<int>(0, (sum, order) => sum + (order.total ?? 0)) ??
+        orderStatusSummary?.values
+            .where((s) => OrderStatusExtension.fromValue(s.status) != OrderStatus.cancelled)
+            .fold<int>(0, (sum, s) => sum + s.totalAmount) ??
         0;
 
     return Scaffold(
@@ -101,7 +96,7 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
         displacement: 60,
         child: Scrollbar(
           child: CustomScrollView(
-            physics: (allOrder?.isEmpty ?? true) ? const NeverScrollableScrollPhysics() : null,
+            physics: (total == 0) ? const NeverScrollableScrollPhysics() : null,
             slivers: [
               SliverToBoxAdapter(
                 child: Padding(
@@ -116,7 +111,7 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
                   ),
                 ),
               ),
-              if (allOrder != null && allOrder.isNotEmpty)
+              if (total != null && total > 0)
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -315,7 +310,7 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
                 ),
               SliverLayoutBuilder(
                 builder: (context, _) {
-                  if (allOrder == null) {
+                  if (total == null) {
                     return const SliverFillRemaining(
                       hasScrollBody: false,
                       fillOverscroll: true,
@@ -323,13 +318,42 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
                     );
                   }
 
-                  if (allOrder.isEmpty) {
+                  if (total == 0) {
                     return SliverFillRemaining(
                       hasScrollBody: false,
                       fillOverscroll: true,
                       child: AppEmptyState(),
                     );
                   }
+
+                  final loaded = allOrder ?? [];
+
+                  if (loaded.isEmpty) {
+                    return SliverFillRemaining(
+                      hasScrollBody: false,
+                      fillOverscroll: true,
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSizes.padding,
+                            AppSizes.padding / 2,
+                            AppSizes.padding,
+                            AppSizes.padding,
+                          ),
+                          child: AppButton(
+                            width: double.infinity,
+                            height: 32,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            text: 'Xem danh sách ($total)',
+                            onTap: () => ref.read(reportOrderNotifierProvider.notifier).loadMore(),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+
+                  final hasMore = loaded.length < total;
 
                   return SliverPadding(
                     padding: const EdgeInsets.fromLTRB(
@@ -367,11 +391,22 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
                           ListView.separated(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            itemCount: allOrder.length,
+                            itemCount: loaded.length + (hasMore ? 1 : 0),
                             separatorBuilder: (_, __) => const SizedBox(height: AppSizes.padding / 2),
                             itemBuilder: (context, i) {
+                              if (i == loaded.length) {
+                                return Center(
+                                  child: AppButton(
+                                    height: 32,
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    text: 'Xem thêm',
+                                    onTap: () => ref.read(reportOrderNotifierProvider.notifier).loadMore(),
+                                  ),
+                                );
+                              }
+
                               return _ReportOrderCard(
-                                order: allOrder[i],
+                                order: loaded[i],
                                 onTap: updateOrder,
                               );
                             },

@@ -14,6 +14,8 @@ import '../datasources/local/order_item_local_datasource_impl.dart';
 import '../datasources/local/queued_action_local_datasource_impl.dart';
 import '../models/order_item_model.dart';
 import '../models/order_model.dart';
+import '../models/order_status_summary_model.dart';
+import '../models/product_summary_model.dart';
 import '../models/queued_action_model.dart';
 
 class OrderRepositoryImpl extends OrderRepository {
@@ -27,7 +29,6 @@ class OrderRepositoryImpl extends OrderRepository {
     required this.queuedActionLocalDatasource,
   });
 
-
   @override
   Future<Result<List<OrderModel>>> getAllOrders(OrderParams params) async {
     try {
@@ -38,6 +39,19 @@ class OrderRepositoryImpl extends OrderRepository {
       final list = local.data ?? [];
       // return Result.success(data: list.map((e) => e.toEntity()).toList());
       return Result.success(data: list.toList());
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<int>> getOrdersCount(OrderParams params) async {
+    try {
+      final local = await orderLocalDatasource.getOrdersCount(params);
+
+      if (local.isFailure) return Result.failure(error: local.error!);
+
+      return Result.success(data: local.data ?? 0);
     } catch (e) {
       return Result.failure(error: e);
     }
@@ -59,6 +73,32 @@ class OrderRepositoryImpl extends OrderRepository {
   }
 
   @override
+  Future<Result<int>> getOrdersCountReportProduct(ReportProductParams params) async {
+    try {
+      final local = await orderLocalDatasource.getOrdersCountReportProduct(params);
+
+      if (local.isFailure) return Result.failure(error: local.error!);
+
+      return Result.success(data: local.data ?? 0);
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<List<ProductSummaryModel>>> getProductSummaryReportProduct(ReportProductParams params) async {
+    try {
+      final local = await orderLocalDatasource.getProductSummaryReportProduct(params);
+
+      if (local.isFailure) return Result.failure(error: local.error!);
+
+      return Result.success(data: local.data ?? []);
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
   Future<Result<List<OrderModel>>> getAllOrderReportOrder(ReportOrderParams params) async {
     try {
       final local = await orderLocalDatasource.getAllOrderReportOrder(params);
@@ -68,6 +108,45 @@ class OrderRepositoryImpl extends OrderRepository {
       final list = local.data ?? [];
       // return Result.success(data: list.map((e) => e.toEntity()).toList());
       return Result.success(data: list.toList());
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<int>> getOrdersCountReportOrder(ReportOrderParams params) async {
+    try {
+      final local = await orderLocalDatasource.getOrdersCountReportOrder(params);
+
+      if (local.isFailure) return Result.failure(error: local.error!);
+
+      return Result.success(data: local.data ?? 0);
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<List<OrderStatusSummaryModel>>> getOrderStatusSummary(ReportOrderParams params) async {
+    try {
+      final local = await orderLocalDatasource.getOrderStatusSummary(params);
+
+      if (local.isFailure) return Result.failure(error: local.error!);
+
+      return Result.success(data: local.data ?? []);
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<List<ProductSummaryModel>>> getOrderProductSummary(ReportOrderParams params) async {
+    try {
+      final local = await orderLocalDatasource.getOrderProductSummary(params);
+
+      if (local.isFailure) return Result.failure(error: local.error!);
+
+      return Result.success(data: local.data ?? []);
     } catch (e) {
       return Result.failure(error: e);
     }
@@ -201,9 +280,7 @@ class OrderRepositoryImpl extends OrderRepository {
   Future<Result<void>> updateOrderWithItems(OrderEntity order, List<dynamic> items) async {
     try {
       final data = OrderModel.fromEntity(order);
-      final itemsModels = items
-          .map((dynamic it) => OrderItemModel.fromEntity(it as OrderItemEntity))
-          .toList();
+      final itemsModels = items.map((dynamic it) => OrderItemModel.fromEntity(it as OrderItemEntity)).toList();
 
       final local = await orderLocalDatasource.updateOrderWithItems(data, itemsModels);
       if (local.isFailure) return Result.failure(error: local.error!);

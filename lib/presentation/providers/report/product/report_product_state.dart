@@ -4,47 +4,40 @@ import '../../../../data/models/product_summary_model.dart';
 
 class ReportProductState {
   final List<OrderModel>? allOrder;
+  final int? total;
   final Map<int, ProductSummaryModel>? productSummary;
-  // final bool isLoadingMore;
   final String? error;
 
   const ReportProductState({
     this.allOrder,
+    this.total,
     this.productSummary,
-    // this.isLoadingMore = false,
-    this.error
+    this.error,
   });
 
   ReportProductState copyWith({
     List<OrderModel>? allOrder,
+    int? total,
     Map<int, ProductSummaryModel>? productSummary,
-    // bool? isLoadingMore,
-    String? error
+    String? error,
   }) {
     return ReportProductState(
       allOrder: allOrder ?? this.allOrder,
+      total: total ?? this.total,
       productSummary: productSummary ?? this.productSummary,
-      // isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       error: error ?? this.error,
     );
   }
 
-  ReportProductState copyWithGroup({
-    List<OrderModel>? allOrder,
-    Map<int, ProductSummaryModel>? productSummary,
-    bool? isLoadingMore,
-    String? error,
-  }) {
+  static List<OrderModel> _group(List<OrderModel> rows) {
     final Map<int, OrderModel> map = {};
 
-    final source = allOrder ?? [];
-
-    for (final row in source) {
+    for (final row in rows) {
       final orderId = row.id!;
 
       map.putIfAbsent(
         orderId,
-            () => OrderModel(
+        () => OrderModel(
           id: row.id,
           userId: row.userId,
           userName: row.userName,
@@ -77,10 +70,22 @@ class ReportProductState {
       }
     }
 
+    return map.values.toList();
+  }
+
+  ReportProductState copyWithGroup({
+    required List<OrderModel> newRows,
+    required bool append,
+    int? total,
+    Map<int, ProductSummaryModel>? productSummary,
+    String? error,
+  }) {
+    final grouped = _group(newRows);
+
     return ReportProductState(
-      allOrder: map.values.toList(),
-      productSummary: productSummary,
-      // isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      allOrder: append ? [...?allOrder, ...grouped] : grouped,
+      total: total ?? this.total,
+      productSummary: productSummary ?? this.productSummary,
       error: error ?? this.error,
     );
   }

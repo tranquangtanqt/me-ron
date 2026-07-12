@@ -8,6 +8,8 @@ import '../../../domain/usecases/params/report_order_params.dart';
 import '../../../domain/usecases/params/report_product_params.dart';
 import '../../models/order_model.dart';
 import '../../models/order_item_model.dart';
+import '../../models/order_status_summary_model.dart';
+import '../../models/product_summary_model.dart';
 import '../interfaces/order_datasource.dart';
 import '../../../domain/usecases/params/order_params.dart';
 import '../../../core/enums/order_status.dart';
@@ -17,12 +19,82 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
 
   OrderLocalDatasourceImpl(this._databaseService);
 
+  String _buildOrderWhere(OrderParams params, List<dynamic> args) {
+    final format = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    String sqlWhere = '';
+
+    if (params.fromDate != null) {
+      sqlWhere += 'deliveryDatetime >= ?';
+      args.add(format.format(params.fromDate!));
+    }
+
+    if (params.toDate != null) {
+      if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
+      sqlWhere += 'deliveryDatetime <= ?';
+      args.add(format.format(params.toDate!));
+    }
+
+    if (params.status != null && params.status != -1) {
+      if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
+      sqlWhere += 'status = ?';
+      args.add(params.status);
+    }
+
+    if (params.userId != null) {
+      if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
+      sqlWhere += 'userId = ?';
+      args.add(params.userId);
+    }
+
+    return sqlWhere;
+  }
+
+  String _buildReportOrderWhere(ReportOrderParams params, List<dynamic> args) {
+    final format = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    String sqlWhere = '';
+
+    if (params.fromDate != null) {
+      sqlWhere += 'deliveryDatetime >= ?';
+      args.add(format.format(params.fromDate!));
+    }
+
+    if (params.toDate != null) {
+      if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
+      sqlWhere += 'deliveryDatetime <= ?';
+      args.add(format.format(params.toDate!));
+    }
+
+    if (params.status != null && params.status != -1) {
+      if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
+      sqlWhere += 'status = ?';
+      args.add(params.status);
+    }
+
+    if (params.userId != null) {
+      if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
+      sqlWhere += 'userId = ?';
+      args.add(params.userId);
+    }
+
+    return sqlWhere;
+  }
+
   @override
   Future<Result<List<OrderModel>>> getAllOrders(OrderParams params) async {
     try {
-      String sql = '''
-          SELECT 
-            O.*, 
+      List<dynamic> args = [];
+      final sqlWhere = _buildOrderWhere(params, args);
+
+      String innerSql = 'SELECT * FROM ${DatabaseConfig.orderTableName}';
+      if (sqlWhere.isNotEmpty) innerSql += ' WHERE $sqlWhere';
+      innerSql += ' ORDER BY deliveryDatetime DESC LIMIT ? OFFSET ?';
+      args.add(params.base.limit);
+      args.add(params.base.offset ?? 0);
+
+      String sql =
+          '''
+          SELECT
+            O.*,
             U.name AS userName,
             D.id AS orderItemId,
             D.orderId AS orderId,
@@ -31,46 +103,13 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
             D.snapshotPrice As snapshotPrice,
             D.quantity As quantity,
             D.lineTotal As lineTotal
-          FROM ${DatabaseConfig.orderTableName} AS O
+          FROM ($innerSql) AS O
             LEFT JOIN ${DatabaseConfig.userTableName} AS U
               ON O.userId = U.id
             LEFT JOIN ${DatabaseConfig.orderItemTableName} AS D
               ON O.id = D.orderId
+          ORDER BY O.deliveryDatetime DESC
         ''';
-
-      List<dynamic> args = [];
-
-      final format = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-      String sqlWhere = '';
-
-      if (params.fromDate != null) {
-        sqlWhere += 'deliveryDatetime >= ?';
-        args.add(format.format(params.fromDate!));
-      }
-
-      if (params.toDate != null) {
-        if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
-        sqlWhere += 'deliveryDatetime <= ?';
-        args.add(format.format(params.toDate!));
-      }
-
-      if (params.status != null && params.status != -1) {
-        if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
-        sqlWhere += 'status = ?';
-        args.add(params.status);
-      }
-
-      if (params.userId != null) {
-        if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
-        sqlWhere += 'userId = ?';
-        args.add(params.userId);
-      }
-
-      if (sqlWhere.isNotEmpty) {
-        sql += ' WHERE $sqlWhere';
-      }
-
-      sql += ' ORDER BY deliveryDatetime DESC';
       print(sql);
 
       var res = await _databaseService.database.rawQuery(sql, args);
@@ -79,19 +118,75 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
       return res.isEmpty
           ? Result.success(data: [])
           : Result.success(
-        data: res.map((e) => OrderModel.fromJson(e)).toList(),
-      );
+              data: res.map((e) => OrderModel.fromJson(e)).toList(),
+            );
     } catch (e) {
       return Result.failure(error: e);
     }
   }
 
   @override
+  Future<Result<int>> getOrdersCount(OrderParams params) async {
+    try {
+      List<dynamic> args = [];
+      final sqlWhere = _buildOrderWhere(params, args);
+
+      String sql = 'SELECT COUNT(*) AS cnt FROM ${DatabaseConfig.orderTableName}';
+      if (sqlWhere.isNotEmpty) sql += ' WHERE $sqlWhere';
+
+      var res = await _databaseService.database.rawQuery(sql, args);
+
+      return Result.success(data: Sqflite.firstIntValue(res) ?? 0);
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  String _buildReportProductOrderWhere(ReportProductParams params, List<dynamic> args) {
+    final format = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    String sqlWhere = 'OO.status <> ${OrderStatus.cancelled.value}';
+
+    if (params.fromDate != null) {
+      sqlWhere += ' AND OO.deliveryDatetime >= ?';
+      args.add(format.format(params.fromDate!));
+    }
+
+    if (params.toDate != null) {
+      sqlWhere += ' AND OO.deliveryDatetime <= ?';
+      args.add(format.format(params.toDate!));
+    }
+
+    if (params.productId != null) {
+      sqlWhere +=
+          ' AND EXISTS (SELECT 1 FROM ${DatabaseConfig.orderItemTableName} AS D2 '
+          'WHERE D2.orderId = OO.id AND D2.productId = ?)';
+      args.add(params.productId);
+    }
+
+    return sqlWhere;
+  }
+
+  @override
   Future<Result<List<OrderModel>>> getAllOrderReportProduct(ReportProductParams params) async {
     try {
-      String sql = '''
-          SELECT 
-            O.*, 
+      List<dynamic> args = [];
+      final sqlWhere = _buildReportProductOrderWhere(params, args);
+
+      final innerSql =
+          'SELECT * FROM ${DatabaseConfig.orderTableName} AS OO '
+          'WHERE $sqlWhere ORDER BY OO.deliveryDatetime DESC LIMIT ? OFFSET ?';
+      args.add(params.base.limit);
+      args.add(params.base.offset ?? 0);
+
+      String joinOn = 'O.id = D.orderId';
+      if (params.productId != null) {
+        joinOn += ' AND D.productId = ?';
+      }
+
+      String sql =
+          '''
+          SELECT
+            O.*,
             U.name AS userName,
             D.id AS orderItemId,
             D.orderId AS orderId,
@@ -100,52 +195,85 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
             D.snapshotPrice As snapshotPrice,
             D.quantity As quantity,
             D.lineTotal As lineTotal
-          FROM ${DatabaseConfig.orderTableName} AS O
+          FROM ($innerSql) AS O
             LEFT JOIN ${DatabaseConfig.userTableName} AS U
               ON O.userId = U.id
             LEFT JOIN ${DatabaseConfig.orderItemTableName} AS D
-              ON O.id = D.orderId
+              ON $joinOn
+          ORDER BY O.deliveryDatetime DESC
         ''';
 
-      List<dynamic> args = [];
+      final joinArgs = [...args];
+      if (params.productId != null) joinArgs.add(params.productId);
 
-      final format = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-      String sqlWhere = '';
-
-      if (params.fromDate != null) {
-        sqlWhere += 'deliveryDatetime >= ?';
-        args.add(format.format(params.fromDate!));
-      }
-
-      if (params.toDate != null) {
-        if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
-        sqlWhere += 'deliveryDatetime <= ?';
-        args.add(format.format(params.toDate!));
-      }
-
-      if (params.productId != null) {
-        if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
-        sqlWhere += 'D.productId = ?';
-        args.add(params.productId);
-      }
-
-      if (sqlWhere.isNotEmpty) {
-        sql += ' WHERE status <> ${OrderStatus.cancelled.value}'; //TODO status
-        sql += ' AND $sqlWhere'; //TODO status
-      } else {
-        sql += ' WHERE status <> ${OrderStatus.cancelled.value}'; //TODO status
-      }
-
-      sql += ' ORDER BY deliveryDatetime DESC';
       print(sql);
 
-      var res = await _databaseService.database.rawQuery(sql, args);
-      print(args);
+      var res = await _databaseService.database.rawQuery(sql, joinArgs);
+      print(joinArgs);
 
       return res.isEmpty
           ? Result.success(data: [])
           : Result.success(
-        data: res.map((e) => OrderModel.fromJson(e)).toList(),
+              data: res.map((e) => OrderModel.fromJson(e)).toList(),
+            );
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<int>> getOrdersCountReportProduct(ReportProductParams params) async {
+    try {
+      List<dynamic> args = [];
+      final sqlWhere = _buildReportProductOrderWhere(params, args);
+
+      final sql = 'SELECT COUNT(*) AS cnt FROM ${DatabaseConfig.orderTableName} AS OO WHERE $sqlWhere';
+
+      var res = await _databaseService.database.rawQuery(sql, args);
+
+      return Result.success(data: Sqflite.firstIntValue(res) ?? 0);
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<List<ProductSummaryModel>>> getProductSummaryReportProduct(ReportProductParams params) async {
+    try {
+      List<dynamic> args = [];
+
+      final format = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+      String sqlWhere = 'O.status <> ${OrderStatus.cancelled.value}';
+
+      if (params.fromDate != null) {
+        sqlWhere += ' AND O.deliveryDatetime >= ?';
+        args.add(format.format(params.fromDate!));
+      }
+
+      if (params.toDate != null) {
+        sqlWhere += ' AND O.deliveryDatetime <= ?';
+        args.add(format.format(params.toDate!));
+      }
+
+      if (params.productId != null) {
+        sqlWhere += ' AND D.productId = ?';
+        args.add(params.productId);
+      }
+
+      String sql =
+          '''
+          SELECT D.productId AS productId, MIN(D.snapshotName) AS productName, SUM(D.quantity) AS quantity
+          FROM ${DatabaseConfig.orderTableName} AS O
+            INNER JOIN ${DatabaseConfig.orderItemTableName} AS D
+              ON O.id = D.orderId
+          WHERE $sqlWhere
+          GROUP BY D.productId
+        ''';
+
+      var res = await _databaseService.database.rawQuery(sql, args);
+
+      return Result.success(
+        data: res.map((e) => ProductSummaryModel.fromJson(e)).toList(),
       );
     } catch (e) {
       return Result.failure(error: e);
@@ -155,9 +283,19 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
   @override
   Future<Result<List<OrderModel>>> getAllOrderReportOrder(ReportOrderParams params) async {
     try {
-      String sql = '''
-          SELECT 
-            O.*, 
+      List<dynamic> args = [];
+      final sqlWhere = _buildReportOrderWhere(params, args);
+
+      String innerSql = 'SELECT * FROM ${DatabaseConfig.orderTableName}';
+      if (sqlWhere.isNotEmpty) innerSql += ' WHERE $sqlWhere';
+      innerSql += ' ORDER BY deliveryDatetime DESC LIMIT ? OFFSET ?';
+      args.add(params.base.limit);
+      args.add(params.base.offset ?? 0);
+
+      String sql =
+          '''
+          SELECT
+            O.*,
             U.name AS userName,
             D.id AS orderItemId,
             D.orderId AS orderId,
@@ -166,53 +304,13 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
             D.snapshotPrice As snapshotPrice,
             D.quantity As quantity,
             D.lineTotal As lineTotal
-          FROM ${DatabaseConfig.orderTableName} AS O
+          FROM ($innerSql) AS O
             LEFT JOIN ${DatabaseConfig.userTableName} AS U
               ON O.userId = U.id
             LEFT JOIN ${DatabaseConfig.orderItemTableName} AS D
               ON O.id = D.orderId
+          ORDER BY O.deliveryDatetime DESC
         ''';
-
-      List<dynamic> args = [];
-
-      final format = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-      String sqlWhere = '';
-
-      if (params.fromDate != null) {
-        sqlWhere += 'deliveryDatetime >= ?';
-        args.add(format.format(params.fromDate!));
-      }
-
-      if (params.toDate != null) {
-        if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
-        sqlWhere += 'deliveryDatetime <= ?';
-        args.add(format.format(params.toDate!));
-      }
-
-      if (params.status != null && params.status != -1) {
-        if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
-        sqlWhere += 'status = ?';
-        args.add(params.status);
-      }
-
-      if (params.userId != null) {
-        if (sqlWhere.isNotEmpty) sqlWhere += ' AND ';
-        sqlWhere += 'O.userId = ?';
-        args.add(params.userId);
-      }
-
-      if (sqlWhere.isNotEmpty) {
-        sql += ' WHERE $sqlWhere';
-      }
-
-      // if (sqlWhere.isNotEmpty) {
-      //   sql += ' WHERE status <> ${OrderStatus.cancelled.value}'; //TODO status
-      //   sql += ' AND $sqlWhere'; //TODO status
-      // } else {
-      //   sql += ' WHERE status <> ${OrderStatus.cancelled.value}'; //TODO status
-      // }
-
-      sql += ' ORDER BY deliveryDatetime DESC';
       print(sql);
 
       var res = await _databaseService.database.rawQuery(sql, args);
@@ -221,7 +319,74 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
       return res.isEmpty
           ? Result.success(data: [])
           : Result.success(
-        data: res.map((e) => OrderModel.fromJson(e)).toList(),
+              data: res.map((e) => OrderModel.fromJson(e)).toList(),
+            );
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<int>> getOrdersCountReportOrder(ReportOrderParams params) async {
+    try {
+      List<dynamic> args = [];
+      final sqlWhere = _buildReportOrderWhere(params, args);
+
+      String sql = 'SELECT COUNT(*) AS cnt FROM ${DatabaseConfig.orderTableName}';
+      if (sqlWhere.isNotEmpty) sql += ' WHERE $sqlWhere';
+
+      var res = await _databaseService.database.rawQuery(sql, args);
+
+      return Result.success(data: Sqflite.firstIntValue(res) ?? 0);
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<List<OrderStatusSummaryModel>>> getOrderStatusSummary(ReportOrderParams params) async {
+    try {
+      List<dynamic> args = [];
+      final sqlWhere = _buildReportOrderWhere(params, args);
+
+      String sql = 'SELECT status, COUNT(*) AS cnt, SUM(total) AS amt FROM ${DatabaseConfig.orderTableName}';
+      if (sqlWhere.isNotEmpty) sql += ' WHERE $sqlWhere';
+      sql += ' GROUP BY status';
+
+      var res = await _databaseService.database.rawQuery(sql, args);
+
+      return Result.success(
+        data: res.map((e) => OrderStatusSummaryModel.fromJson(e)).toList(),
+      );
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<List<ProductSummaryModel>>> getOrderProductSummary(ReportOrderParams params) async {
+    try {
+      List<dynamic> args = [];
+      final sqlWhere = _buildReportOrderWhere(params, args);
+
+      final finalWhere = sqlWhere.isNotEmpty
+          ? '$sqlWhere AND O.status <> ${OrderStatus.cancelled.value}'
+          : 'O.status <> ${OrderStatus.cancelled.value}';
+
+      String sql =
+          '''
+          SELECT D.productId AS productId, MIN(D.snapshotName) AS productName, SUM(D.quantity) AS quantity
+          FROM ${DatabaseConfig.orderTableName} AS O
+            INNER JOIN ${DatabaseConfig.orderItemTableName} AS D
+              ON O.id = D.orderId
+          WHERE $finalWhere
+          GROUP BY D.productId
+        ''';
+
+      var res = await _databaseService.database.rawQuery(sql, args);
+
+      return Result.success(
+        data: res.map((e) => ProductSummaryModel.fromJson(e)).toList(),
       );
     } catch (e) {
       return Result.failure(error: e);
@@ -374,15 +539,14 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
               ON O.id = D.orderId
           WHERE O.id = ?
           ''',
-          [id],
+        [id],
       );
 
       return res.isEmpty
           ? Result.success(data: [])
           : Result.success(
-        data: res.map((e) => OrderModel.fromJson(e)).toList(),
-      );
-
+              data: res.map((e) => OrderModel.fromJson(e)).toList(),
+            );
     } catch (e) {
       return Result.failure(error: e);
     }

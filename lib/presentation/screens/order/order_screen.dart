@@ -37,6 +37,10 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
     super.initState();
   }
 
+  Future<void> _search() async {
+    await ref.read(orderNotifierProvider.notifier).reload();
+  }
+
   void createOrder() async {
     final result = await context.push('/order/order-create');
     if (result == true) {
@@ -71,6 +75,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
     // });
 
     final allOrder = ref.watch(orderNotifierProvider.select((s) => s.allOrder));
+    final total = ref.watch(orderNotifierProvider.select((s) => s.total));
 
     return Scaffold(
       appBar: AppBar(
@@ -85,7 +90,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () => ref.read(orderNotifierProvider.notifier).reload(),
+        onRefresh: _search,
         displacement: 60,
         child: Scrollbar(
           child: CustomScrollView(
@@ -98,15 +103,13 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                     vertical: 8,
                   ),
                   child: _OrderFilterBar(
-                    onSearch: () {
-                      ref.read(orderNotifierProvider.notifier).reload();
-                    },
+                    onSearch: _search,
                   ),
                 ),
               ),
               SliverLayoutBuilder(
                 builder: (context, _) {
-                  if (allOrder == null) {
+                  if (total == null) {
                     return const SliverFillRemaining(
                       hasScrollBody: false,
                       fillOverscroll: true,
@@ -114,7 +117,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                     );
                   }
 
-                  if (allOrder.isEmpty) {
+                  if (total == 0) {
                     return SliverFillRemaining(
                       hasScrollBody: false,
                       fillOverscroll: true,
@@ -126,16 +129,59 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                     );
                   }
 
+                  final loaded = allOrder ?? [];
+
+                  if (loaded.isEmpty) {
+                    return SliverFillRemaining(
+                      hasScrollBody: false,
+                      fillOverscroll: true,
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSizes.padding,
+                            AppSizes.padding / 2,
+                            AppSizes.padding,
+                            AppSizes.padding,
+                          ),
+                          child: AppButton(
+                            width: double.infinity,
+                            height: 32,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            text: 'Xem danh sách ($total)',
+                            onTap: () => ref.read(orderNotifierProvider.notifier).loadMore(),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+
+                  final hasMore = loaded.length < total;
+
                   return SliverPadding(
                     padding: const EdgeInsets.fromLTRB(AppSizes.padding, 2, AppSizes.padding, AppSizes.padding),
                     sliver: SliverList.builder(
-                      itemCount: allOrder.length,
+                      itemCount: loaded.length + (hasMore ? 1 : 0),
                       itemBuilder: (context, i) {
+                        if (i == loaded.length) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: AppSizes.padding / 2),
+                            child: Center(
+                              child: AppButton(
+                                height: 32,
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                text: 'Xem thêm',
+                                onTap: () => ref.read(orderNotifierProvider.notifier).loadMore(),
+                              ),
+                            ),
+                          );
+                        }
+
                         return Padding(
                           padding: const EdgeInsets.only(
                             bottom: AppSizes.padding / 2,
                           ),
-                          child: _OrderCard(order: allOrder[i], onTap: updateOrder),
+                          child: _OrderCard(order: loaded[i], onTap: updateOrder),
                         );
                       },
                     ),

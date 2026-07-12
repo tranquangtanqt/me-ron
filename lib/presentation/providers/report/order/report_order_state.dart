@@ -1,56 +1,48 @@
 import '../../../../data/models/order_item_model.dart';
 import '../../../../data/models/order_model.dart';
-import '../../../../data/models/order_summary_model.dart';
+import '../../../../data/models/order_status_summary_model.dart';
 import '../../../../data/models/product_summary_model.dart';
 
 class ReportOrderState {
   final List<OrderModel>? allOrder;
+  final int? total;
   final Map<int, ProductSummaryModel>? productSummary;
-  final Map<int, OrderSummaryModel>? orderSummary;
-  // final bool isLoadingMore;
+  final Map<int, OrderStatusSummaryModel>? orderStatusSummary;
   final String? error;
 
   const ReportOrderState({
     this.allOrder,
+    this.total,
     this.productSummary,
-    this.orderSummary,
-    // this.isLoadingMore = false,
-    this.error
+    this.orderStatusSummary,
+    this.error,
   });
 
   ReportOrderState copyWith({
     List<OrderModel>? allOrder,
+    int? total,
     Map<int, ProductSummaryModel>? productSummary,
-    Map<int, OrderSummaryModel>? orderSummary,
-    // bool? isLoadingMore,
-    String? error
+    Map<int, OrderStatusSummaryModel>? orderStatusSummary,
+    String? error,
   }) {
     return ReportOrderState(
       allOrder: allOrder ?? this.allOrder,
+      total: total ?? this.total,
       productSummary: productSummary ?? this.productSummary,
-      orderSummary: orderSummary ?? this.orderSummary,
-      // isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      orderStatusSummary: orderStatusSummary ?? this.orderStatusSummary,
       error: error ?? this.error,
     );
   }
 
-  ReportOrderState copyWithGroup({
-    List<OrderModel>? allOrder,
-    Map<int, ProductSummaryModel>? productSummary,
-    Map<int, OrderSummaryModel>? orderSummary,
-    bool? isLoadingMore,
-    String? error,
-  }) {
+  static List<OrderModel> _group(List<OrderModel> rows) {
     final Map<int, OrderModel> map = {};
 
-    final source = allOrder ?? [];
-
-    for (final row in source) {
+    for (final row in rows) {
       final orderId = row.id!;
 
       map.putIfAbsent(
         orderId,
-            () => OrderModel(
+        () => OrderModel(
           id: row.id,
           userId: row.userId,
           userName: row.userName,
@@ -83,11 +75,24 @@ class ReportOrderState {
       }
     }
 
+    return map.values.toList();
+  }
+
+  ReportOrderState copyWithGroup({
+    required List<OrderModel> newRows,
+    required bool append,
+    int? total,
+    Map<int, ProductSummaryModel>? productSummary,
+    Map<int, OrderStatusSummaryModel>? orderStatusSummary,
+    String? error,
+  }) {
+    final grouped = _group(newRows);
+
     return ReportOrderState(
-      allOrder: map.values.toList(),
-      productSummary: productSummary,
-      orderSummary: orderSummary,
-      // isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      allOrder: append ? [...?allOrder, ...grouped] : grouped,
+      total: total ?? this.total,
+      productSummary: productSummary ?? this.productSummary,
+      orderStatusSummary: orderStatusSummary ?? this.orderStatusSummary,
       error: error ?? this.error,
     );
   }
