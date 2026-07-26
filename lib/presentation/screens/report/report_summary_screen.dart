@@ -140,6 +140,7 @@ class _ReportSummaryScreenState extends ConsumerState<ReportSummaryScreen> {
                                             return _SummaryChip(
                                               title: e.productName,
                                               value: '${e.quantity}',
+                                              subValue: '${currencyFormat.format(e.totalAmount)} đ',
                                               color: Colors.blue,
                                             );
                                           })
@@ -270,11 +271,13 @@ class _SummaryMetricCard extends StatelessWidget {
 class _SummaryChip extends StatelessWidget {
   final String title;
   final String value;
+  final String? subValue;
   final Color color;
 
   const _SummaryChip({
     required this.title,
     required this.value,
+    this.subValue,
     required this.color,
   });
 
@@ -300,6 +303,13 @@ class _SummaryChip extends StatelessWidget {
             value,
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color),
           ),
+          if (subValue != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              subValue!,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.blueGrey),
+            ),
+          ],
         ],
       ),
     );

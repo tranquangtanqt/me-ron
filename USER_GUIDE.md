@@ -192,7 +192,8 @@ hàng/món ăn):
 
 Gộp số liệu 2 nguồn trong cùng khoảng ngày để nhìn nhanh tổng quan thu/chi:
 
-- **Đơn hàng**: Tổng số đơn, Tổng thành tiền, và bảng chia theo từng món ăn.
+- **Đơn hàng**: Tổng số đơn, Tổng thành tiền, và bảng chia theo từng món ăn (mỗi món hiện cả số
+  lượng và thành tiền của riêng món đó).
 - **Mua hàng**: Tổng số phiếu nhập, Tổng thành tiền, và bảng chia theo từng khoản mục đã nhập.
 
 ### Theo khách hàng tiềm năng
