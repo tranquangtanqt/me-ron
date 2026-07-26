@@ -264,7 +264,7 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
 
       String sql =
           '''
-          SELECT D.productId AS productId, MIN(D.snapshotName) AS productName, SUM(D.quantity) AS quantity
+          SELECT D.productId AS productId, MIN(D.snapshotName) AS productName, SUM(D.quantity) AS quantity, SUM(D.lineTotal) AS totalAmount
           FROM ${DatabaseConfig.orderTableName} AS O
             INNER JOIN ${DatabaseConfig.orderItemTableName} AS D
               ON O.id = D.orderId
@@ -377,7 +377,7 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
 
       String sql =
           '''
-          SELECT D.productId AS productId, MIN(D.snapshotName) AS productName, SUM(D.quantity) AS quantity
+          SELECT D.productId AS productId, MIN(D.snapshotName) AS productName, SUM(D.quantity) AS quantity, SUM(D.lineTotal) AS totalAmount
           FROM ${DatabaseConfig.orderTableName} AS O
             INNER JOIN ${DatabaseConfig.orderItemTableName} AS D
               ON O.id = D.orderId

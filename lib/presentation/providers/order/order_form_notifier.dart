@@ -9,6 +9,8 @@ import '../../../domain/entities/order_item_entity.dart';
 import '../../../domain/entities/product_entity.dart';
 import '../../../domain/usecases/order_item_usecases.dart';
 import '../../../domain/usecases/order_usecases.dart';
+import '../../../domain/usecases/params/base_params.dart';
+import '../../../domain/usecases/params/order_params.dart';
 import '../base/base_form_notifier.dart';
 import '../../screens/order/components/order_item_form.dart';
 import '../products/products_notifier.dart';
@@ -51,7 +53,7 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
         total: 0,
         isLoaded: true,
         status: OrderStatus.shipping.value,
-        originalStatus: OrderStatus.shipping.value
+        originalStatus: OrderStatus.shipping.value,
       );
       return;
     }
@@ -95,10 +97,37 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
         );
       }
 
-     // state = state.copyWithGroup(order: res.data ?? [], isLoadingMore: false);
+      // state = state.copyWithGroup(order: res.data ?? [], isLoadingMore: false);
     } else {
       throw res.error ?? 'Failed to load data';
     }
+  }
+
+  Future<bool> hasOrderTodayForUser({int? excludeOrderId}) async {
+    final userId = state.userId;
+    final deliveryDatetime = state.deliveryDatetime;
+
+    if (userId == null || deliveryDatetime == null) return false;
+
+    final fromDate = DateTime(deliveryDatetime.year, deliveryDatetime.month, deliveryDatetime.day);
+    final toDate = DateTime(deliveryDatetime.year, deliveryDatetime.month, deliveryDatetime.day, 23, 59, 59, 999);
+
+    final orderRepository = ref.read(orderRepositoryProvider);
+
+    final res = await GetAllOrderUsecase(orderRepository).call(
+      OrderParams(
+        base: const BaseParams(limit: 50, offset: 0),
+        userId: userId,
+        fromDate: fromDate,
+        toDate: toDate,
+      ),
+    );
+
+    if (res.isFailure) return false;
+
+    final orders = res.data ?? [];
+
+    return orders.any((o) => o.id != excludeOrderId && o.status != OrderStatus.cancelled.value);
   }
 
   Future<Result<int>> createOrder() async {
@@ -170,9 +199,15 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
               orderId: id,
               productId: item.product?.id,
               snapshotName: item.product?.name,
-              snapshotPrice: calculateOrderItemPrice(item, disabledProductSnapshotPrices: disabledProductSnapshotPrices),
+              snapshotPrice: calculateOrderItemPrice(
+                item,
+                disabledProductSnapshotPrices: disabledProductSnapshotPrices,
+              ),
               quantity: item.quantity,
-              lineTotal: calculateOrderItemLineTotal(item, disabledProductSnapshotPrices: disabledProductSnapshotPrices),
+              lineTotal: calculateOrderItemLineTotal(
+                item,
+                disabledProductSnapshotPrices: disabledProductSnapshotPrices,
+              ),
             ),
           );
         }

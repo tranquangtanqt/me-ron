@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/enums/order_status.dart';
 import '../../../core/themes/app_sizes.dart';
+import '../../../core/utilities/currency_formatter.dart';
 import '../../../data/models/order_model.dart';
 import '../../../data/models/order_status_summary_model.dart';
 import '../../../domain/entities/category_entity.dart';
@@ -293,6 +294,15 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.bold,
                                                     color: Colors.blue,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  CurrencyFormatter.formatVND(e.totalAmount),
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.blueGrey,
                                                   ),
                                                 ),
                                               ],

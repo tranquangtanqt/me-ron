@@ -71,7 +71,27 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
     super.dispose();
   }
 
+  Future<bool> _confirmDuplicateOrder() async {
+    final result = await AppDialog.show(
+      title: 'Cảnh báo trùng đơn',
+      text: 'Khách hàng này đã có đơn đặt hàng trong ngày hôm nay. Bạn có chắc chắn muốn tiếp tục lưu đơn này?',
+      leftButtonText: 'Hủy',
+      rightButtonText: 'Vẫn lưu',
+      onTapLeftButton: (context) => Navigator.of(context).pop(false),
+      onTapRightButton: (context) => Navigator.of(context).pop(true),
+    );
+
+    return result == true;
+  }
+
   void createOrder() async {
+    final hasDuplicate = await ref.read(orderFormNotifierProvider.notifier).hasOrderTodayForUser();
+
+    if (hasDuplicate) {
+      final confirmed = await _confirmDuplicateOrder();
+      if (!confirmed) return;
+    }
+
     var res = await AppDialog.showProgress(() {
       return ref.read(orderFormNotifierProvider.notifier).createOrder();
     });
@@ -86,6 +106,15 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
   }
 
   void updatedOrder() async {
+    final hasDuplicate = await ref
+        .read(orderFormNotifierProvider.notifier)
+        .hasOrderTodayForUser(excludeOrderId: widget.id);
+
+    if (hasDuplicate) {
+      final confirmed = await _confirmDuplicateOrder();
+      if (!confirmed) return;
+    }
+
     var res = await AppDialog.showProgress(() {
       return ref.read(orderFormNotifierProvider.notifier).updatedOrder(widget.id!);
     });

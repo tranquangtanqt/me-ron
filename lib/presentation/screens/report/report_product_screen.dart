@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../core/constants/constants.dart';
 import '../../../core/enums/order_status.dart';
 import '../../../core/themes/app_sizes.dart';
+import '../../../core/utilities/currency_formatter.dart';
 import '../../../data/models/order_model.dart';
 import '../../../domain/entities/category_entity.dart';
 import '../../../domain/entities/product_entity.dart';
@@ -160,6 +161,15 @@ class _ReportProductScreenState extends ConsumerState<ReportProductScreen> {
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.bold,
                                                 color: Colors.blue,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              CurrencyFormatter.formatVND(e.totalAmount),
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.blueGrey,
                                               ),
                                             ),
                                           ],

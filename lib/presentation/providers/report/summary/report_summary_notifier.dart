@@ -91,11 +91,13 @@ class ReportSummaryNotifier extends Notifier<ReportSummaryState> {
             productId: value.productId,
             productName: value.productName,
             quantity: value.quantity + (item.quantity as int),
+            totalAmount: value.totalAmount + item.lineTotal,
           ),
           ifAbsent: () => ProductSummaryModel(
             productId: item.productId,
             productName: item.snapshotName,
             quantity: item.quantity.toInt(),
+            totalAmount: item.lineTotal,
           ),
         );
       }
