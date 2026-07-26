@@ -12,7 +12,6 @@ import '../../widgets/app_empty_state.dart';
 import '../../widgets/app_loading_more_indicator.dart';
 import '../../widgets/app_progress_indicator.dart';
 import '../../widgets/app_snack_bar.dart';
-import '../../widgets/app_text_field.dart';
 
 class ProductsScreen extends ConsumerStatefulWidget {
   const ProductsScreen({super.key});
@@ -32,6 +31,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
       ref.read(productsNotifierProvider.notifier).getAllProducts();
     });
     super.initState();
+  }
+
+  void search() {
+    FocusScope.of(context).unfocus();
+    ref.read(productsNotifierProvider.notifier).resetProducts();
+    ref.read(productsNotifierProvider.notifier).getAllProducts(contains: searchFieldController.text);
   }
 
   void updateProduct(int id) {
@@ -101,6 +106,15 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             // Disable scroll when data is null or empty
             physics: (allProducts?.isEmpty ?? true) ? const NeverScrollableScrollPhysics() : null,
             slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.padding,
+                    vertical: 8,
+                  ),
+                  child: _SearchBar(controller: searchFieldController, onSearch: search),
+                ),
+              ),
               SliverLayoutBuilder(
                 builder: (context, _) {
                   if (allProducts == null) {
@@ -127,8 +141,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                                 error,
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Theme.of(context).colorScheme.error,
-                                    ),
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
                               ),
                               const SizedBox(height: 24),
                               ElevatedButton(
@@ -163,105 +177,121 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
                   return SliverToBoxAdapter(
                     child: Align(
-                    alignment: Alignment.topLeft,
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(AppSizes.padding),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: AppSizes.padding),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: DataTable(
-                              showCheckboxColumn: false, //ẩn checkbox
-                              columnSpacing: 25, // giảm khoảng cách giữa các cột
-                              horizontalMargin: 8,
-                              dataRowMinHeight: 40,
-                              dataRowMaxHeight: 48,
-                              dividerThickness: 0, // tắt line mặc định
-                              columns: const [
-                                DataColumn(label: Padding(
-                                  padding: EdgeInsets.only(left: 8),
-                                  child: Text('STT',style: TextStyle(fontWeight: FontWeight.bold,)),
-                                ),),
-                                DataColumn(label: Text('Tên',style: TextStyle(fontWeight: FontWeight.bold,))),
-                                DataColumn(
-                                  label: SizedBox(
-                                    width: 100,
-                                    child: Align(
-                                      alignment: Alignment.centerRight,
+                      alignment: Alignment.topLeft,
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(AppSizes.padding),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: AppSizes.padding),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: DataTable(
+                                showCheckboxColumn: false, //ẩn checkbox
+                                columnSpacing: 25, // giảm khoảng cách giữa các cột
+                                horizontalMargin: 8,
+                                dataRowMinHeight: 40,
+                                dataRowMaxHeight: 48,
+                                dividerThickness: 0, // tắt line mặc định
+                                columns: const [
+                                  DataColumn(
+                                    label: Padding(
+                                      padding: EdgeInsets.only(left: 8),
                                       child: Text(
-                                        'Giá',
-                                        style: TextStyle(fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                // DataColumn(label: Text('cate')),
-                                // DataColumn(label: Text('Tùy chọn')),
-                              ],
-                              rows: (allProducts ?? []).map((item) {
-                                return DataRow(
-                                  onSelectChanged: (selected) {
-                                    if (selected == true) {
-                                      updateProduct(item.id!);
-                                    }
-                                  },
-                                  cells: [
-                                    DataCell(Padding(
-                                      padding: const EdgeInsets.only(left: 8),
-                                      child: Text(item.id.toString()),
-                                    ),),
-                                    DataCell(Text(item.name ?? '')),
-                                    DataCell(
-                                      SizedBox(
-                                        width: 100,
-                                        child: Align(
-                                          alignment: Alignment.centerRight,
-                                          child: Text(
-                                            CurrencyFormatter.formatVND(item.price),
-                                          ),
+                                        'STT',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                     ),
-                                    // DataCell(Text(item.categoryId.toString() ?? '')),
-                                    // DataCell(
-                                    //   Row(
-                                    //     children: [
-                                    //       IconButton(
-                                    //         icon: const Icon(Icons.edit, color: Colors.orange),
-                                    //         onPressed: () {
-                                    //           updateProduct(item.id!);
-                                    //         },
-                                    //       ),
-                                    //       IconButton(
-                                    //         icon: const Icon(Icons.delete, color: Colors.red),
-                                    //         onPressed: () {
-                                    //           AppDialog.show(
-                                    //             title: 'Xác nhận',
-                                    //             text: 'Bạn có chắc chắn muốn xóa dữ liệu?',
-                                    //             leftButtonText: 'Hủy bỏ',
-                                    //             rightButtonText: 'Xóa',
-                                    //             rightButtonColor: Theme.of(context).colorScheme.errorContainer,
-                                    //             rightButtonTextColor: Theme.of(context).colorScheme.error,
-                                    //             onTapRightButton: (context) async {
-                                    //               context.pop();
-                                    //               deleteProduct(item.id!);
-                                    //             },
-                                    //           );
-                                    //         },
-                                    //       ),
-                                    //     ],
-                                    //   ),
-                                    // ),
-                                  ],
-                                );
-                              }).toList(),
+                                  ),
+                                  DataColumn(
+                                    label: Text(
+                                      'Tên',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  DataColumn(
+                                    label: SizedBox(
+                                      width: 100,
+                                      child: Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Text(
+                                          'Giá',
+                                          style: TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  // DataColumn(label: Text('cate')),
+                                  // DataColumn(label: Text('Tùy chọn')),
+                                ],
+                                rows: (allProducts ?? []).map((item) {
+                                  return DataRow(
+                                    onSelectChanged: (selected) {
+                                      if (selected == true) {
+                                        updateProduct(item.id!);
+                                      }
+                                    },
+                                    cells: [
+                                      DataCell(
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 8),
+                                          child: Text(item.id.toString()),
+                                        ),
+                                      ),
+                                      DataCell(Text(item.name ?? '')),
+                                      DataCell(
+                                        SizedBox(
+                                          width: 100,
+                                          child: Align(
+                                            alignment: Alignment.centerRight,
+                                            child: Text(
+                                              CurrencyFormatter.formatVND(item.price),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      // DataCell(Text(item.categoryId.toString() ?? '')),
+                                      // DataCell(
+                                      //   Row(
+                                      //     children: [
+                                      //       IconButton(
+                                      //         icon: const Icon(Icons.edit, color: Colors.orange),
+                                      //         onPressed: () {
+                                      //           updateProduct(item.id!);
+                                      //         },
+                                      //       ),
+                                      //       IconButton(
+                                      //         icon: const Icon(Icons.delete, color: Colors.red),
+                                      //         onPressed: () {
+                                      //           AppDialog.show(
+                                      //             title: 'Xác nhận',
+                                      //             text: 'Bạn có chắc chắn muốn xóa dữ liệu?',
+                                      //             leftButtonText: 'Hủy bỏ',
+                                      //             rightButtonText: 'Xóa',
+                                      //             rightButtonColor: Theme.of(context).colorScheme.errorContainer,
+                                      //             rightButtonTextColor: Theme.of(context).colorScheme.error,
+                                      //             onTapRightButton: (context) async {
+                                      //               context.pop();
+                                      //               deleteProduct(item.id!);
+                                      //             },
+                                      //           );
+                                      //         },
+                                      //       ),
+                                      //     ],
+                                      //   ),
+                                      // ),
+                                    ],
+                                  );
+                                }).toList(),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
                     ),
                   );
                 },
@@ -313,26 +343,55 @@ class _AddButton extends StatelessWidget {
   }
 }
 
-class _SearchField extends ConsumerWidget {
+class _SearchBar extends StatelessWidget {
   final TextEditingController controller;
+  final VoidCallback onSearch;
 
-  const _SearchField({required this.controller});
+  const _SearchBar({
+    required this.controller,
+    required this.onSearch,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return AppTextField(
-      controller: controller,
-      hintText: 'Tìm kiếm sản phẩm...',
-      type: AppTextFieldType.search,
-      textInputAction: TextInputAction.search,
-      onEditingComplete: () {
-        FocusScope.of(context).unfocus();
-        ref.read(productsNotifierProvider.notifier).resetProducts();
-        ref.read(productsNotifierProvider.notifier).getAllProducts(contains: controller.text);
-      },
-      onTapClearButton: () {
-        ref.read(productsNotifierProvider.notifier).getAllProducts(contains: controller.text);
-      },
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: SizedBox(
+            height: 40,
+            child: TextField(
+              controller: controller,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (_) => onSearch(),
+              decoration: InputDecoration(
+                hintText: 'Tìm theo tên món ăn...',
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        SizedBox(
+          height: 40,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: onSearch,
+            child: const Icon(Icons.search, size: 18),
+          ),
+        ),
+      ],
     );
   }
 }

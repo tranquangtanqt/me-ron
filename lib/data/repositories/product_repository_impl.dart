@@ -18,7 +18,6 @@ class ProductRepositoryImpl extends ProductRepository {
     required this.queuedActionLocalDatasource,
   });
 
-
   @override
   Future<Result<List<ProductEntity>>> getAllProducts(BaseParams params) async {
     try {
@@ -27,6 +26,7 @@ class ProductRepositoryImpl extends ProductRepository {
         sortBy: params.sortBy,
         limit: params.limit,
         offset: params.offset,
+        contains: params.contains,
       );
 
       if (local.isFailure) return Result.failure(error: local.error!);

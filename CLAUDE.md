@@ -101,6 +101,8 @@ lib/
 - `UI.md` — UI reference (layouts, components, design specs)
 - `DATABASE.md` — Database schema reference (tables, columns, queries)
 - `WORKFLOW.md` — Git workflow (commits, branches, PRs)
+- `USER_GUIDE.md` — End-user feature guide (Vietnamese). Whenever a user-facing feature is added,
+  changed, or removed, use the `update-user-guide` skill to keep it in sync.
 
 These docs may not exist yet. If provided, follow them.
 

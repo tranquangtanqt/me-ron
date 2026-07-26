@@ -72,10 +72,10 @@ class UserFormNotifier extends BaseFormNotifier<UserFormState> {
   Future<Result<void>> updatedUser(int id) async {
     return performUpdate(
       execute: () async {
-        // Check for duplicate name
+        // Check for duplicate name (ignore the user being edited)
         final currentUsers = ref.read(userNotifierProvider).allUser ?? [];
         final isDuplicate = currentUsers.any(
-              (user) => user.name?.toLowerCase() == (state.name ?? '').toLowerCase(),
+          (user) => user.id != id && user.name?.toLowerCase() == (state.name ?? '').toLowerCase(),
         );
 
         if (isDuplicate) {

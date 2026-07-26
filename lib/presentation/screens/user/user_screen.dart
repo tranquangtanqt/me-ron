@@ -18,12 +18,27 @@ class UserScreen extends ConsumerStatefulWidget {
 }
 
 class _UserScreenState extends ConsumerState<UserScreen> {
+  final searchController = TextEditingController();
+  String searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       ref.read(userNotifierProvider.notifier).getAllUser();
+    });
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
+  void search() {
+    FocusScope.of(context).unfocus();
+    setState(() {
+      searchQuery = searchController.text.trim().toLowerCase();
     });
   }
 
@@ -54,6 +69,10 @@ class _UserScreenState extends ConsumerState<UserScreen> {
 
     final allUser = ref.watch(userNotifierProvider.select((s) => s.allUser));
 
+    final filteredUser = searchQuery.isEmpty
+        ? allUser
+        : allUser?.where((u) => (u.name ?? '').toLowerCase().contains(searchQuery)).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Danh sách khách hàng'),
@@ -73,6 +92,8 @@ class _UserScreenState extends ConsumerState<UserScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: AppSizes.padding),
+              _SearchBar(controller: searchController, onSearch: search),
+              const SizedBox(height: AppSizes.padding),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: DataTable(
@@ -87,16 +108,44 @@ class _UserScreenState extends ConsumerState<UserScreen> {
                   //   width: 1,
                   // ),
                   columns: const [
-                    DataColumn(label: Padding(
-                      padding: EdgeInsets.only(left: 8),
-                      child: Text('STT', style: TextStyle(fontWeight: FontWeight.bold,)),
-                    ),),
-                    DataColumn(label: Text('Tên',style: TextStyle(fontWeight: FontWeight.bold,))),
-                    DataColumn(label: Text('Số ĐT',style: TextStyle(fontWeight: FontWeight.bold,))),
-                    DataColumn(label: Text('Địa chỉ',style: TextStyle(fontWeight: FontWeight.bold,))),
+                    DataColumn(
+                      label: Padding(
+                        padding: EdgeInsets.only(left: 8),
+                        child: Text(
+                          'STT',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Tên',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Số ĐT',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Địa chỉ',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                     // DataColumn(label: Text('Tùy chọn')),
                   ],
-                  rows: (allUser ?? []).map((item) {
+                  rows: (filteredUser ?? []).map((item) {
                     return DataRow(
                       onSelectChanged: (selected) {
                         if (selected == true) {
@@ -104,10 +153,12 @@ class _UserScreenState extends ConsumerState<UserScreen> {
                         }
                       },
                       cells: [
-                        DataCell(Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: Text(item.id.toString()),
-                        ),),
+                        DataCell(
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Text(item.id.toString()),
+                          ),
+                        ),
                         DataCell(Text(item.name ?? '')),
                         DataCell(Text(item.phone ?? '')),
                         DataCell(Text(item.address ?? '')),
@@ -149,6 +200,59 @@ class _UserScreenState extends ConsumerState<UserScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SearchBar extends StatelessWidget {
+  final TextEditingController controller;
+  final VoidCallback onSearch;
+
+  const _SearchBar({
+    required this.controller,
+    required this.onSearch,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: SizedBox(
+            height: 40,
+            child: TextField(
+              controller: controller,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (_) => onSearch(),
+              decoration: InputDecoration(
+                hintText: 'Tìm theo tên khách hàng...',
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        SizedBox(
+          height: 40,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: onSearch,
+            child: const Icon(Icons.search, size: 18),
+          ),
+        ),
+      ],
     );
   }
 }

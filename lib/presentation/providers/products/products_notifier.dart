@@ -32,6 +32,7 @@ class ProductsNotifier extends Notifier<ProductsState> {
         orderBy: 'id',
         sortBy: 'ASC',
         offset: offset,
+        contains: contains,
       );
 
       final productRepository = ref.read(productRepositoryProvider);
