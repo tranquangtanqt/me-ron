@@ -14,20 +14,14 @@ final reportOrderNotifierProvider = NotifierProvider<ReportOrderNotifier, Report
 );
 
 class ReportOrderNotifier extends Notifier<ReportOrderState> {
-  static const int pageSize = 30;
-
-  ReportOrderParams? _lastFilter;
-  bool _isFetching = false;
-
   @override
   ReportOrderState build() {
     return const ReportOrderState();
   }
 
   void resetOrder() {
-    _lastFilter = null;
     state = const ReportOrderState(
-      allOrder: [],
+      customerSummary: null,
       total: null,
       productSummary: null,
       orderStatusSummary: null,
@@ -42,7 +36,7 @@ class ReportOrderNotifier extends Notifier<ReportOrderState> {
     int? status,
     int? userId,
   }) async {
-    _lastFilter = ReportOrderParams(
+    final filter = ReportOrderParams(
       base: const BaseParams(),
       contains: contains,
       fromDate: fromDate,
@@ -52,7 +46,7 @@ class ReportOrderNotifier extends Notifier<ReportOrderState> {
     );
 
     state = const ReportOrderState(
-      allOrder: [],
+      customerSummary: null,
       total: null,
       productSummary: null,
       orderStatusSummary: null,
@@ -61,15 +55,16 @@ class ReportOrderNotifier extends Notifier<ReportOrderState> {
 
     final orderRepository = ref.read(orderRepositoryProvider);
 
-    final countRes = await GetOrdersCountReportOrderUsecase(orderRepository).call(_lastFilter!);
+    final countRes = await GetOrdersCountReportOrderUsecase(orderRepository).call(filter);
 
     if (countRes.isFailure) {
       state = state.copyWith(error: countRes.error?.toString());
       throw Exception(countRes.error?.toString() ?? 'Failed to load data');
     }
 
-    final statusSummaryRes = await GetOrderStatusSummaryUsecase(orderRepository).call(_lastFilter!);
-    final productSummaryRes = await GetOrderProductSummaryUsecase(orderRepository).call(_lastFilter!);
+    final statusSummaryRes = await GetOrderStatusSummaryUsecase(orderRepository).call(filter);
+    final productSummaryRes = await GetOrderProductSummaryUsecase(orderRepository).call(filter);
+    final customerSummaryRes = await GetCustomerSummaryReportOrderUsecase(orderRepository).call(filter);
 
     if (statusSummaryRes.isFailure) {
       state = state.copyWith(error: statusSummaryRes.error?.toString());
@@ -79,6 +74,11 @@ class ReportOrderNotifier extends Notifier<ReportOrderState> {
     if (productSummaryRes.isFailure) {
       state = state.copyWith(error: productSummaryRes.error?.toString());
       throw Exception(productSummaryRes.error?.toString() ?? 'Failed to load data');
+    }
+
+    if (customerSummaryRes.isFailure) {
+      state = state.copyWith(error: customerSummaryRes.error?.toString());
+      throw Exception(customerSummaryRes.error?.toString() ?? 'Failed to load data');
     }
 
     final total = countRes.data ?? 0;
@@ -95,62 +95,8 @@ class ReportOrderNotifier extends Notifier<ReportOrderState> {
       total: total,
       orderStatusSummary: orderStatusSummary,
       productSummary: productSummary,
+      customerSummary: customerSummaryRes.data ?? [],
     );
-
-    if (total == 0) return;
-
-    while ((state.allOrder?.length ?? 0) < (state.total ?? 0) && (state.total ?? 0) <= pageSize) {
-      final before = state.allOrder?.length ?? 0;
-
-      await loadMore();
-
-      if ((state.allOrder?.length ?? 0) <= before) break;
-    }
-  }
-
-  Future<void> loadMore() async {
-    if (_isFetching || _lastFilter == null) return;
-
-    final total = state.total ?? 0;
-    final current = state.allOrder ?? [];
-
-    if (total == 0 || current.length >= total) return;
-
-    _isFetching = true;
-
-    try {
-      final orderRepository = ref.read(orderRepositoryProvider);
-
-      final baseParams = BaseParams(
-        orderBy: 'id',
-        sortBy: 'ASC',
-        limit: pageSize,
-        offset: current.length,
-      );
-
-      final params = ReportOrderParams(
-        base: baseParams,
-        contains: _lastFilter!.contains,
-        fromDate: _lastFilter!.fromDate,
-        toDate: _lastFilter!.toDate,
-        status: _lastFilter!.status,
-        userId: _lastFilter!.userId,
-      );
-
-      final res = await GetAllOrderReportOrderUsecase(orderRepository).call(params);
-
-      if (res.isFailure) {
-        state = state.copyWith(error: res.error?.toString());
-        throw Exception(res.error?.toString() ?? 'Failed to load data');
-      }
-
-      state = state.copyWithGroup(
-        newRows: res.data ?? [],
-        append: current.isNotEmpty,
-      );
-    } finally {
-      _isFetching = false;
-    }
   }
 
   Future<void> reloadByReportOrder() async {

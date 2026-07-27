@@ -38,6 +38,7 @@ import '../../presentation/screens/report/report_product_screen.dart';
 import '../../presentation/screens/report/report_screen.dart';
 import '../../presentation/screens/report/report_summary_screen.dart';
 import 'params/error_screen_param.dart';
+import 'params/order_detail_param.dart';
 
 /// Route paths
 class AppRouteConst {
@@ -391,7 +392,9 @@ class AppRoutes {
       path: 'order-detail',
       parentNavigatorKey: navNavigatorKey,
       builder: (context, state) {
-        return const OrderDetailScreen();
+        final param = state.extra is OrderDetailParam ? state.extra as OrderDetailParam : null;
+
+        return OrderDetailScreen(param: param);
       },
     );
   }

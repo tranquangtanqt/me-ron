@@ -47,9 +47,7 @@ class OrderDetailCard extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      order.deliveryDatetime != null
-                          ? DateFormat('dd/MM/yyyy').format(order.deliveryDatetime!)
-                          : '',
+                      order.deliveryDatetime != null ? DateFormat('dd/MM/yyyy').format(order.deliveryDatetime!) : '',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -74,7 +72,7 @@ class OrderDetailCard extends StatelessWidget {
                             Expanded(
                               flex: 3,
                               child: Text(
-                                  item.snapshotName ?? '',
+                                item.snapshotName ?? '',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -123,18 +121,26 @@ class OrderDetailCard extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerRight,
                   child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.4,
+                    width: MediaQuery.of(context).size.width * 0.6,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Divider(
                           thickness: 0.8,
                           height: 0,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .outline
-                              .withValues(alpha: 0.3),
+                          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
                         ),
+
+                        if (order.discountValue > 0) ...[
+                          _SummaryRow(
+                            label: 'Tạm tính',
+                            value: CurrencyFormatter.formatVND(order.subTotal),
+                          ),
+                          _SummaryRow(
+                            label: 'Giảm giá',
+                            value: '-${CurrencyFormatter.formatVND(order.discountValue)}',
+                          ),
+                        ],
 
                         Text(
                           CurrencyFormatter.formatVND(order.total),
@@ -147,11 +153,46 @@ class OrderDetailCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SummaryRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _SummaryRow({
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 2),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '$label: ',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: 11,
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          ),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: 11,
+            ),
+          ),
+        ],
       ),
     );
   }

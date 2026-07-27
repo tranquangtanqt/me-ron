@@ -161,4 +161,23 @@ class OrderNotifier extends Notifier<OrderState> {
       loadAll: loadAll,
     );
   }
+
+  // Loads orders using an explicit filter instead of [orderFilterProvider], so callers
+  // (e.g. drilling down from a report screen) don't leak into the shared Orders tab filter.
+  Future<void> reloadWithFilter({
+    DateTime? fromDate,
+    DateTime? toDate,
+    int? status,
+    int? userId,
+    bool loadAll = false,
+  }) async {
+    await getAllOrder(
+      true,
+      fromDate: fromDate,
+      toDate: toDate,
+      status: status,
+      userId: userId,
+      loadAll: loadAll,
+    );
+  }
 }

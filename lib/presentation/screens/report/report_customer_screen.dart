@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../app/routes/params/order_detail_param.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../../core/utilities/currency_formatter.dart';
 import '../../../data/models/customer_summary_model.dart';
@@ -18,6 +20,28 @@ class ReportCustomerScreen extends ConsumerStatefulWidget {
 }
 
 class _ReportCustomerScreenState extends ConsumerState<ReportCustomerScreen> {
+  void openCustomerDetail(CustomerSummaryModel customer) async {
+    final filter = ref.read(reportCustomerFilterProvider);
+
+    final toDate = filter.toDate == null
+        ? null
+        : DateTime(filter.toDate!.year, filter.toDate!.month, filter.toDate!.day, 23, 59, 59, 999);
+
+    final result = await context.push(
+      '/order/order-detail',
+      extra: OrderDetailParam(
+        userId: customer.userId,
+        fromDate: filter.fromDate,
+        toDate: toDate,
+        status: -1,
+      ),
+    );
+
+    if (result == true) {
+      ref.read(reportCustomerNotifierProvider.notifier).reload();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final customers = ref.watch(reportCustomerNotifierProvider.select((s) => s.customers));
@@ -75,7 +99,11 @@ class _ReportCustomerScreenState extends ConsumerState<ReportCustomerScreen> {
                       itemBuilder: (context, i) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: AppSizes.padding / 2),
-                          child: _CustomerRankCard(rank: i + 1, customer: customers[i]),
+                          child: _CustomerRankCard(
+                            rank: i + 1,
+                            customer: customers[i],
+                            onTap: () => openCustomerDetail(customers[i]),
+                          ),
                         );
                       },
                     ),
@@ -215,63 +243,69 @@ class _ReportCustomerFilterBarState extends ConsumerState<_ReportCustomerFilterB
 class _CustomerRankCard extends StatelessWidget {
   final int rank;
   final CustomerSummaryModel customer;
+  final VoidCallback onTap;
 
   const _CustomerRankCard({
     required this.rank,
     required this.customer,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          width: 0.5,
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            width: 0.5,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          ),
         ),
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 28,
-            child: Text(
-              '$rank',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+        child: Row(
+          children: [
+            SizedBox(
+              width: 28,
+              child: Text(
+                '$rank',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  customer.userName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    customer.userName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${customer.orderCount} đơn',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
+                  const SizedBox(height: 2),
+                  Text(
+                    '${customer.orderCount} đơn',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
             ),
-          ),
-          Text(
-            CurrencyFormatter.formatVND(customer.totalAmount),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary,
+            Text(
+              CurrencyFormatter.formatVND(customer.totalAmount),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

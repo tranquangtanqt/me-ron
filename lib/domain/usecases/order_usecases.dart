@@ -1,6 +1,7 @@
 import '../../core/common/result.dart';
 import '../../core/usecase/usecase.dart';
 import '../../data/models/customer_summary_model.dart';
+import '../../data/models/order_customer_summary_model.dart';
 import '../../data/models/order_model.dart';
 import '../../data/models/order_status_summary_model.dart';
 import '../../data/models/product_summary_model.dart';
@@ -95,6 +96,16 @@ class GetOrderProductSummaryUsecase extends Usecase<Result, ReportOrderParams> {
   @override
   Future<Result<List<ProductSummaryModel>>> call(ReportOrderParams params) async =>
       _orderRepository.getOrderProductSummary(params);
+}
+
+class GetCustomerSummaryReportOrderUsecase extends Usecase<Result, ReportOrderParams> {
+  GetCustomerSummaryReportOrderUsecase(this._orderRepository);
+
+  final OrderRepository _orderRepository;
+
+  @override
+  Future<Result<List<OrderCustomerSummaryModel>>> call(ReportOrderParams params) async =>
+      _orderRepository.getCustomerSummaryReportOrder(params);
 }
 
 class GetTopCustomersUsecase extends Usecase<Result, ReportCustomerParams> {

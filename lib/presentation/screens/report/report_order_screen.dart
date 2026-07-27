@@ -3,21 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../app/routes/params/order_detail_param.dart';
 import '../../../core/enums/order_status.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../../core/utilities/currency_formatter.dart';
-import '../../../data/models/order_model.dart';
+import '../../../data/models/order_customer_summary_model.dart';
 import '../../../data/models/order_status_summary_model.dart';
 import '../../../domain/entities/category_entity.dart';
 import '../../providers/category/category_notifier.dart';
 import '../../providers/report/order/report_order_filter_notifier.dart';
 import '../../providers/report/order/report_order_notifier.dart';
 import '../../providers/user/user_notifier.dart';
-import '../../widgets/app_button.dart';
 import '../../widgets/app_empty_state.dart';
 import '../../widgets/app_progress_indicator.dart';
 import '../../widgets/app_user_autocomplete.dart';
-import 'components/report_order_card.dart';
 
 class ReportOrderScreen extends ConsumerStatefulWidget {
   const ReportOrderScreen({super.key});
@@ -38,15 +37,29 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
     super.initState();
   }
 
-  void updateOrder(int id) async {
-    final result = await context.push('/order/order-edit/$id');
-    if (result == true) {
-      ref.read(reportOrderNotifierProvider.notifier).reloadByReportOrder();
-    }
-  }
+  void openCustomerDetail(OrderCustomerSummaryModel customer) async {
+    final filter = ref.read(reportOrderFilterProvider);
 
-  void toDetailOrder() async {
-    final result = await context.push('/order/order-detail');
+    final toDate = DateTime(
+      filter.toDate!.year,
+      filter.toDate!.month,
+      filter.toDate!.day,
+      23,
+      59,
+      59,
+      999,
+    );
+
+    final result = await context.push(
+      '/order/order-detail',
+      extra: OrderDetailParam(
+        userId: customer.userId,
+        fromDate: filter.fromDate,
+        toDate: toDate,
+        status: filter.status,
+      ),
+    );
+
     if (result == true) {
       ref.read(reportOrderNotifierProvider.notifier).reloadByReportOrder();
     }
@@ -59,7 +72,7 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final allOrder = ref.watch(reportOrderNotifierProvider.select((s) => s.allOrder));
+    final customerSummary = ref.watch(reportOrderNotifierProvider.select((s) => s.customerSummary));
     final total = ref.watch(reportOrderNotifierProvider.select((s) => s.total));
     final orderStatusSummary = ref.watch(reportOrderNotifierProvider.select((s) => s.orderStatusSummary));
     final productSummary = ref.watch(reportOrderNotifierProvider.select((s) => s.productSummary));
@@ -336,34 +349,7 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
                     );
                   }
 
-                  final loaded = allOrder ?? [];
-
-                  if (loaded.isEmpty) {
-                    return SliverFillRemaining(
-                      hasScrollBody: false,
-                      fillOverscroll: true,
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            AppSizes.padding,
-                            AppSizes.padding / 2,
-                            AppSizes.padding,
-                            AppSizes.padding,
-                          ),
-                          child: AppButton(
-                            width: double.infinity,
-                            height: 32,
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            text: 'Xem danh sách ($total)',
-                            onTap: () => ref.read(reportOrderNotifierProvider.notifier).loadMore(),
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-
-                  final hasMore = loaded.length < total;
+                  final customers = customerSummary ?? [];
 
                   return SliverPadding(
                     padding: const EdgeInsets.fromLTRB(
@@ -401,25 +387,12 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
                           ListView.separated(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            itemCount: loaded.length + (hasMore ? 1 : 0),
+                            itemCount: customers.length,
                             separatorBuilder: (_, __) => const SizedBox(height: AppSizes.padding / 2),
-                            itemBuilder: (context, i) {
-                              if (i == loaded.length) {
-                                return Center(
-                                  child: AppButton(
-                                    height: 32,
-                                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                                    text: 'Xem thêm',
-                                    onTap: () => ref.read(reportOrderNotifierProvider.notifier).loadMore(),
-                                  ),
-                                );
-                              }
-
-                              return _ReportOrderCard(
-                                order: loaded[i],
-                                onTap: updateOrder,
-                              );
-                            },
+                            itemBuilder: (context, i) => _CustomerSummaryCard(
+                              customer: customers[i],
+                              onTap: () => openCustomerDetail(customers[i]),
+                            ),
                           ),
                         ],
                       ),
@@ -639,32 +612,60 @@ class _ReportOrderFilterBarState extends ConsumerState<_ReportOrderFilterBar> wi
   }
 }
 
-class _ReportOrderCard extends StatelessWidget {
-  final OrderModel order;
-  final ValueChanged<int> onTap;
+class _CustomerSummaryCard extends StatelessWidget {
+  final OrderCustomerSummaryModel customer;
+  final VoidCallback onTap;
 
-  const _ReportOrderCard({
-    required this.order,
-    required this.onTap,
-  });
+  const _CustomerSummaryCard({required this.customer, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    Color? bg;
-    final status = order.status;
-    if (status != null) {
-      try {
-        final st = OrderStatusExtension.fromValue(status);
-        bg = st.color;
-      } catch (_) {
-        bg = null;
-      }
-    }
-
-    return ReportOrderCard(
-      order: order,
-      onTap: () => onTap(order.id!),
-      backgroundColor: bg,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            width: 0.5,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    customer.userName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${customer.orderCount} đơn',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              CurrencyFormatter.formatVND(customer.totalAmount),
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

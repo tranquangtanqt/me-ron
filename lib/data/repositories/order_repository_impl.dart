@@ -14,6 +14,7 @@ import '../datasources/local/order_local_datasource_impl.dart';
 import '../datasources/local/order_item_local_datasource_impl.dart';
 import '../datasources/local/queued_action_local_datasource_impl.dart';
 import '../models/customer_summary_model.dart';
+import '../models/order_customer_summary_model.dart';
 import '../models/order_item_model.dart';
 import '../models/order_model.dart';
 import '../models/order_status_summary_model.dart';
@@ -145,6 +146,19 @@ class OrderRepositoryImpl extends OrderRepository {
   Future<Result<List<ProductSummaryModel>>> getOrderProductSummary(ReportOrderParams params) async {
     try {
       final local = await orderLocalDatasource.getOrderProductSummary(params);
+
+      if (local.isFailure) return Result.failure(error: local.error!);
+
+      return Result.success(data: local.data ?? []);
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<List<OrderCustomerSummaryModel>>> getCustomerSummaryReportOrder(ReportOrderParams params) async {
+    try {
+      final local = await orderLocalDatasource.getCustomerSummaryReportOrder(params);
 
       if (local.isFailure) return Result.failure(error: local.error!);
 

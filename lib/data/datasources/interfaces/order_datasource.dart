@@ -4,6 +4,7 @@ import '../../../domain/usecases/params/report_customer_params.dart';
 import '../../../domain/usecases/params/report_order_params.dart';
 import '../../../domain/usecases/params/report_product_params.dart';
 import '../../models/customer_summary_model.dart';
+import '../../models/order_customer_summary_model.dart';
 import '../../models/order_model.dart';
 import '../../models/order_item_model.dart';
 import '../../models/order_status_summary_model.dart';
@@ -39,6 +40,8 @@ abstract class OrderDatasource {
   Future<Result<List<OrderStatusSummaryModel>>> getOrderStatusSummary(ReportOrderParams params);
 
   Future<Result<List<ProductSummaryModel>>> getOrderProductSummary(ReportOrderParams params);
+
+  Future<Result<List<OrderCustomerSummaryModel>>> getCustomerSummaryReportOrder(ReportOrderParams params);
 
   Future<Result<List<CustomerSummaryModel>>> getTopCustomers(ReportCustomerParams params);
 

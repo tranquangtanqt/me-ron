@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/di/app_providers.dart';
+import '../../../../data/models/order_item_model.dart';
 import '../../../../data/models/order_model.dart';
 import '../../../../data/models/product_summary_model.dart';
 import '../../../../data/models/purchase_item_summary_model.dart';
@@ -11,7 +12,6 @@ import '../../../../domain/usecases/params/purchase_params.dart';
 import '../../../../domain/usecases/params/report_order_params.dart';
 import '../../../../domain/usecases/purchase_usecases.dart';
 import '../../purchase/purchase_state.dart';
-import '../order/report_order_state.dart';
 import 'report_summary_filter_notifier.dart';
 import 'report_summary_state.dart';
 
@@ -60,7 +60,7 @@ class ReportSummaryNotifier extends Notifier<ReportSummaryState> {
         ),
       );
 
-      allOrder = const ReportOrderState().copyWithGroup(newRows: orderRes.data ?? [], append: false).allOrder ?? [];
+      allOrder = _groupOrders(orderRes.data ?? []);
     }
 
     final productSummary = _buildProductSummary(allOrder);
@@ -80,6 +80,50 @@ class ReportSummaryNotifier extends Notifier<ReportSummaryState> {
       allPurchase: allPurchase,
       purchaseItemSummary: purchaseItemSummary,
     );
+  }
+
+  List<OrderModel> _groupOrders(List<OrderModel> rows) {
+    final Map<int, OrderModel> map = {};
+
+    for (final row in rows) {
+      final orderId = row.id!;
+
+      map.putIfAbsent(
+        orderId,
+        () => OrderModel(
+          id: row.id,
+          userId: row.userId,
+          userName: row.userName,
+          status: row.status,
+          deliveryDatetime: row.deliveryDatetime,
+          paymentDatetime: row.paymentDatetime,
+          discountValue: row.discountValue,
+          subTotal: row.subTotal,
+          total: row.total,
+          note: row.note,
+          createdAt: row.createdAt,
+          updatedAt: row.updatedAt,
+          items: <OrderItemModel>[],
+        ),
+      );
+
+      if (row.orderItemId != null) {
+        map[orderId]!.items = [
+          ...?map[orderId]!.items,
+          OrderItemModel(
+            id: row.orderItemId,
+            orderId: row.orderId,
+            productId: row.productId,
+            snapshotName: row.snapshotName,
+            snapshotPrice: row.snapshotPrice,
+            quantity: row.quantity ?? 0,
+            lineTotal: row.lineTotal ?? 0,
+          ),
+        ];
+      }
+    }
+
+    return map.values.toList();
   }
 
   Map<int, ProductSummaryModel> _buildProductSummary(List<OrderModel> orders) {

@@ -8,6 +8,7 @@ import '../../../domain/usecases/params/report_customer_params.dart';
 import '../../../domain/usecases/params/report_order_params.dart';
 import '../../../domain/usecases/params/report_product_params.dart';
 import '../../models/customer_summary_model.dart';
+import '../../models/order_customer_summary_model.dart';
 import '../../models/order_model.dart';
 import '../../models/order_item_model.dart';
 import '../../models/order_status_summary_model.dart';
@@ -389,6 +390,32 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
 
       return Result.success(
         data: res.map((e) => ProductSummaryModel.fromJson(e)).toList(),
+      );
+    } catch (e) {
+      return Result.failure(error: e);
+    }
+  }
+
+  @override
+  Future<Result<List<OrderCustomerSummaryModel>>> getCustomerSummaryReportOrder(ReportOrderParams params) async {
+    try {
+      List<dynamic> args = [];
+      final sqlWhere = _buildReportOrderWhere(params, args);
+
+      String sql =
+          '''
+          SELECT O.userId AS userId, U.name AS userName, COUNT(*) AS orderCount, SUM(O.total) AS totalAmount
+          FROM ${DatabaseConfig.orderTableName} AS O
+            LEFT JOIN ${DatabaseConfig.userTableName} AS U
+              ON O.userId = U.id
+        ''';
+      if (sqlWhere.isNotEmpty) sql += ' WHERE $sqlWhere';
+      sql += ' GROUP BY O.userId ORDER BY totalAmount DESC';
+
+      var res = await _databaseService.database.rawQuery(sql, args);
+
+      return Result.success(
+        data: res.map((e) => OrderCustomerSummaryModel.fromJson(e)).toList(),
       );
     } catch (e) {
       return Result.failure(error: e);

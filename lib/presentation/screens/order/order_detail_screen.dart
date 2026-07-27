@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/routes/params/order_detail_param.dart';
 import '../../../core/enums/order_status.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../../core/utilities/currency_formatter.dart';
@@ -14,7 +15,9 @@ import '../../widgets/app_snack_bar.dart';
 import 'components/order_detail_card.dart';
 
 class OrderDetailScreen extends ConsumerStatefulWidget {
-  const OrderDetailScreen({super.key});
+  final OrderDetailParam? param;
+
+  const OrderDetailScreen({super.key, this.param});
 
   @override
   ConsumerState<OrderDetailScreen> createState() => _OrderDetailScreenState();
@@ -25,15 +28,31 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      ref.read(orderDetailNotifierProvider.notifier).reload(loadAll: true);
-    });
+    Future.microtask(_reload);
+  }
+
+  Future<void> _reload() {
+    final param = widget.param;
+
+    if (param != null) {
+      return ref
+          .read(orderDetailNotifierProvider.notifier)
+          .reloadWithFilter(
+            fromDate: param.fromDate,
+            toDate: param.toDate,
+            status: param.status,
+            userId: param.userId,
+            loadAll: true,
+          );
+    }
+
+    return ref.read(orderDetailNotifierProvider.notifier).reload(loadAll: true);
   }
 
   void updateOrder(int id) async {
     final result = await context.push('/order/order-edit/$id');
     if (result == true) {
-      ref.read(orderDetailNotifierProvider.notifier).reload(loadAll: true);
+      _reload();
     }
   }
 

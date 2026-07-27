@@ -62,8 +62,9 @@ hoàn toàn với luồng "Đặt hàng" chính (không tạo bản ghi trong b�
 ### Nút "Chi tiết" (góc trên bên phải danh sách)
 
 Tải **toàn bộ** đơn hàng (không giới hạn theo trang) và gộp theo từng khách hàng, hiển thị tổng
-tiền mỗi khách. Nếu còn ít nhất 1 đơn ở trạng thái "Đã lên đơn", nút **"Thanh toán toàn bộ"** xuất
-hiện trên AppBar:
+tiền mỗi khách. Với đơn có giảm giá, thẻ đơn hiện thêm 2 dòng **Tạm tính** và **Giảm giá** ngay
+trên dòng tổng của đơn đó; đơn không giảm giá chỉ hiện dòng tổng như cũ. Nếu còn ít nhất 1 đơn ở
+trạng thái "Đã lên đơn", nút **"Thanh toán toàn bộ"** xuất hiện trên AppBar:
 
 - Bấm vào sẽ hỏi xác nhận, sau đó lần lượt chuyển **tất cả** đơn đang "Đã lên đơn" của danh sách
   hiện tại sang trạng thái "Đã thanh toán".
@@ -178,7 +179,12 @@ hàng/món ăn):
 - Dải thẻ ngang theo từng trạng thái (Đã lên đơn/Đã thanh toán/Huỷ): số đơn + thành tiền mỗi
   trạng thái.
 - Khối "Tổng cộng theo món": tổng số lượng bán ra của từng món trong khoảng ngày đã chọn.
-- Danh sách chi tiết từng đơn hàng bên dưới, phân trang giống màn hình Đặt hàng.
+- Khối "Chi tiết đơn hàng" bên dưới: gộp theo **từng khách hàng** (không hiện từng đơn riêng lẻ),
+  mỗi dòng hiện tên khách hàng, tổng số đơn và tổng tiền đã đặt trong khoảng ngày đã chọn — sắp
+  xếp theo tổng tiền **giảm dần**.
+- Chạm vào 1 dòng khách hàng để mở màn hình "Chi tiết" (giống nút "Chi tiết" ở mục Đặt hàng) nhưng
+  chỉ hiện đơn của **riêng khách hàng đó**, giới hạn trong đúng khoảng ngày và trạng thái đang lọc
+  ở màn Thống kê — không ảnh hưởng tới bộ lọc của tab Orders.
 
 ### Theo món ăn
 
@@ -199,7 +205,9 @@ Gộp số liệu 2 nguồn trong cùng khoảng ngày để nhìn nhanh tổng 
 ### Theo khách hàng tiềm năng
 
 Xếp hạng khách hàng theo tổng tiền đã đặt hàng trong khoảng ngày đã chọn — dùng để nhận diện
-khách hàng thân thiết/mua nhiều.
+khách hàng thân thiết/mua nhiều. Chạm vào 1 dòng khách hàng để mở màn hình "Chi tiết" chỉ hiện đơn
+của riêng khách hàng đó trong đúng khoảng ngày đang lọc (giống cách chạm vào dòng khách hàng ở mục
+"Theo đơn hàng").
 
 ## 9. Giao dịch (Transactions)
 

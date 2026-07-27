@@ -1,5 +1,6 @@
 import '../../core/common/result.dart';
 import '../../data/models/customer_summary_model.dart';
+import '../../data/models/order_customer_summary_model.dart';
 import '../../data/models/order_model.dart';
 import '../../data/models/order_status_summary_model.dart';
 import '../../data/models/product_summary_model.dart';
@@ -27,6 +28,8 @@ abstract class OrderRepository {
   Future<Result<List<OrderStatusSummaryModel>>> getOrderStatusSummary(ReportOrderParams params);
 
   Future<Result<List<ProductSummaryModel>>> getOrderProductSummary(ReportOrderParams params);
+
+  Future<Result<List<OrderCustomerSummaryModel>>> getCustomerSummaryReportOrder(ReportOrderParams params);
 
   Future<Result<List<CustomerSummaryModel>>> getTopCustomers(ReportCustomerParams params);
 
