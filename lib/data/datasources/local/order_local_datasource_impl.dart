@@ -270,7 +270,7 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
             INNER JOIN ${DatabaseConfig.orderItemTableName} AS D
               ON O.id = D.orderId
           WHERE $sqlWhere
-          GROUP BY D.productId
+          GROUP BY COALESCE(D.productId, D.snapshotName)
         ''';
 
       var res = await _databaseService.database.rawQuery(sql, args);
@@ -383,7 +383,7 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
             INNER JOIN ${DatabaseConfig.orderItemTableName} AS D
               ON O.id = D.orderId
           WHERE $finalWhere
-          GROUP BY D.productId
+          GROUP BY COALESCE(D.productId, D.snapshotName)
         ''';
 
       var res = await _databaseService.database.rawQuery(sql, args);

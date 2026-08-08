@@ -63,8 +63,10 @@ hoàn toàn với luồng "Đặt hàng" chính (không tạo bản ghi trong b�
 
 Tải **toàn bộ** đơn hàng (không giới hạn theo trang) và gộp theo từng khách hàng, hiển thị tổng
 tiền mỗi khách. Với đơn có giảm giá, thẻ đơn hiện thêm 2 dòng **Tạm tính** và **Giảm giá** ngay
-trên dòng tổng của đơn đó; đơn không giảm giá chỉ hiện dòng tổng như cũ. Nếu còn ít nhất 1 đơn ở
-trạng thái "Đã lên đơn", nút **"Thanh toán toàn bộ"** xuất hiện trên AppBar:
+trên dòng tổng của đơn đó; đơn không giảm giá chỉ hiện dòng tổng như cũ. Nếu đơn có **Ghi chú**,
+thẻ đơn hiện thêm dòng ghi chú (kèm icon) ngay dưới danh sách món; đơn không có ghi chú thì không
+hiện dòng này. Nếu còn ít nhất 1 đơn ở trạng thái "Đã lên đơn", nút **"Thanh toán toàn bộ"** xuất
+hiện trên AppBar:
 
 - Bấm vào sẽ hỏi xác nhận, sau đó lần lượt chuyển **tất cả** đơn đang "Đã lên đơn" của danh sách
   hiện tại sang trạng thái "Đã thanh toán".
@@ -76,6 +78,13 @@ trạng thái "Đã lên đơn", nút **"Thanh toán toàn bộ"** xuất hiện
 1. Chọn khách hàng (autocomplete, có thể xoá lựa chọn bằng nút "x").
 2. Bấm **"Thêm món"** để thêm từng dòng: chọn món ăn từ dropdown, tăng/giảm số lượng bằng nút
    `-`/`+` (tối thiểu 1), hoặc bấm dấu `x` để xoá dòng.
+   - Với món **không có sẵn** trong danh sách Món ăn, bấm **"Thêm món tự do"** thay vào đó: dòng
+     này cho nhập trực tiếp **Tên món** và **Đơn giá**, kèm ô tăng/giảm số lượng và nút xoá y như
+     dòng thường. Món tự do được lưu thẳng vào đơn như một dòng món bình thường nhưng **không gắn**
+     với món nào trong danh sách Món ăn (không xuất hiện nếu sau này sửa Product, không tính vào
+     bộ lọc "chọn món ăn cụ thể" ở báo cáo Theo món ăn).
+   - Khi lưu đơn, nếu để trống **Tên món** hoặc **Đơn giá** ≤ 0 ở một dòng món tự do, ứng dụng báo
+     lỗi và không cho lưu.
 3. Nhập **Giảm giá** (nếu có).
 4. Tổng tiền tự tính và hiển thị ở góc phải: `Tổng = Tạm tính - Giảm giá` (không âm).
 5. Chọn **Ngày giao hàng**.
@@ -94,7 +103,8 @@ trạng thái "Đã lên đơn", nút **"Thanh toán toàn bộ"** xuất hiện
 Mở lại y hệt form tạo đơn, với 1 quy tắc riêng: nếu giá bán của một món trong đơn **đã bị đổi**
 so với đơn giá được lưu tại thời điểm đặt (snapshot), dòng món đó sẽ **bị khoá hoàn toàn** (làm mờ,
 không cho đổi món / đổi số lượng / xoá dòng) để giữ nguyên lịch sử đơn giá cũ. Muốn thay đổi món đó
-phải xoá cả đơn và tạo lại.
+phải xoá cả đơn và tạo lại. Quy tắc khoá này chỉ áp dụng cho món chọn từ danh sách Món ăn — các
+dòng **món tự do** không bao giờ bị khoá vì không có giá gốc nào để so sánh.
 
 ### Huỷ đơn / Xoá đơn
 
@@ -178,7 +188,8 @@ hàng/món ăn):
 - 2 ô tổng: **Tổng số đơn** và **Tổng thành tiền** (không tính đơn Huỷ).
 - Dải thẻ ngang theo từng trạng thái (Đã lên đơn/Đã thanh toán/Huỷ): số đơn + thành tiền mỗi
   trạng thái.
-- Khối "Tổng cộng theo món": tổng số lượng bán ra của từng món trong khoảng ngày đã chọn.
+- Khối "Tổng cộng theo món": tổng số lượng bán ra của từng món trong khoảng ngày đã chọn (món tự do
+  cũng được gộp vào đây theo tên món, xem thêm ở báo cáo "Theo món ăn" bên dưới).
 - Khối "Chi tiết đơn hàng" bên dưới: gộp theo **từng khách hàng** (không hiện từng đơn riêng lẻ),
   mỗi dòng hiện tên khách hàng, tổng số đơn và tổng tiền đã đặt trong khoảng ngày đã chọn — sắp
   xếp theo tổng tiền **giảm dần**.
@@ -191,7 +202,10 @@ hàng/món ăn):
 - Bộ lọc: chọn món ăn cụ thể (tuỳ chọn) + khoảng ngày.
 - **Tổng số món**: tổng số lượng đã bán trong khoảng ngày.
 - Dải thẻ ngang từng món, sắp theo số lượng bán giảm dần, mỗi thẻ hiện **số lượng** và
-  **thành tiền** (đơn giá × số lượng cộng dồn).
+  **thành tiền** (đơn giá × số lượng cộng dồn). Các dòng **món tự do** (thêm trực tiếp khi đặt
+  hàng, không gắn với Món ăn trong danh mục) cũng được gộp vào dải thẻ này, mỗi tên món tự do khác
+  nhau ra 1 thẻ riêng; bộ lọc "chọn món ăn cụ thể" chỉ áp dụng cho món có trong danh mục Món ăn nên
+  không lọc được món tự do.
 - Danh sách chi tiết đơn hàng liên quan bên dưới.
 
 ### Tổng hợp
@@ -199,7 +213,7 @@ hàng/món ăn):
 Gộp số liệu 2 nguồn trong cùng khoảng ngày để nhìn nhanh tổng quan thu/chi:
 
 - **Đơn hàng**: Tổng số đơn, Tổng thành tiền, và bảng chia theo từng món ăn (mỗi món hiện cả số
-  lượng và thành tiền của riêng món đó).
+  lượng và thành tiền của riêng món đó; món tự do gộp riêng theo tên món).
 - **Mua hàng**: Tổng số phiếu nhập, Tổng thành tiền, và bảng chia theo từng khoản mục đã nhập.
 
 ### Theo khách hàng tiềm năng

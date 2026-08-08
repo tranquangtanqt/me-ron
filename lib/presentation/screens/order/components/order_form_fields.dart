@@ -120,7 +120,7 @@ class OrderNoteField extends StatelessWidget {
         controller: controller,
         labelText: 'Ghi chú',
         hintText: 'Nhập ghi chú...',
-        maxLines: 2,
+        maxLines: 6,
         onChanged: onChanged,
       ),
     );

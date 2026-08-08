@@ -22,6 +22,10 @@ final orderFormNotifierProvider = NotifierProvider.autoDispose<OrderFormNotifier
 );
 
 int calculateOrderItemPrice(OrderItemForm item, {Map<int, int>? disabledProductSnapshotPrices}) {
+  if (item.isFreeItem) {
+    return item.freeItemPrice ?? 0;
+  }
+
   if (disabledProductSnapshotPrices != null &&
       item.product != null &&
       item.product!.id != null &&
@@ -81,14 +85,25 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
       );
 
       for (OrderModel order in orders ?? []) {
+        ProductEntity? matchedProduct;
+        for (final p in allProduct) {
+          if (p.id == order.productId) {
+            matchedProduct = p;
+            break;
+          }
+        }
+
+        final isFreeItem = order.productId == null || matchedProduct == null;
+
         final item = OrderItemForm(
           id: order.orderItemId,
-          product: allProduct.firstWhere(
-            (p) => p.id == order.productId,
-          ),
+          product: matchedProduct,
           quantity: order.quantity ?? 0,
           snapshotPrice: order.snapshotPrice,
           originalProductId: order.productId,
+          isFreeItem: isFreeItem,
+          freeItemName: isFreeItem ? order.snapshotName : null,
+          freeItemPrice: isFreeItem ? order.snapshotPrice : null,
         );
 
         final current = state.items ?? [];
@@ -133,6 +148,8 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
   Future<Result<int>> createOrder() async {
     return performCreate(
       execute: () async {
+        _validateItems(state.items ?? []);
+
         final orderRepository = ref.read(orderRepositoryProvider);
 
         final order = OrderEntity(
@@ -153,8 +170,8 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
         for (final OrderItemForm item in state.items ?? []) {
           final oderItem = OrderItemEntity(
             orderId: null,
-            productId: item.product?.id,
-            snapshotName: item.product?.name,
+            productId: item.isFreeItem ? null : item.product?.id,
+            snapshotName: item.isFreeItem ? item.freeItemName : item.product?.name,
             snapshotPrice: calculateOrderItemPrice(item, disabledProductSnapshotPrices: disabledProductSnapshotPrices),
             quantity: item.quantity,
             lineTotal: calculateOrderItemLineTotal(item, disabledProductSnapshotPrices: disabledProductSnapshotPrices),
@@ -176,6 +193,8 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
   Future<Result<void>> updatedOrder(int id) async {
     return performUpdate(
       execute: () async {
+        _validateItems(state.items ?? []);
+
         final orderRepository = ref.read(orderRepositoryProvider);
 
         final order = OrderEntity(
@@ -197,8 +216,8 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
             OrderItemEntity(
               id: item.id,
               orderId: id,
-              productId: item.product?.id,
-              snapshotName: item.product?.name,
+              productId: item.isFreeItem ? null : item.product?.id,
+              snapshotName: item.isFreeItem ? item.freeItemName : item.product?.name,
               snapshotPrice: calculateOrderItemPrice(
                 item,
                 disabledProductSnapshotPrices: disabledProductSnapshotPrices,
@@ -356,6 +375,20 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
     );
   }
 
+  void _validateItems(List<OrderItemForm> items) {
+    for (final item in items) {
+      if (!item.isFreeItem) continue;
+
+      if ((item.freeItemName ?? '').trim().isEmpty) {
+        throw 'Vui lòng nhập tên cho món tự do';
+      }
+
+      if ((item.freeItemPrice ?? 0) <= 0) {
+        throw 'Vui lòng nhập đơn giá hợp lệ cho món tự do';
+      }
+    }
+  }
+
   Map<int, int> _getDisabledProductSnapshotPrices(List<OrderItemForm> items) {
     final disabledProductSnapshotPrices = <int, int>{};
 
@@ -394,6 +427,55 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
       subTotal: subTotal,
       total: _calcTotal(
         subTotal,
+        state.discountValue ?? 0,
+      ),
+    );
+  }
+
+  void addFreeItem() {
+    final items = [
+      ...?state.items,
+      OrderItemForm(
+        isFreeItem: true,
+        quantity: 1,
+        freeItemPrice: 0,
+      ),
+    ];
+
+    final subTotal = _calcSubTotal(items);
+
+    state = state.copyWith(
+      items: items,
+      subTotal: subTotal,
+      total: _calcTotal(
+        subTotal,
+        state.discountValue ?? 0,
+      ),
+    );
+  }
+
+  void updateFreeItemName(int index, String name) {
+    final items = [...?state.items];
+
+    if (index < 0 || index >= items.length) return;
+
+    items[index] = items[index].copyWith(freeItemName: name);
+
+    state = state.copyWith(items: items);
+  }
+
+  void updateFreeItemPrice(int index, int price) {
+    final items = [...?state.items];
+
+    if (index < 0 || index >= items.length) return;
+
+    items[index] = items[index].copyWith(freeItemPrice: price);
+
+    state = state.copyWith(
+      items: items,
+      subTotal: _calcSubTotal(items),
+      total: _calcTotal(
+        _calcSubTotal(items),
         state.discountValue ?? 0,
       ),
     );

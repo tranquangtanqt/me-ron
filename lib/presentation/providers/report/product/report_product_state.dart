@@ -5,7 +5,7 @@ import '../../../../data/models/product_summary_model.dart';
 class ReportProductState {
   final List<OrderModel>? allOrder;
   final int? total;
-  final Map<int, ProductSummaryModel>? productSummary;
+  final Map<String, ProductSummaryModel>? productSummary;
   final String? error;
 
   const ReportProductState({
@@ -18,7 +18,7 @@ class ReportProductState {
   ReportProductState copyWith({
     List<OrderModel>? allOrder,
     int? total,
-    Map<int, ProductSummaryModel>? productSummary,
+    Map<String, ProductSummaryModel>? productSummary,
     String? error,
   }) {
     return ReportProductState(
@@ -77,7 +77,7 @@ class ReportProductState {
     required List<OrderModel> newRows,
     required bool append,
     int? total,
-    Map<int, ProductSummaryModel>? productSummary,
+    Map<String, ProductSummaryModel>? productSummary,
     String? error,
   }) {
     final grouped = _group(newRows);

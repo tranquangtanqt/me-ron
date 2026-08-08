@@ -210,6 +210,7 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                                 item.snapshotPrice != item.product!.price;
 
                             return OrderItemRow(
+                              key: ValueKey(item.localKey),
                               index: i,
                               item: item,
                               products: allProduct,
@@ -223,20 +224,35 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                               onProductChanged: (product) {
                                 ref.read(orderFormNotifierProvider.notifier).updateProduct(i, product);
                               },
+                              onFreeItemNameChanged: (name) {
+                                ref.read(orderFormNotifierProvider.notifier).updateFreeItemName(i, name);
+                              },
+                              onFreeItemPriceChanged: (price) {
+                                ref.read(orderFormNotifierProvider.notifier).updateFreeItemPrice(i, price);
+                              },
                             );
                           },
                         ),
                       ),
                     ],
                   ),
-                  TextButton.icon(
-                    onPressed: () {
-                      notifier.addItem(
-                        allProduct.isNotEmpty ? allProduct.first : null,
-                      );
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text('Thêm món'),
+                  Row(
+                    children: [
+                      TextButton.icon(
+                        onPressed: () {
+                          notifier.addItem(
+                            allProduct.isNotEmpty ? allProduct.first : null,
+                          );
+                        },
+                        icon: const Icon(Icons.add),
+                        label: const Text('Thêm món'),
+                      ),
+                      TextButton.icon(
+                        onPressed: notifier.addFreeItem,
+                        icon: const Icon(Icons.add_circle_outline),
+                        label: const Text('Thêm món tự do'),
+                      ),
+                    ],
                   ),
                   OrderDiscountValueField(
                     controller: discountValueController,

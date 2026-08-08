@@ -87,8 +87,8 @@ class ReportOrderNotifier extends Notifier<ReportOrderState> {
       for (final s in statusSummaryRes.data ?? []) s.status: s,
     };
 
-    final productSummary = <int, ProductSummaryModel>{
-      for (final p in productSummaryRes.data ?? []) (p.productId ?? 0): p,
+    final productSummary = <String, ProductSummaryModel>{
+      for (final p in productSummaryRes.data ?? []) (p.productId?.toString() ?? 'name:${p.productName}'): p,
     };
 
     state = state.copyWith(

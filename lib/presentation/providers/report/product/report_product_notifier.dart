@@ -72,8 +72,8 @@ class ReportProductNotifier extends Notifier<ReportProductState> {
 
     final total = countRes.data ?? 0;
 
-    final productSummary = <int, ProductSummaryModel>{
-      for (final p in summaryRes.data ?? []) (p.productId ?? 0): p,
+    final productSummary = <String, ProductSummaryModel>{
+      for (final p in summaryRes.data ?? []) (p.productId?.toString() ?? 'name:${p.productName}'): p,
     };
 
     state = state.copyWith(

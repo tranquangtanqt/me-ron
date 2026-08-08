@@ -126,21 +126,23 @@ class ReportSummaryNotifier extends Notifier<ReportSummaryState> {
     return map.values.toList();
   }
 
-  Map<int, ProductSummaryModel> _buildProductSummary(List<OrderModel> orders) {
-    return orders.fold<Map<int, ProductSummaryModel>>({}, (map, order) {
-      for (final item in order.items ?? []) {
+  Map<String, ProductSummaryModel> _buildProductSummary(List<OrderModel> orders) {
+    return orders.fold<Map<String, ProductSummaryModel>>({}, (map, order) {
+      for (final OrderItemModel item in order.items ?? []) {
+        final key = item.productId?.toString() ?? 'name:${item.snapshotName}';
+
         map.update(
-          item.productId,
+          key,
           (value) => ProductSummaryModel(
             productId: value.productId,
             productName: value.productName,
-            quantity: value.quantity + (item.quantity as int),
+            quantity: value.quantity + item.quantity,
             totalAmount: value.totalAmount + item.lineTotal,
           ),
           ifAbsent: () => ProductSummaryModel(
             productId: item.productId,
-            productName: item.snapshotName,
-            quantity: item.quantity.toInt(),
+            productName: item.snapshotName ?? '',
+            quantity: item.quantity,
             totalAmount: item.lineTotal,
           ),
         );

@@ -5,7 +5,7 @@ import '../../../../data/models/purchase_model.dart';
 
 class ReportSummaryState {
   final List<OrderModel>? allOrder;
-  final Map<int, ProductSummaryModel>? productSummary;
+  final Map<String, ProductSummaryModel>? productSummary;
   final List<PurchaseModel>? allPurchase;
   final Map<String, PurchaseItemSummaryModel>? purchaseItemSummary;
   final String? error;
@@ -20,7 +20,7 @@ class ReportSummaryState {
 
   ReportSummaryState copyWith({
     List<OrderModel>? allOrder,
-    Map<int, ProductSummaryModel>? productSummary,
+    Map<String, ProductSummaryModel>? productSummary,
     List<PurchaseModel>? allPurchase,
     Map<String, PurchaseItemSummaryModel>? purchaseItemSummary,
     String? error,
