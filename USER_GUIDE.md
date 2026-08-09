@@ -85,6 +85,15 @@ hiện trên AppBar:
      bộ lọc "chọn món ăn cụ thể" ở báo cáo Theo món ăn).
    - Khi lưu đơn, nếu để trống **Tên món** hoặc **Đơn giá** ≤ 0 ở một dòng món tự do, ứng dụng báo
      lỗi và không cho lưu.
+   - Nút **mic** (🎙️) cạnh 2 nút trên cho **thêm món bằng giọng nói**: bấm nút, nói tên món (có
+     thể kèm số lượng ở đầu câu, ví dụ "2 phở bò" hoặc "hai phở bò") rồi bấm **Dừng** hoặc chờ ứng
+     dụng tự nhận diện xong — nếu khớp được tên món trong danh mục, dòng món tương ứng được thêm
+     tự động kèm đúng số lượng. Nói kèm từ khoá **"tự do"** (ví dụ "tự do bánh flan") sẽ luôn thêm
+     thành dòng **món tự do** với tên đó, để trống đơn giá cho nhập tay. Nếu không khớp được món
+     nào và không nói "tự do", ứng dụng hỏi lại "Không tìm thấy món khớp với '...'. Bạn có muốn
+     thêm làm món tự do không?" — chỉ khi bấm **"Thêm món tự do"** ở hộp thoại này thì dòng món tự
+     do mới được tạo, bấm **Hủy** thì không thêm gì. Tính năng này cần cấp quyền truy cập micro
+     trên thiết bị.
 3. Nhập **Giảm giá** (nếu có).
 4. Tổng tiền tự tính và hiển thị ở góc phải: `Tổng = Tạm tính - Giảm giá` (không âm).
 5. Chọn **Ngày giao hàng**.

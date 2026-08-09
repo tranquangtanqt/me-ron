@@ -11,6 +11,7 @@ import '../../core/services/database/database_service.dart';
 import '../../core/services/info/device_info_service.dart';
 import '../../core/services/logger/error_logger_service.dart';
 import '../../core/services/printer/printer_service.dart';
+import '../../core/services/speech/speech_recognition_service.dart';
 import '../../data/datasources/local/order_item_local_datasource_impl.dart';
 import '../../data/datasources/local/order_local_datasource_impl.dart';
 import '../../data/datasources/local/product_local_datasource_impl.dart';
@@ -64,6 +65,9 @@ final printerServiceProvider = Provider<PrinterService>(
 );
 final errorLoggerServiceProvider = Provider<ErrorLoggerService>(
   (ref) => ErrorLoggerService(FirebaseCrashlytics.instance),
+);
+final speechRecognitionServiceProvider = Provider<SpeechRecognitionService>(
+  (ref) => SpeechRecognitionService(),
 );
 
 // Datasources

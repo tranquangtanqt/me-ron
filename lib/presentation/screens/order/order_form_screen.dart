@@ -18,6 +18,7 @@ import 'components/order_form_action_buttons.dart';
 import 'components/order_form_fields.dart';
 import 'components/order_form_save_button.dart';
 import 'components/order_item_row.dart';
+import 'components/order_voice_add_button.dart';
 
 class OrderFormScreen extends ConsumerStatefulWidget {
   final int? id;
@@ -252,6 +253,8 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                         icon: const Icon(Icons.add_circle_outline),
                         label: const Text('Thêm món tự do'),
                       ),
+
+                      OrderVoiceAddButton(products: allProduct),
                     ],
                   ),
                   OrderDiscountValueField(
