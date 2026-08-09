@@ -10,12 +10,16 @@ class OrderCustomerSummaryModel {
   final String userName;
   final int orderCount;
   final int totalAmount;
+  final DateTime? firstDeliveryDatetime;
+  final DateTime? lastDeliveryDatetime;
 
   const OrderCustomerSummaryModel({
     required this.userId,
     required this.userName,
     required this.orderCount,
     required this.totalAmount,
+    this.firstDeliveryDatetime,
+    this.lastDeliveryDatetime,
   });
 
   factory OrderCustomerSummaryModel.fromJson(Map<String, dynamic> json) {
@@ -24,10 +28,18 @@ class OrderCustomerSummaryModel {
       userName: json['userName']?.toString() ?? '',
       orderCount: _parseIntValue(json['orderCount']),
       totalAmount: _parseIntValue(json['totalAmount']),
+      firstDeliveryDatetime: json['firstDeliveryDatetime'] != null
+          ? DateTime.tryParse(json['firstDeliveryDatetime'].toString())
+          : null,
+      lastDeliveryDatetime: json['lastDeliveryDatetime'] != null
+          ? DateTime.tryParse(json['lastDeliveryDatetime'].toString())
+          : null,
     );
   }
 
   @override
   String toString() =>
-      'OrderCustomerSummaryModel(userId: $userId, userName: $userName, orderCount: $orderCount, totalAmount: $totalAmount)';
+      'OrderCustomerSummaryModel(userId: $userId, userName: $userName, orderCount: $orderCount, '
+      'totalAmount: $totalAmount, firstDeliveryDatetime: $firstDeliveryDatetime, '
+      'lastDeliveryDatetime: $lastDeliveryDatetime)';
 }

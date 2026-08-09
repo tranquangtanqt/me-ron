@@ -27,6 +27,7 @@ class ReportOrderScreen extends ConsumerStatefulWidget {
 
 class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
   List<CategoryEntity> allCategory = [];
+  _CustomerSortOption? sortOption;
 
   @override
   void initState() {
@@ -68,6 +69,33 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  List<OrderCustomerSummaryModel> sortCustomers(List<OrderCustomerSummaryModel> customers) {
+    if (sortOption == null) return customers;
+
+    final sorted = [...customers];
+
+    switch (sortOption!) {
+      case _CustomerSortOption.totalAmountAsc:
+        sorted.sort((a, b) => a.totalAmount.compareTo(b.totalAmount));
+      case _CustomerSortOption.totalAmountDesc:
+        sorted.sort((a, b) => b.totalAmount.compareTo(a.totalAmount));
+      case _CustomerSortOption.deliveryDateAsc:
+        sorted.sort((a, b) => _compareNullableDate(a.firstDeliveryDatetime, b.firstDeliveryDatetime));
+      case _CustomerSortOption.deliveryDateDesc:
+        sorted.sort((a, b) => _compareNullableDate(b.lastDeliveryDatetime, a.lastDeliveryDatetime));
+    }
+
+    return sorted;
+  }
+
+  int _compareNullableDate(DateTime? a, DateTime? b) {
+    if (a == null && b == null) return 0;
+    if (a == null) return -1;
+    if (b == null) return 1;
+
+    return a.compareTo(b);
   }
 
   @override
@@ -349,7 +377,7 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
                     );
                   }
 
-                  final customers = customerSummary ?? [];
+                  final customers = sortCustomers(customerSummary ?? []);
 
                   return SliverPadding(
                     padding: const EdgeInsets.fromLTRB(
@@ -365,15 +393,22 @@ class _ReportOrderScreenState extends ConsumerState<ReportOrderScreen> {
 
                           // ===== SECTION HEADER =====
                           Row(
-                            children: const [
-                              Icon(Icons.list_alt, size: 18),
-                              SizedBox(width: 6),
-                              Text(
+                            children: [
+                              const Icon(Icons.list_alt, size: 18),
+                              const SizedBox(width: 6),
+                              const Text(
                                 'Chi tiết đơn hàng',
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
                                 ),
+                              ),
+
+                              const Spacer(),
+
+                              _CustomerSortButton(
+                                selected: sortOption,
+                                onSelected: (option) => setState(() => sortOption = option),
                               ),
                             ],
                           ),
@@ -455,6 +490,48 @@ class _OrderSummary {
   final int totalAmount;
 
   const _OrderSummary({this.count = 0, this.totalAmount = 0});
+}
+
+enum _CustomerSortOption {
+  totalAmountAsc('Tăng dần theo thành tiền'),
+  totalAmountDesc('Giảm dần theo thành tiền'),
+  deliveryDateAsc('Tăng dần theo ngày giao đơn'),
+  deliveryDateDesc('Giảm dần theo ngày giao đơn');
+
+  final String label;
+
+  const _CustomerSortOption(this.label);
+}
+
+class _CustomerSortButton extends StatelessWidget {
+  final _CustomerSortOption? selected;
+  final ValueChanged<_CustomerSortOption> onSelected;
+
+  const _CustomerSortButton({
+    required this.selected,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<_CustomerSortOption>(
+      tooltip: 'Sắp xếp',
+      icon: Icon(
+        Icons.sort,
+        size: 20,
+        color: selected != null ? Theme.of(context).colorScheme.primary : null,
+      ),
+      onSelected: onSelected,
+      itemBuilder: (context) {
+        return _CustomerSortOption.values.map((option) {
+          return PopupMenuItem(
+            value: option,
+            child: Text(option.label),
+          );
+        }).toList();
+      },
+    );
+  }
 }
 
 class _ReportOrderFilterBar extends ConsumerStatefulWidget {

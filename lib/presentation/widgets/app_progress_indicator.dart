@@ -12,7 +12,7 @@ class AppProgressIndicator extends StatelessWidget {
     super.key,
     this.fontSize = 10,
     this.showMessage = true,
-    this.message = 'Please wait',
+    this.message = 'Đang xử lý, vui lòng chờ...',
   });
 
   @override

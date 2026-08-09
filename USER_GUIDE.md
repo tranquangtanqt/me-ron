@@ -200,8 +200,13 @@ hàng/món ăn):
 - Khối "Tổng cộng theo món": tổng số lượng bán ra của từng món trong khoảng ngày đã chọn (món tự do
   cũng được gộp vào đây theo tên món, xem thêm ở báo cáo "Theo món ăn" bên dưới).
 - Khối "Chi tiết đơn hàng" bên dưới: gộp theo **từng khách hàng** (không hiện từng đơn riêng lẻ),
-  mỗi dòng hiện tên khách hàng, tổng số đơn và tổng tiền đã đặt trong khoảng ngày đã chọn — sắp
-  xếp theo tổng tiền **giảm dần**.
+  mỗi dòng hiện tên khách hàng, tổng số đơn và tổng tiền đã đặt trong khoảng ngày đã chọn — mặc
+  định sắp xếp theo tổng tiền **giảm dần**.
+- Nút **sắp xếp** (icon 🔀) cạnh tiêu đề "Chi tiết đơn hàng": bấm vào hiện menu 4 lựa chọn, chọn 1
+  cái là áp dụng ngay — **Tăng dần theo thành tiền**, **Giảm dần theo thành tiền**, **Tăng dần theo
+  ngày giao đơn**, **Giảm dần theo ngày giao đơn**. Vì mỗi dòng gộp nhiều đơn của cùng 1 khách
+  hàng, sắp theo "ngày giao đơn" dùng **đơn sớm nhất** của khách hàng khi sắp tăng dần và
+  **đơn gần nhất (mới nhất)** của khách hàng khi sắp giảm dần làm mốc so sánh.
 - Chạm vào 1 dòng khách hàng để mở màn hình "Chi tiết" (giống nút "Chi tiết" ở mục Đặt hàng) nhưng
   chỉ hiện đơn của **riêng khách hàng đó**, giới hạn trong đúng khoảng ngày và trạng thái đang lọc
   ở màn Thống kê — không ảnh hưởng tới bộ lọc của tab Orders.

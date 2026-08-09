@@ -404,7 +404,8 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
 
       String sql =
           '''
-          SELECT O.userId AS userId, U.name AS userName, COUNT(*) AS orderCount, SUM(O.total) AS totalAmount
+          SELECT O.userId AS userId, U.name AS userName, COUNT(*) AS orderCount, SUM(O.total) AS totalAmount,
+            MIN(O.deliveryDatetime) AS firstDeliveryDatetime, MAX(O.deliveryDatetime) AS lastDeliveryDatetime
           FROM ${DatabaseConfig.orderTableName} AS O
             LEFT JOIN ${DatabaseConfig.userTableName} AS U
               ON O.userId = U.id
