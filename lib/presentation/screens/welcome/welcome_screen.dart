@@ -32,11 +32,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           ),
           const SizedBox(height: AppSizes.padding),
           Text(
-            'Welcome!',
+            'Chào mừng!',
             style: Theme.of(context).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           Text(
-            'Welcome to Flutter POS app',
+            'Chào mừng đến với Mẹ Rôn',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge,
           ),

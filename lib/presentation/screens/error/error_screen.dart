@@ -28,7 +28,7 @@ class ErrorScreen extends StatelessWidget {
               borderColor: Theme.of(context).colorScheme.surfaceContainerLowest,
               textColor: Theme.of(context).colorScheme.primary,
               alignment: null,
-              text: 'Back to home',
+              text: 'Về trang chủ',
               onTap: () {
                 // Go back to default initial route
                 context.go('/home');

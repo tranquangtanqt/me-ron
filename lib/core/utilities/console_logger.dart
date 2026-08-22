@@ -89,10 +89,7 @@ void ce(
   String? message,
   String? state,
 }) {
-  // TODO comment test
-  //return cl(any, title: title, message: message, state: state, type: LogType.error);
   cl(any, title: title, message: message, state: state, type: LogType.error);
-  throw any is Exception ? any : Exception(any);
 }
 
 /// Quick concole log for warning

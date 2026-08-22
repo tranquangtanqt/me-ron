@@ -66,7 +66,7 @@ class AppDialog {
     String? title,
     String? message,
     String? error,
-    String buttonText = 'Close',
+    String buttonText = 'Đóng',
     Function(BuildContext)? onTapButton,
   }) async {
     final context = AppRoutes.rootNavigatorKey.currentContext;
@@ -91,18 +91,18 @@ class AppDialog {
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
-                if (error != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: AppSizes.padding),
-                    child: Text(
-                      error.toString().length > 200 ? error.toString().substring(0, 200) : error.toString(),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.outlineVariant,
-                      ),
-                    ),
-                  ),
+                // if (error != null)
+                //   Padding(
+                //     padding: const EdgeInsets.only(top: AppSizes.padding),
+                //     child: Text(
+                //       error.toString().length > 200 ? error.toString().substring(0, 200) : error.toString(),
+                //       textAlign: TextAlign.center,
+                //       style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                //         fontWeight: FontWeight.bold,
+                //         color: Theme.of(context).colorScheme.outlineVariant,
+                //       ),
+                //     ),
+                //   ),
               ],
             ),
           ),

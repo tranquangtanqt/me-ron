@@ -43,7 +43,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     // So, throw error with a first time internet error message then the [ErrorScreen] will be shown
     if (isLoaded && user == null && !isHasInternet) {
       throw Exception(
-        'No Internet connection! Internet connection is required for the first time app open or user login',
+        'Không có kết nối mạng! Cần có kết nối mạng cho lần mở ứng dụng đầu tiên hoặc khi đăng nhập.',
       );
     }
 
@@ -57,7 +57,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_customize_outlined),
-            label: 'Orders',
+            label: 'Đặt hàng',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.receipt_long_rounded),

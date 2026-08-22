@@ -206,7 +206,7 @@ class _BackupPasswordButton extends ConsumerWidget {
           AppDialog.show(
             title: 'Mật khẩu sao lưu',
             leftButtonText: 'Hủy',
-            rightButtonText: 'OK',
+            rightButtonText: 'Xác nhận',
             child: _BackupPasswordDialogBody(controller: controller),
             onTapRightButton: (dialogContext) {
               ref.read(autoExportNotifierProvider.notifier).verifyBackupPassword(controller.text);

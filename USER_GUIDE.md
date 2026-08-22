@@ -84,7 +84,8 @@ hiện trên AppBar:
      với món nào trong danh sách Món ăn (không xuất hiện nếu sau này sửa Product, không tính vào
      bộ lọc "chọn món ăn cụ thể" ở báo cáo Theo món ăn).
    - Khi lưu đơn, nếu để trống **Tên món** hoặc **Đơn giá** ≤ 0 ở một dòng món tự do, ứng dụng báo
-     lỗi và không cho lưu.
+     lỗi và không cho lưu — sau khi đóng thông báo lỗi, con trỏ tự động nhảy vào đúng ô (**Tên
+     món** hoặc **Đơn giá**) đang thiếu ở đúng dòng món đó.
    - Nút **mic** (🎙️) cạnh 2 nút trên cho **thêm món bằng giọng nói**: bấm nút, nói tên món (có
      thể kèm số lượng ở đầu câu, ví dụ "2 phở bò" hoặc "hai phở bò") rồi bấm **Dừng** hoặc chờ ứng
      dụng tự nhận diện xong — nếu khớp được tên món trong danh mục, dòng món tương ứng được thêm
@@ -95,7 +96,9 @@ hiện trên AppBar:
      do mới được tạo, bấm **Hủy** thì không thêm gì. Tính năng này cần cấp quyền truy cập micro
      trên thiết bị.
 3. Nhập **Giảm giá** (nếu có).
-4. Tổng tiền tự tính và hiển thị ở góc phải: `Tổng = Tạm tính - Giảm giá` (không âm).
+4. Tổng tiền tự tính và hiển thị ở góc phải: `Tổng = Tạm tính - Giảm giá` (không âm). Cạnh ô
+   Giảm giá có icon ⓘ — bấm vào để xem **tổng số lượng món** (cộng số lượng của tất cả các dòng
+   món, kể cả món tự do) trong đơn.
 5. Chọn **Ngày giao hàng**.
 6. Bật công tắc **"Đã thanh toán trước"** nếu khách trả tiền ngay lúc lên đơn — khi bật sẽ hiện
    thêm ô chọn **Ngày thanh toán**.

@@ -1,5 +1,24 @@
 import '../../../../domain/entities/product_entity.dart';
 
+enum FreeItemValidationField { name, price }
+
+/// Thrown by [OrderFormNotifier]'s item validation so the screen can focus the exact row/field
+/// that failed, instead of just showing a generic error message.
+class OrderItemValidationException implements Exception {
+  final Object itemLocalKey;
+  final FreeItemValidationField field;
+  final String message;
+
+  OrderItemValidationException({
+    required this.itemLocalKey,
+    required this.field,
+    required this.message,
+  });
+
+  @override
+  String toString() => message;
+}
+
 class OrderItemForm {
   // Stable per-row identity, used as a widget key so text-editing rows
   // (free items) keep their focus/cursor across rebuilds instead of

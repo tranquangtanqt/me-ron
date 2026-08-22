@@ -380,11 +380,19 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
       if (!item.isFreeItem) continue;
 
       if ((item.freeItemName ?? '').trim().isEmpty) {
-        throw 'Vui lòng nhập tên cho món tự do';
+        throw OrderItemValidationException(
+          itemLocalKey: item.localKey,
+          field: FreeItemValidationField.name,
+          message: 'Vui lòng nhập tên cho món tự do',
+        );
       }
 
       if ((item.freeItemPrice ?? 0) <= 0) {
-        throw 'Vui lòng nhập đơn giá hợp lệ cho món tự do';
+        throw OrderItemValidationException(
+          itemLocalKey: item.localKey,
+          field: FreeItemValidationField.price,
+          message: 'Vui lòng nhập đơn giá hợp lệ cho món tự do',
+        );
       }
     }
   }

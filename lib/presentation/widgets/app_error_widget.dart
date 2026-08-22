@@ -23,7 +23,7 @@ class AppErrorWidget extends StatelessWidget {
     if (textOnly) {
       return Text(
         message ??
-            'Something went wrong!\n${kDebugMode ? "${error is FlutterErrorDetails ? (error as FlutterErrorDetails).summary : error ?? '(No error details)'}" : ""}',
+            'Đã xảy ra lỗi!\n${kDebugMode ? "${error is FlutterErrorDetails ? (error as FlutterErrorDetails).summary : error ?? '(Không có chi tiết lỗi)'}" : ""}',
         textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.bodyMedium,
       );
@@ -43,7 +43,7 @@ class AppErrorWidget extends StatelessWidget {
               ),
               const SizedBox(height: AppSizes.padding / 6),
               Text(
-                'Oops!',
+                'Ôi!',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.error,
@@ -51,7 +51,7 @@ class AppErrorWidget extends StatelessWidget {
               ),
               const SizedBox(height: AppSizes.padding / 4),
               Text(
-                message ?? 'Something went wrong.\nPlease try again later.',
+                message ?? 'Đã xảy ra lỗi.\nVui lòng thử lại sau.',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
@@ -59,7 +59,7 @@ class AppErrorWidget extends StatelessWidget {
               // Only show error details to UI on Debug Mode
               if (kDebugMode)
                 Text(
-                  "${error is FlutterErrorDetails ? (error as FlutterErrorDetails).summary : error ?? '(No error details)'}",
+                  "${error is FlutterErrorDetails ? (error as FlutterErrorDetails).summary : error ?? '(Không có chi tiết lỗi)'}",
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     fontSize: 10,

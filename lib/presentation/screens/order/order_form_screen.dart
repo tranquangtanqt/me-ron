@@ -17,6 +17,7 @@ import 'components/order_date_field.dart';
 import 'components/order_form_action_buttons.dart';
 import 'components/order_form_fields.dart';
 import 'components/order_form_save_button.dart';
+import 'components/order_item_form.dart';
 import 'components/order_item_row.dart';
 import 'components/order_voice_add_button.dart';
 
@@ -37,6 +38,25 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
   final paymentDatetimeController = TextEditingController();
   final discountValueController = TextEditingController();
   final noteController = TextEditingController();
+
+  // Keyed by OrderItemForm.localKey so a validation failure can focus the exact free-item row
+  // that caused it, instead of just showing a generic error message.
+  final _freeItemNameFocusNodes = <Object, FocusNode>{};
+  final _freeItemPriceFocusNodes = <Object, FocusNode>{};
+
+  FocusNode _nameFocusNodeFor(Object key) => _freeItemNameFocusNodes.putIfAbsent(key, FocusNode.new);
+
+  FocusNode _priceFocusNodeFor(Object key) => _freeItemPriceFocusNodes.putIfAbsent(key, FocusNode.new);
+
+  void _focusInvalidItem(Object error) {
+    if (error is! OrderItemValidationException) return;
+
+    final focusNode = error.field == FreeItemValidationField.name
+        ? _freeItemNameFocusNodes[error.itemLocalKey]
+        : _freeItemPriceFocusNodes[error.itemLocalKey];
+
+    focusNode?.requestFocus();
+  }
 
   @override
   void initState() {
@@ -69,6 +89,12 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
     paymentDatetimeController.dispose();
     noteController.dispose();
     discountValueController.dispose();
+    for (final node in _freeItemNameFocusNodes.values) {
+      node.dispose();
+    }
+    for (final node in _freeItemPriceFocusNodes.values) {
+      node.dispose();
+    }
     super.dispose();
   }
 
@@ -102,7 +128,8 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
       context.pop(true);
       AppSnackBar.show('Thêm mới dữ liệu thành công');
     } else {
-      AppDialog.showError(error: res.error?.toString());
+      await AppDialog.showError(error: res.error?.toString());
+      if (res.error != null) _focusInvalidItem(res.error!);
     }
   }
 
@@ -125,7 +152,8 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
       context.pop(true);
       AppSnackBar.show('Cập nhật dữ liệu thành công');
     } else {
-      AppDialog.showError(error: res.error?.toString());
+      await AppDialog.showError(error: res.error?.toString());
+      if (res.error != null) _focusInvalidItem(res.error!);
     }
   }
 
@@ -141,6 +169,14 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
     } else {
       AppDialog.showError(error: res.error?.toString());
     }
+  }
+
+  void _showTotalQuantityDialog(int totalQuantity) {
+    AppDialog.show(
+      title: 'Tổng số lượng',
+      text: 'Tổng số lượng món trong đơn: $totalQuantity',
+      leftButtonText: 'Đóng',
+    );
   }
 
   void cancelOrder() async {
@@ -167,6 +203,7 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
 
     final formState = ref.watch(orderFormNotifierProvider);
     final isLoaded = formState.isLoaded;
+    final totalQuantity = (formState.items ?? []).fold<int>(0, (sum, item) => sum + item.quantity);
 
     return Scaffold(
       appBar: AppBar(
@@ -231,6 +268,8 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                               onFreeItemPriceChanged: (price) {
                                 ref.read(orderFormNotifierProvider.notifier).updateFreeItemPrice(i, price);
                               },
+                              nameFocusNode: item.isFreeItem ? _nameFocusNodeFor(item.localKey) : null,
+                              priceFocusNode: item.isFreeItem ? _priceFocusNodeFor(item.localKey) : null,
                             );
                           },
                         ),
@@ -264,22 +303,29 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 12),
                   ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        onPressed: () => _showTotalQuantityDialog(totalQuantity),
+                        icon: const Icon(Icons.info_outline),
+                        tooltip: 'Tổng số lượng',
                       ),
-                      child: Text(
-                        'Tổng: ${CurrencyFormatter.formatVND(formState.total ?? 0)}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'Tổng: ${CurrencyFormatter.formatVND(formState.total ?? 0)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                   OrderDateField(
                     label: 'Ngày giao hàng',

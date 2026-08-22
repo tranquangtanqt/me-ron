@@ -13,6 +13,8 @@ class OrderItemRow extends StatelessWidget {
   final ValueChanged<ProductEntity?> onProductChanged;
   final ValueChanged<String> onFreeItemNameChanged;
   final ValueChanged<int> onFreeItemPriceChanged;
+  final FocusNode? nameFocusNode;
+  final FocusNode? priceFocusNode;
 
   const OrderItemRow({
     super.key,
@@ -25,6 +27,8 @@ class OrderItemRow extends StatelessWidget {
     required this.onProductChanged,
     required this.onFreeItemNameChanged,
     required this.onFreeItemPriceChanged,
+    this.nameFocusNode,
+    this.priceFocusNode,
   });
 
   @override
@@ -98,6 +102,7 @@ class OrderItemRow extends StatelessWidget {
             height: 36,
             child: TextFormField(
               initialValue: item.freeItemName,
+              focusNode: nameFocusNode,
               enabled: !isDisabled,
               style: const TextStyle(fontSize: 13),
               decoration: InputDecoration(
@@ -124,6 +129,7 @@ class OrderItemRow extends StatelessWidget {
             height: 36,
             child: TextFormField(
               initialValue: item.freeItemPrice == null || item.freeItemPrice == 0 ? '' : item.freeItemPrice.toString(),
+              focusNode: priceFocusNode,
               enabled: !isDisabled,
               keyboardType: TextInputType.number,
               style: const TextStyle(fontSize: 13),
