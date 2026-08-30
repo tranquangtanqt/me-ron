@@ -46,11 +46,12 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
     return const OrderFormState();
   }
 
-  Future<void> initOrderForm(int? orderId) async {
+  Future<void> initOrderForm(int? orderId, {int? initialUserId}) async {
     final now = DateTime.now();
 
     if (orderId == null) {
       state = state.copyWith(
+        userId: initialUserId,
         deliveryDatetime: now,
         discountValue: 0,
         subTotal: 0,

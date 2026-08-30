@@ -331,7 +331,9 @@ class AppRoutes {
       path: 'order-create',
       parentNavigatorKey: navNavigatorKey,
       builder: (context, state) {
-        return const OrderFormScreen();
+        final initialUserId = int.tryParse(state.uri.queryParameters['userId'] ?? '');
+
+        return OrderFormScreen(initialUserId: initialUserId);
       },
     );
   }

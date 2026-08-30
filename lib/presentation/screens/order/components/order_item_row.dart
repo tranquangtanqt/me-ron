@@ -231,39 +231,59 @@ class _QuantityStepper extends StatelessWidget {
   }
 
   Future<void> _showQuantityInputDialog(BuildContext context) async {
-    final controller = TextEditingController(text: '$quantity');
-
     final result = await showDialog<int>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Nhập số lượng'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(hintText: 'Số lượng'),
-            onSubmitted: (value) => Navigator.of(context).pop(int.tryParse(value)),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Hủy'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(int.tryParse(controller.text)),
-              child: const Text('Xác nhận'),
-            ),
-          ],
-        );
-      },
+      builder: (context) => _QuantityInputDialog(initialQuantity: quantity),
     );
-
-    controller.dispose();
 
     if (result != null && result != quantity) {
       onQuantityChanged(result < 1 ? 1 : result);
     }
+  }
+}
+
+class _QuantityInputDialog extends StatefulWidget {
+  final int initialQuantity;
+
+  const _QuantityInputDialog({required this.initialQuantity});
+
+  @override
+  State<_QuantityInputDialog> createState() => _QuantityInputDialogState();
+}
+
+class _QuantityInputDialogState extends State<_QuantityInputDialog> {
+  late final _controller = TextEditingController(text: '${widget.initialQuantity}');
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() => Navigator.of(context).pop(int.tryParse(_controller.text));
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Nhập số lượng'),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        keyboardType: TextInputType.number,
+        decoration: const InputDecoration(hintText: 'Số lượng'),
+        onSubmitted: (_) => _submit(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Hủy'),
+        ),
+        TextButton(
+          onPressed: _submit,
+          child: const Text('Xác nhận'),
+        ),
+      ],
+    );
   }
 }
 

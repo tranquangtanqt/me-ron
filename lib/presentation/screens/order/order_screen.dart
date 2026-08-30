@@ -42,7 +42,11 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
   }
 
   void createOrder() async {
-    final result = await context.push('/order/order-create');
+    final filterUserId = ref.read(orderFilterProvider).userId;
+
+    final path = filterUserId != null ? '/order/order-create?userId=$filterUserId' : '/order/order-create';
+
+    final result = await context.push(path);
     if (result == true) {
       ref.read(orderNotifierProvider.notifier).reload();
     }

@@ -75,7 +75,9 @@ hiện trên AppBar:
 
 ### Nút "Thêm" — tạo đơn mới
 
-1. Chọn khách hàng (autocomplete, có thể xoá lựa chọn bằng nút "x").
+1. Chọn khách hàng (autocomplete, có thể xoá lựa chọn bằng nút "x"). Nếu trước đó đang lọc danh
+   sách đơn theo một khách hàng, khách đó được **điền sẵn** vào đơn mới — chỉ cần xoá đi nếu muốn
+   chọn khách khác.
 2. Bấm **"Thêm món"** để thêm từng dòng: chọn món ăn từ dropdown, tăng/giảm số lượng bằng nút
    `-`/`+` (tối thiểu 1), hoặc bấm dấu `x` để xoá dòng. Bấm thẳng vào **con số lượng** (có gạch
    chân) ở giữa để mở hộp thoại **"Nhập số lượng"** gõ trực tiếp một số lớn thay vì bấm `+` nhiều

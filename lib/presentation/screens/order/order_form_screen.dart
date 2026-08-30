@@ -23,10 +23,12 @@ import 'components/order_voice_add_button.dart';
 
 class OrderFormScreen extends ConsumerStatefulWidget {
   final int? id;
+  final int? initialUserId;
 
   const OrderFormScreen({
     super.key,
     this.id,
+    this.initialUserId,
   });
 
   @override
@@ -62,7 +64,7 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await ref.read(orderFormNotifierProvider.notifier).initOrderForm(widget.id);
+      await ref.read(orderFormNotifierProvider.notifier).initOrderForm(widget.id, initialUserId: widget.initialUserId);
 
       ref.read(userNotifierProvider.notifier).getAllUser();
       ref.read(productsNotifierProvider.notifier).getAllProducts();
