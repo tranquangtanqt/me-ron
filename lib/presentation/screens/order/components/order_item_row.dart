@@ -199,14 +199,18 @@ class _QuantityStepper extends StatelessWidget {
             ),
           ),
 
-          SizedBox(
-            width: 22,
-            child: Center(
-              child: Text(
-                '$quantity',
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
+          InkWell(
+            onTap: isDisabled ? null : () => _showQuantityInputDialog(context),
+            child: SizedBox(
+              width: 32,
+              child: Center(
+                child: Text(
+                  '$quantity',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    decoration: TextDecoration.underline,
+                  ),
                 ),
               ),
             ),
@@ -224,6 +228,42 @@ class _QuantityStepper extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _showQuantityInputDialog(BuildContext context) async {
+    final controller = TextEditingController(text: '$quantity');
+
+    final result = await showDialog<int>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Nhập số lượng'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(hintText: 'Số lượng'),
+            onSubmitted: (value) => Navigator.of(context).pop(int.tryParse(value)),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Hủy'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(int.tryParse(controller.text)),
+              child: const Text('Xác nhận'),
+            ),
+          ],
+        );
+      },
+    );
+
+    controller.dispose();
+
+    if (result != null && result != quantity) {
+      onQuantityChanged(result < 1 ? 1 : result);
+    }
   }
 }
 

@@ -77,7 +77,9 @@ hiện trên AppBar:
 
 1. Chọn khách hàng (autocomplete, có thể xoá lựa chọn bằng nút "x").
 2. Bấm **"Thêm món"** để thêm từng dòng: chọn món ăn từ dropdown, tăng/giảm số lượng bằng nút
-   `-`/`+` (tối thiểu 1), hoặc bấm dấu `x` để xoá dòng.
+   `-`/`+` (tối thiểu 1), hoặc bấm dấu `x` để xoá dòng. Bấm thẳng vào **con số lượng** (có gạch
+   chân) ở giữa để mở hộp thoại **"Nhập số lượng"** gõ trực tiếp một số lớn thay vì bấm `+` nhiều
+   lần; nhập số < 1 sẽ tự đưa về 1, bỏ trống hoặc không hợp lệ thì giữ nguyên số cũ.
    - Với món **không có sẵn** trong danh sách Món ăn, bấm **"Thêm món tự do"** thay vào đó: dòng
      này cho nhập trực tiếp **Tên món** và **Đơn giá**, kèm ô tăng/giảm số lượng và nút xoá y như
      dòng thường. Món tự do được lưu thẳng vào đơn như một dòng món bình thường nhưng **không gắn**
