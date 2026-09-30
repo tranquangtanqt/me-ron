@@ -46,13 +46,17 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
     return const OrderFormState();
   }
 
-  Future<void> initOrderForm(int? orderId, {int? initialUserId}) async {
+  Future<void> initOrderForm(int? orderId, {int? initialUserId, DateTime? initialDeliveryDate}) async {
     final now = DateTime.now();
 
     if (orderId == null) {
+      final deliveryDatetime = initialDeliveryDate != null
+          ? DateTime(initialDeliveryDate.year, initialDeliveryDate.month, initialDeliveryDate.day)
+          : now;
+
       state = state.copyWith(
         userId: initialUserId,
-        deliveryDatetime: now,
+        deliveryDatetime: deliveryDatetime,
         discountValue: 0,
         subTotal: 0,
         total: 0,
@@ -318,7 +322,7 @@ class OrderFormNotifier extends BaseFormNotifier<OrderFormState> {
   void onChangedPrepaid(bool value) {
     state = state.copyWith(
       isPrepaid: value,
-      paymentDatetime: value ? state.paymentDatetime : null,
+      paymentDatetime: value ? state.deliveryDatetime : null,
     );
   }
 

@@ -332,8 +332,9 @@ class AppRoutes {
       parentNavigatorKey: navNavigatorKey,
       builder: (context, state) {
         final initialUserId = int.tryParse(state.uri.queryParameters['userId'] ?? '');
+        final initialDeliveryDate = DateTime.tryParse(state.uri.queryParameters['deliveryDate'] ?? '');
 
-        return OrderFormScreen(initialUserId: initialUserId);
+        return OrderFormScreen(initialUserId: initialUserId, initialDeliveryDate: initialDeliveryDate);
       },
     );
   }

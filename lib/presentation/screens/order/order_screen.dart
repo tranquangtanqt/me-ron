@@ -42,11 +42,19 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
   }
 
   void createOrder() async {
-    final filterUserId = ref.read(orderFilterProvider).userId;
+    final filter = ref.read(orderFilterProvider);
+    final fromDate = filter.fromDate;
+    final toDate = filter.toDate;
 
-    final path = filterUserId != null ? '/order/order-create?userId=$filterUserId' : '/order/order-create';
+    final queryParameters = <String, String>{
+      if (filter.userId != null) 'userId': '${filter.userId}',
+      if (fromDate != null && toDate != null && DateUtils.isSameDay(fromDate, toDate))
+        'deliveryDate': DateFormat('yyyy-MM-dd').format(fromDate),
+    };
 
-    final result = await context.push(path);
+    final path = Uri(path: '/order/order-create', queryParameters: queryParameters.isEmpty ? null : queryParameters);
+
+    final result = await context.push(path.toString());
     if (result == true) {
       ref.read(orderNotifierProvider.notifier).reload();
     }

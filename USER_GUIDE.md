@@ -77,7 +77,8 @@ hiện trên AppBar:
 
 1. Chọn khách hàng (autocomplete, có thể xoá lựa chọn bằng nút "x"). Nếu trước đó đang lọc danh
    sách đơn theo một khách hàng, khách đó được **điền sẵn** vào đơn mới — chỉ cần xoá đi nếu muốn
-   chọn khách khác.
+   chọn khách khác. Nếu bộ lọc **Từ ngày** và **Đến ngày** đang là cùng một ngày, **Ngày giao hàng**
+   của đơn mới được điền sẵn bằng ngày đó (nếu khác nhau thì mặc định là hôm nay).
 2. Bấm **"Thêm món"** để thêm từng dòng: chọn món ăn từ dropdown, tăng/giảm số lượng bằng nút
    `-`/`+` (tối thiểu 1), hoặc bấm dấu `x` để xoá dòng. Bấm thẳng vào **con số lượng** (có gạch
    chân) ở giữa để mở hộp thoại **"Nhập số lượng"** gõ trực tiếp một số lớn thay vì bấm `+` nhiều

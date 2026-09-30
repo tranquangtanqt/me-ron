@@ -24,11 +24,13 @@ import 'components/order_voice_add_button.dart';
 class OrderFormScreen extends ConsumerStatefulWidget {
   final int? id;
   final int? initialUserId;
+  final DateTime? initialDeliveryDate;
 
   const OrderFormScreen({
     super.key,
     this.id,
     this.initialUserId,
+    this.initialDeliveryDate,
   });
 
   @override
@@ -64,7 +66,13 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await ref.read(orderFormNotifierProvider.notifier).initOrderForm(widget.id, initialUserId: widget.initialUserId);
+      await ref
+          .read(orderFormNotifierProvider.notifier)
+          .initOrderForm(
+            widget.id,
+            initialUserId: widget.initialUserId,
+            initialDeliveryDate: widget.initialDeliveryDate,
+          );
 
       ref.read(userNotifierProvider.notifier).getAllUser();
       ref.read(productsNotifierProvider.notifier).getAllProducts();
@@ -336,7 +344,15 @@ class _OrderFormScreenState extends ConsumerState<OrderFormScreen> {
                   ),
                   OrderPrepaidCheckbox(
                     value: formState.isPrepaid,
-                    onChanged: notifier.onChangedPrepaid,
+                    onChanged: (value) {
+                      notifier.onChangedPrepaid(value);
+
+                      final deliveryDatetime = ref.read(orderFormNotifierProvider).deliveryDatetime;
+
+                      if (value && deliveryDatetime != null) {
+                        paymentDatetimeController.text = DateFormat('dd/MM/yyyy').format(deliveryDatetime);
+                      }
+                    },
                   ),
                   if (formState.isPrepaid)
                     OrderDateField(
