@@ -54,6 +54,12 @@ hoàn toàn với luồng "Đặt hàng" chính (không tạo bản ghi trong b�
   chọn ngày.
 - Bộ lọc tự động tìm kiếm ngay khi mở màn hình và mỗi khi đổi trạng thái/khách hàng; còn khi đổi
   ngày thì cần bấm nút kính lúp để tìm.
+- Nút **sắp xếp** (icon bên phải nút kính lúp) để chọn: **Tăng/Giảm dần theo thành tiền** hoặc
+  **Tăng/Giảm dần theo ngày giao đơn**. Chọn xong danh sách tự tìm lại; icon đổi màu khi đang sắp
+  xếp. Mặc định (chưa chọn) là ngày giao mới nhất lên trước.
+- Bộ lọc (trạng thái, khách hàng, ngày, sắp xếp) được **giữ nguyên** khi thêm/sửa đơn rồi quay lại
+  danh sách. Khi vào lại màn Đặt hàng từ menu dưới (hoặc màn khác), bộ lọc trở về mặc định: "Đã
+  lên đơn", hôm nay, không lọc khách, không sắp xếp.
 - Kéo xuống để làm mới (pull-to-refresh); danh sách phân trang — cuộn hết trang rồi bấm
   **"Xem thêm"** để tải tiếp.
 - Mỗi thẻ đơn tô màu nền theo trạng thái (Đã thanh toán: xanh lá nhạt, Huỷ: đỏ nhạt, Đã lên đơn:

@@ -88,9 +88,12 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
       List<dynamic> args = [];
       final sqlWhere = _buildOrderWhere(params, args);
 
+      final sortOption = params.sortOption;
+      final orderBy = sortOption?.orderByClause('') ?? 'deliveryDatetime DESC';
+
       String innerSql = 'SELECT * FROM ${DatabaseConfig.orderTableName}';
       if (sqlWhere.isNotEmpty) innerSql += ' WHERE $sqlWhere';
-      innerSql += ' ORDER BY deliveryDatetime DESC LIMIT ? OFFSET ?';
+      innerSql += ' ORDER BY $orderBy LIMIT ? OFFSET ?';
       args.add(params.base.limit);
       args.add(params.base.offset ?? 0);
 
@@ -111,7 +114,7 @@ class OrderLocalDatasourceImpl extends OrderDatasource {
               ON O.userId = U.id
             LEFT JOIN ${DatabaseConfig.orderItemTableName} AS D
               ON O.id = D.orderId
-          ORDER BY O.deliveryDatetime DESC
+          ORDER BY ${sortOption?.orderByClause('O') ?? 'O.deliveryDatetime DESC'}
         ''';
       print(sql);
 

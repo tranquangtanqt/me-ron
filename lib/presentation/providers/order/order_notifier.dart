@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/app_providers.dart';
+import '../../../core/enums/order_sort_option.dart';
 import '../../../core/enums/order_status.dart';
 import '../../../domain/usecases/params/base_params.dart';
 import '../../../domain/usecases/order_usecases.dart';
@@ -45,6 +46,7 @@ class OrderNotifier extends Notifier<OrderState> {
     DateTime? toDate,
     int? status,
     int? userId,
+    OrderSortOption? sortOption,
     bool loadAll = false,
   }) async {
     status ??= OrderStatus.shipping.value;
@@ -60,6 +62,7 @@ class OrderNotifier extends Notifier<OrderState> {
       toDate: toDate,
       status: status,
       userId: userId,
+      sortOption: sortOption,
     );
 
     if (!resetDataFlg) return;
@@ -121,6 +124,7 @@ class OrderNotifier extends Notifier<OrderState> {
         toDate: _lastFilter!.toDate,
         status: _lastFilter!.status,
         userId: _lastFilter!.userId,
+        sortOption: _lastFilter!.sortOption,
       );
 
       final res = await GetAllOrderUsecase(orderRepository).call(params);
@@ -158,6 +162,7 @@ class OrderNotifier extends Notifier<OrderState> {
       toDate: toDate,
       status: filter.status,
       userId: filter.userId,
+      sortOption: filter.sortOption,
       loadAll: loadAll,
     );
   }

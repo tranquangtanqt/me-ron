@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/enums/order_sort_option.dart';
 import '../../../core/enums/order_status.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../../data/models/order_model.dart';
@@ -26,11 +27,14 @@ class OrderScreen extends ConsumerStatefulWidget {
 
 class _OrderScreenState extends ConsumerState<OrderScreen> {
   List<CategoryEntity> allCategory = [];
+  bool _isFilterReady = false;
 
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(orderNotifierProvider.notifier).getAllOrder(true);
+      ref.read(orderFilterProvider.notifier).reset();
+      setState(() => _isFilterReady = true);
+
       ref.read(categoryNotifierProvider.notifier).getAllCategory();
       ref.read(userNotifierProvider.notifier).getAllUser();
     });
@@ -114,9 +118,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
                     horizontal: AppSizes.padding,
                     vertical: 8,
                   ),
-                  child: _OrderFilterBar(
-                    onSearch: _search,
-                  ),
+                  child: _isFilterReady ? _OrderFilterBar(onSearch: _search) : const SizedBox.shrink(),
                 ),
               ),
               SliverLayoutBuilder(
@@ -308,24 +310,16 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> with RouteAwar
   void initState() {
     super.initState();
 
-    DateTime now = DateTime.now();
-    DateTime fromDate = DateTime(now.year, now.month, now.day, 00, 00, 00, 000);
-    DateTime toDate = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
-
-    final filter = ref.read(orderFilterProvider);
-    if (filter.fromDate != null) {
-      fromDate = DateTime(filter.fromDate!.year, filter.fromDate!.month, filter.fromDate!.day, 00, 00, 00, 000);
-    }
-    if (filter.toDate != null) {
-      toDate = DateTime(filter.toDate!.year, filter.toDate!.month, filter.toDate!.day, 23, 59, 59, 999);
-    }
-
-    fromController.text = DateFormat('dd/MM/yyyy').format(fromDate);
-    toController.text = DateFormat('dd/MM/yyyy').format(toDate);
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onSearch(); // auto trigger search
     });
+  }
+
+  @override
+  void dispose() {
+    fromController.dispose();
+    toController.dispose();
+    super.dispose();
   }
 
   @override
@@ -333,6 +327,10 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> with RouteAwar
     final allUser = ref.watch(userNotifierProvider.select((s) => s.allUser)) ?? [];
 
     final filter = ref.watch(orderFilterProvider);
+    final now = DateTime.now();
+
+    fromController.text = DateFormat('dd/MM/yyyy').format(filter.fromDate ?? now);
+    toController.text = DateFormat('dd/MM/yyyy').format(filter.toDate ?? now);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -434,9 +432,49 @@ class _OrderFilterBarState extends ConsumerState<_OrderFilterBar> with RouteAwar
                 child: const Icon(Icons.search, size: 18),
               ),
             ),
+
+            _OrderSortButton(
+              selected: filter.sortOption,
+              onSelected: (option) {
+                ref.read(orderFilterProvider.notifier).setSortOption(option);
+                widget.onSearch();
+              },
+            ),
           ],
         ),
       ],
+    );
+  }
+}
+
+class _OrderSortButton extends StatelessWidget {
+  final OrderSortOption? selected;
+  final ValueChanged<OrderSortOption> onSelected;
+
+  const _OrderSortButton({
+    required this.selected,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<OrderSortOption>(
+      tooltip: 'Sắp xếp',
+      icon: Icon(
+        Icons.sort,
+        size: 20,
+        color: selected != null ? Theme.of(context).colorScheme.primary : null,
+      ),
+      onSelected: onSelected,
+      itemBuilder: (context) {
+        return OrderSortOption.values.map((option) {
+          return CheckedPopupMenuItem(
+            value: option,
+            checked: option == selected,
+            child: Text(option.label),
+          );
+        }).toList();
+      },
     );
   }
 }

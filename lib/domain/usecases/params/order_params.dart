@@ -1,3 +1,4 @@
+import '../../../core/enums/order_sort_option.dart';
 import 'base_params.dart';
 
 class OrderParams<T> extends BaseParams<void> {
@@ -7,6 +8,7 @@ class OrderParams<T> extends BaseParams<void> {
   final DateTime? toDate;
   final int? status;
   final int? userId;
+  final OrderSortOption? sortOption;
 
   const OrderParams({
     required this.base,
@@ -15,5 +17,6 @@ class OrderParams<T> extends BaseParams<void> {
     this.toDate,
     this.status,
     this.userId,
+    this.sortOption,
   });
 }
